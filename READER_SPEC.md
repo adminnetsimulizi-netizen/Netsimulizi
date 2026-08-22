@@ -1,0 +1,12 @@
+# Reader
+- Premium distraction-free reading screen
+- Chapter navigation
+- Progress persistence
+- Bookmark
+- Font/size/spacing controls
+- Dark/light/sepia modes
+- Authenticated chapter access
+- Dynamic watermark
+- Protected offline content architecture
+- Best-effort web copy/print restrictions
+- Mobile screenshot/screen-recording restrictions where supported by OS
