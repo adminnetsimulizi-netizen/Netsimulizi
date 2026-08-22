@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Net Simulizi</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #090b10;
+      --surface: #11141b;
+      --surface-2: #171b24;
+      --gold: #e5a51c;
+      --gold-light: #f2bd3d;
+      --text: #ffffff;
+      --muted: #a8afbd;
+      --border: rgba(255,255,255,.09);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* =====================================================
+       LANGUAGE SCREEN
+    ===================================================== */
+
+    #languageScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background:
+        radial-gradient(
+          circle at 50% 30%,
+          rgba(229,165,28,.13),
+          transparent 32%
+        ),
+        #090b10;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 25px;
+    }
+
+    .language-container {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .language-logo {
+      width: 125px;
+      height: 125px;
+      object-fit: contain;
+      margin: 0 auto 25px;
+      display: block;
+    }
+
+    .language-brand {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+
+    .language-brand span {
+      color: var(--gold);
+    }
+
+    .language-subtitle {
+      color: var(--muted);
+      margin-bottom: 38px;
+      font-size: 15px;
+    }
+
+    .language-title {
+      font-size: 19px;
+      margin-bottom: 18px;
+    }
+
+    .language-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .language-option {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: white;
+      border-radius: 14px;
+      padding: 22px 15px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .language-option:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+      background: var(--surface-2);
+    }
+
+    .language-option strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 5px;
+    }
+
+    .language-option small {
+      color: var(--muted);
+    }
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+
+      background: rgba(9,11,16,.96);
+      backdrop-filter: blur(12px);
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      min-height: 72px;
+      margin: auto;
+
+      padding: 10px 20px;
+
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 220px;
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: .3px;
+    }
+
+    .brand-name span {
+      color: var(--gold);
+    }
+
+    /* =====================================================
+       NAV
+    ===================================================== */
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex: 1;
+    }
+
+    .main-nav a {
+      color: #d9dde6;
+      font-size: 14px;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    .main-nav a:hover {
+      color: var(--gold);
+    }
+
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    .search {
+      position: relative;
+      width: 210px;
+    }
+
+    .search input {
+      width: 100%;
+      height: 40px;
+
+      padding: 0 14px 0 38px;
+
+      border-radius: 22px;
+      border: 1px solid var(--border);
+
+      outline: none;
+
+      background: var(--surface);
+      color: white;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 10px;
+      color: #8f96a5;
+    }
+
+    /* =====================================================
+       AUTH
+    ===================================================== */
+
+    .auth-buttons {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: 800;
+      transition: .2s;
+    }
+
+    .login-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid var(--border);
+    }
+
+    .login-btn:hover {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .register-btn {
+      background: var(--gold);
+      color: #111;
+    }
+
+    .register-btn:hover {
+      background: var(--gold-light);
+    }
+
+    .language-select {
+      height: 40px;
+      padding: 0 8px;
+
+      border-radius: 8px;
+      border: 1px solid var(--border);
+
+      background: var(--surface);
+      color: white;
+
+      cursor: pointer;
+    }
+
+    .mobile-menu {
+      display: none;
+
+      border: 0;
+      background: transparent;
+      color: white;
+
+      font-size: 25px;
+      cursor: pointer;
+    }
+
+    /* =====================================================
+       HERO
+    ===================================================== */
+
+    .hero {
+      min-height: 510px;
+
+      display: flex;
+      align-items: center;
+
+      background:
+        radial-gradient(
+          circle at 80% 35%,
+          rgba(229,165,28,.14),
+          transparent 30%
+        ),
+        linear-gradient(
+          120deg,
+          #090b10,
+          #12151d
+        );
+    }
+
+    .hero-inner {
+      width: 100%;
+      max-width: 1280px;
+      margin: auto;
+      padding: 75px 20px;
+    }
+
+    .hero-content {
+      max-width: 720px;
+    }
+
+    .hero-label {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .hero h1 {
+      font-size: clamp(40px, 6vw, 70px);
+      line-height: 1.04;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 span {
+      color: var(--gold);
+    }
+
+    .hero p {
+      max-width: 650px;
+      color: var(--muted);
+      font-size: 17px;
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .primary-btn {
+      background: var(--gold);
+      color: #111;
+      padding: 13px 22px;
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid #363b47;
+      padding: 13px 22px;
+    }
+
+    /* =====================================================
+       CONTENT
+    ===================================================== */
+
+    main {
+      max-width: 1280px;
+      margin: auto;
+      padding: 50px 20px 80px;
+    }
+
+    .section {
+      margin-bottom: 58px;
+    }
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      font-size: 27px;
+    }
+
+    .view-all {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    /* =====================================================
+       CATEGORIES
+    ===================================================== */
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 13px;
+    }
+
+    .category {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 19px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .category:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+    }
+
+    .category-icon {
+      font-size: 25px;
+      margin-bottom: 7px;
+    }
+
+    .category-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #dce0e8;
+    }
+
+    /* =====================================================
+       STORY GRID
+    ===================================================== */
+
+    .stories {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 18px;
+    }
+
+    .story-card {
+      overflow: hidden;
+
+      background: var(--surface);
+
+      border: 1px solid var(--border);
+      border-radius: 12px;
+
+      transition: .2s;
+    }
+
+    .story-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(229,165,28,.45);
+    }
+
+    .story-cover {
+      height: 245px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      text-align: center;
+
+      padding: 15px;
+
+      background:
+        linear-gradient(
+          145deg,
+          #303542,
+          #11131a
+        );
+    }
+
+    .story-cover h3 {
+      font-size: 21px;
+      letter-spacing: 1px;
+    }
+
+    .story-cover small {
+      display: block;
+      margin-top: 6px;
+      color: #c2c6d0;
+    }
+
+    .story-content {
+      padding: 13px;
+    }
+
+    .story-content h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .story-content p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .story-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+
+      color: #8f96a5;
+      font-size: 11px;
+    }
+
+    /* =====================================================
+       FOOTER
+    ===================================================== */
+
+    footer {
+      background: #07090d;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: auto;
+
+      padding: 38px 20px;
+
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .footer-description {
+      color: var(--muted);
+      max-width: 450px;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      color: #aeb4c1;
+      font-size: 13px;
+    }
+
+    .copyright {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 18px;
+      color: #707785;
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       MODAL
+    ===================================================== */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+
+      z-index: 5000;
+
+      display: none;
+      align-items: center;
+      justify-content: center;
+
+      padding: 20px;
+
+      background: rgba(0,0,0,.8);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 430px;
+
+      position: relative;
+
+      padding: 28px;
+
+      border-radius: 15px;
+      border: 1px solid var(--border);
+
+      background: var(--surface);
+    }
+
+    .close-modal {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+
+      border: 0;
+      background: transparent;
+
+      color: #aaa;
+      font-size: 25px;
+
+      cursor: pointer;
+    }
+
+    .modal-box h2 {
+      margin-bottom: 7px;
+    }
+
+    .modal-description {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 22px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+
+      font-size: 13px;
+      font-weight: 700;
+      color: #d9dce4;
+    }
+
+    .form-group input {
+      width: 100%;
+      height: 45px;
+
+      padding: 0 13px;
+
+      border-radius: 8px;
+      border: 1px solid #303541;
+
+      background: #0d0f15;
+      color: white;
+
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--gold);
+    }
+
+    .submit-btn {
+      width: 100%;
+      margin-top: 5px;
+
+      background: var(--gold);
+      color: #111;
+    }
+
+    .switch-form {
+      margin-top: 18px;
+
+      text-align: center;
+
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .switch-form button {
+      border: 0;
+      background: transparent;
+      color: var(--gold);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* =====================================================
+       MOBILE
+    ===================================================== */
+
+    @media (max-width: 1080px) {
+
+      .main-nav {
+        display: none;
+      }
+
+      .search {
+        margin-left: auto;
+      }
+
+      .stories {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .categories {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+    }
+
+    @media (max-width: 760px) {
+
+      .header-inner {
+        padding: 10px 14px;
+        gap: 10px;
+      }
+
+      .brand {
+        min-width: auto;
+      }
+
+      .brand-logo {
+        width: 40px;
+        height: 40px;
+      }
+
+      .brand-name {
+        font-size: 18px;
+      }
+
+      .search {
+        display: none;
+      }
+
+      .login-btn {
+        display: none;
+      }
+
+      .register-btn {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .language-select {
+        height: 36px;
+      }
+
+      .hero {
+        min-height: 450px;
+      }
+
+      .hero-inner {
+        padding: 55px 20px;
+      }
+
+      .hero p {
+        font-size: 15px;
+      }
+
+      .categories {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stories {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .story-cover {
+        height: 205px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
+
+      .language-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+
+      .brand-name {
+        font-size: 16px;
+      }
+
+      .brand-logo {
+        width: 36px;
+        height: 36px;
+      }
+
+      .stories {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .story-cover {
+        height: 185px;
+      }
+
+      .story-cover h3 {
+        font-size: 17px;
+      }
+
+      .story-content {
+        padding: 10px;
+      }
+
+      .story-content h3 {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- =====================================================
+     FIRST SCREEN — LANGUAGE SELECTION
+===================================================== -->
+
+<div id="languageScreen">
+
+  <div class="language-container">
+
+    <!-- OFFICIAL NET SIMULIZI LOGO -->
+    <img
+      src="Logo.png"
+      alt="Net Simulizi Logo"
+      class="language-logo"
+    >
+
+    <div class="language-brand">
+      NET <span>SIMULIZI</span>
+    </div>
+
+    <p class="language-subtitle">
+      Hadithi Zako. Ulimwengu Wako.
+    </p>
+
+    <h2 class="language-title">
+      Chagua lugha / Choose your language
+    </h2>
+
+    <div class="language-options">
+
+      <button
+        class="language-option"
+        onclick="selectLanguage('sw')"
+      >
+        <strong>🇹🇿 Kiswahili</strong>
+        <small>Endelea kwa Kiswahili</small>
+      </button>
+
+      <button
+        class="language-option"
+        onclick="selectLanguage('en')"
+      >
+        <strong>🇬🇧 English</strong>
+        <small>Continue in English</small>
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+  <div class="header-inner">
+
+    <a href="#home" class="brand">
+
+      <!-- OFFICIAL LOGO -->
+      <img
+        src="Logo.png"
+        alt="Net Simulizi Logo"
+        class="brand-logo"
+      >
+
+      <div class="brand-name">
+        NET <span>SIMULIZI</span>
+      </div>
+
+    </a>
+
+
+    <nav class="main-nav">
+
+      <a href="#home">Home</a>
+      <a href="#discover">Discover</a>
+      <a href="#categories">Categories</a>
+      <a href="#trending">Trending</a>
+
+    </nav>
+
+
+    <div class="search">
+
+      <span class="search-icon">⌕</span>
+
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Tafuta hadithi..."
+      >
+
+    </div>
+
+
+    <div class="auth-buttons">
+
+      <button
+        class="btn login-btn"
+        onclick="openAuth('login')"
+      >
+        Login
+      </button>
+
+      <button
+        class="btn register-btn"
+        onclick="openAuth('register')"
+      >
+        Register
+      </button>
+
+      <select
+        id="headerLanguage"
+        class="language-select"
+      >
+        <option value="sw">SW</option>
+        <option value="en">EN</option>
+      </select>
+
+    </div>
+
+
+    <button
+      class="mobile-menu"
+      onclick="toggleMenu()"
+    >
+      ☰
+    </button>
+
+  </div>
+
+</header>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero" id="home">
+
+  <div class="hero-inner">
+
+    <div class="hero-content">
+
+      <span class="hero-label">
+        NET SIMULIZI
+      </span>
+
+      <h1>
+        Hadithi Zako.<br>
+        <span>Ulimwengu Wako.</span>
+      </h1>
+
+      <p id="heroText">
+        Gundua hadithi zinazokufurahisha, kukusisimua
+        na kukupeleka kwenye ulimwengu mwingine.
+        Soma Kiswahili au English, popote na wakati wowote.
+      </p>
+
+      <div class="hero-actions">
+
+        <a
+          href="#discover"
+          class="btn primary-btn"
+          id="startReading"
+        >
+          Anza Kusoma
+        </a>
+
+        <button
+          class="btn secondary-btn"
+          onclick="openAuth('register')"
+          id="joinButton"
+        >
+          Jiunge Bure
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main>
+
+
+  <!-- DISCOVER -->
+
+  <section
+    class="section"
+    id="discover"
+  >
+
+    <div class="section-heading">
+
+      <h2 id="discoverTitle">
+        Gundua Hadithi
+      </h2>
+
+      <a
+        href="#"
+        class="view-all"
+      >
+        Tazama zote →
+      </a>
+
+    </div>
+
+
+    <div
+      class="stories"
+      id="storyGrid"
+    >
+
+
+      <article
+        class="story-card"
+        data-title="FADHAA"
+      >
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>FADHAA</h3>
+
+            <small>
+              Supernatural Horror
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>FADHAA</h3>
+
+          <p>
+            Hadithi ya hofu na siri zisizoelezeka.
+          </p>
+
+          <div class="story-meta">
+
+            <span>Swahili</span>
+            <span>★ 4.9</span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="story-card"
+        data-title="SOULMATE"
+      >
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>SOULMATE</h3>
+
+            <small>
+              Romance
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>SOULMATE</h3>
+
+          <p>
+            Mapenzi, siri na safari ya moyo.
+          </p>
+
+          <div class="story-meta">
+
+            <span>Swahili</span>
+            <span>★ 4.8</span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="story-card"
+        data-title="WRONGED"
+      >
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>WRONGED</h3>
+
+            <small>
+              Drama
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>WRONGED</h3>
+
+          <p>
+            Hadithi ya usaliti, maumivu na kulipiza kisasi.
+          </p>
+
+          <div class="story-meta">
+
+            <span>English</span>
+            <span>★ 4.9</span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="story-card"
+        data-title="LONELY TIGER"
+      >
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>LONELY TIGER</h3>
+
+            <small>
+              Adventure
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>LONELY TIGER</h3>
+
+          <p>
+            Safari ya nguvu, ujasiri na survival.
+          </p>
+
+          <div class="story-meta">
+
+            <span>English</span>
+            <span>★ 4.7</span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <article
+        class="story-card"
+        data-title="FOREVER YOU LIVE"
+      >
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>FOREVER YOU LIVE</h3>
+
+            <small>
+              Romance
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>FOREVER YOU LIVE</h3>
+
+          <p>
+            Hadithi ya mapenzi yanayovuka mipaka.
+          </p>
+
+          <div class="story-meta">
+
+            <span>English</span>
+            <span>★ 4.8</span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- CATEGORIES -->
+
+  <section
+    class="section"
+    id="categories"
+  >
+
+    <div class="section-heading">
+
+      <h2>
+        Categories
+      </h2>
+
+      <a
+        href="#"
+        class="view-all"
+      >
+        View all →
+      </a>
+
+    </div>
+
+
+    <div class="categories">
+
+      <div class="category">
+        <div class="category-icon">❤️</div>
+        <div class="category-name">Romance</div>
+      </div>
+
+      <div class="category">
+        <div class="category-icon">👻</div>
+        <div class="category-name">Horror</div>
+      </div>
+
+      <div class="category">
+        <div class="category-icon">🔥</div>
+        <div class="category-name">Drama</div>
+      </div>
+
+      <div class="category">
+        <div class="category-icon">⚔️</div>
+        <div class="category-name">Action</div>
+      </div>
+
+      <div class="category">
+        <div class="category-icon">🗺️</div>
+        <div class="category-name">Adventure</div>
+      </div>
+
+      <div class="category">
+        <div class="category-icon">✨</div>
+        <div class="category-name">Fantasy</div>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- TRENDING -->
+
+  <section
+    class="section"
+    id="trending"
+  >
+
+    <div class="section-heading">
+
+      <h2>
+        Trending Now
+      </h2>
+
+      <a
+        href="#"
+        class="view-all"
+      >
+        View all →
+      </a>
+
+    </div>
+
+
+    <div class="stories">
+
+
+      <article class="story-card">
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>FADHAA</h3>
+
+            <small>
+              Trending #1
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>FADHAA</h3>
+
+          <p>Supernatural Horror</p>
+
+        </div>
+
+      </article>
+
+
+      <article class="story-card">
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>WRONGED</h3>
+
+            <small>
+              Trending #2
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>WRONGED</h3>
+
+          <p>Drama</p>
+
+        </div>
+
+      </article>
+
+
+      <article class="story-card">
+
+        <div class="story-cover">
+
+          <div>
+
+            <h3>SOULMATE</h3>
+
+            <small>
+              Trending #3
+            </small>
+
+          </div>
+
+        </div>
+
+        <div class="story-content">
+
+          <h3>SOULMATE</h3>
+
+          <p>Romance</p>
+
+        </div>
+
+      </article>
+
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+  <div class="footer-inner">
+
+    <div>
+
+      <div class="brand">
+
+        <img
+          src="/logo.png"
+          alt="Net Simulizi Logo"
+          class="brand-logo"
+        >
+
+        <div class="brand-name">
+          NET <span>SIMULIZI</span>
+        </div>
+
+      </div>
+
+      <p class="footer-description">
+
+        Jukwaa la hadithi kwa wasomaji na waandishi.
+        Soma, gundua na furahia simulizi zako.
+
+      </p>
+
+    </div>
+
+
+    <div class="footer-links">
+
+      <a href="#">About</a>
+      <a href="#">Terms</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+
+    </div>
+
+  </div>
+
+
+  <div class="copyright">
+
+    © 2026 Net Simulizi. All rights reserved.
+
+  </div>
+
+</footer>
+
+
+<!-- =====================================================
+     AUTH MODAL
+===================================================== -->
+
+<div
+  class="modal"
+  id="authModal"
+>
+
+  <div class="modal-box">
+
+    <button
+      class="close-modal"
+      onclick="closeAuth()"
+    >
+      ×
+    </button>
+
+
+    <!-- LOGIN -->
+
+    <div id="loginForm">
+
+      <h2>
+        Karibu tena
+      </h2>
+
+      <p class="modal-description">
+        Ingia kwenye akaunti yako ya Net Simulizi.
+      </p>
+
+
+      <div class="form-group">
+
+        <label>
+          Email au Username
+        </label>
+
+        <input
+          type="text"
+          placeholder="Email au username"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Password
+        </label>
+
+        <input
+          type="password"
+          placeholder="Password"
+        >
+
+      </div>
+
+
+      <button
+        class="btn submit-btn"
+        onclick="loginDemo()"
+      >
+        Login
+      </button>
+
+
+      <div class="switch-form">
+
+        Huna akaunti?
+
+        <button
+          onclick="switchAuth('register')"
+        >
+          Register
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- REGISTER -->
+
+    <div
+      id="registerForm"
+      style="display:none;"
+    >
+
+      <h2>
+        Create Account
+      </h2>
+
+      <p class="modal-description">
+        Fungua akaunti yako ya Net Simulizi.
+      </p>
+
+
+      <div class="form-group">
+
+        <label>
+          Username
+        </label>
+
+        <input
+          type="text"
+          placeholder="Username"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Email
+        </label>
+
+        <input
+          type="email"
+          placeholder="Email"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Password
+        </label>
+
+        <input
+          type="password"
+          placeholder="Password"
+        >
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Confirm Password
+        </label>
+
+        <input
+          type="password"
+          placeholder="Confirm password"
+        >
+
+      </div>
+
+
+      <button
+        class="btn submit-btn"
+        onclick="registerDemo()"
+      >
+        Register
+      </button>
+
+
+      <div class="switch-form">
+
+        Una akaunti tayari?
+
+        <button
+          onclick="switchAuth('login')"
+        >
+          Login
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =====================================================
+     LANGUAGE SELECTION
+  ===================================================== */
+
+  function selectLanguage(language) {
+
+    localStorage.setItem(
+      "netsimulizi_language",
+      language
+    );
+
+    document
+      .getElementById("languageScreen")
+      .style.display = "none";
+
+    document
+      .getElementById("headerLanguage")
+      .value = language;
+
+    applyLanguage(language);
+  }
+
+
+  function applyLanguage(language) {
+
+    const heroText =
+      document.getElementById("heroText");
+
+    const startReading =
+      document.getElementById("startReading");
+
+    const joinButton =
+      document.getElementById("joinButton");
+
+    const discoverTitle =
+      document.getElementById("discoverTitle");
+
+
+    if (language === "en") {
+
+      heroText.textContent =
+        "Discover stories that entertain, inspire and take you into another world. Read in Swahili or English, anywhere and anytime.";
+
+      startReading.textContent =
+        "Start Reading";
+
+      joinButton.textContent =
+        "Join Free";
+
+      discoverTitle.textContent =
+        "Discover Stories";
+
+    } else {
+
+      heroText.textContent =
+        "Gundua hadithi zinazokufurahisha, kukusisimua na kukupeleka kwenye ulimwengu mwingine. Soma Kiswahili au English, popote na wakati wowote.";
+
+      startReading.textContent =
+        "Anza Kusoma";
+
+      joinButton.textContent =
+        "Jiunge Bure";
+
+      discoverTitle.textContent =
+        "Gundua Hadithi";
+
+    }
+
+  }
+
+
+  /* =====================================================
+     REMEMBER LANGUAGE
+  ===================================================== */
+
+  window.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+      const savedLanguage =
+        localStorage.getItem(
+          "netsimulizi_language"
+        );
+
+      if (savedLanguage) {
+
+        document
+          .getElementById("languageScreen")
+          .style.display = "none";
+
+        document
+          .getElementById("headerLanguage")
+          .value = savedLanguage;
+
+        applyLanguage(savedLanguage);
+
+      }
+
+    }
+  );
+
+
+  /* =====================================================
+     HEADER LANGUAGE
+  ===================================================== */
+
+  document
+    .getElementById("headerLanguage")
+    .addEventListener(
+      "change",
+      function() {
+
+        const language =
+          this.value;
+
+        localStorage.setItem(
+          "netsimulizi_language",
+          language
+        );
+
+        applyLanguage(language);
+
+      }
+    );
+
+
+  /* =====================================================
+     AUTH
+  ===================================================== */
+
+  function openAuth(type) {
+
+    document
+      .getElementById("authModal")
+      .classList.add("active");
+
+    switchAuth(type);
+  }
+
+
+  function closeAuth() {
+
+    document
+      .getElementById("authModal")
+      .classList.remove("active");
+
+  }
+
+
+  function switchAuth(type) {
+
+    const login =
+      document.getElementById("loginForm");
+
+    const register =
+      document.getElementById("registerForm");
+
+
+    if (type === "login") {
+
+      login.style.display = "block";
+      register.style.display = "none";
+
+    } else {
+
+      login.style.display = "none";
+      register.style.display = "block";
+
+    }
+
+  }
+
+
+  function loginDemo() {
+
+    alert(
+      "Login UI iko tayari. Itaunganishwa na D1 kupitia Functions kwenye hatua ya Integration."
+    );
+
+  }
+
+
+  function registerDemo() {
+
+    alert(
+      "Register UI iko tayari. Itaunganishwa na D1 kupitia Functions kwenye hatua ya Integration."
+    );
+
+  }
+
+
+  /* =====================================================
+     SEARCH
+  ===================================================== */
+
+  document
+    .getElementById("searchInput")
+    .addEventListener(
+      "input",
+      function() {
+
+        const query =
+          this.value
+            .toLowerCase()
+            .trim();
+
+        const cards =
+          document.querySelectorAll(
+            ".story-card"
+          );
+
+
+        cards.forEach(
+          function(card) {
+
+            const title =
+              (
+                card.dataset.title ||
+                card.innerText
+              ).toLowerCase();
+
+
+            if (
+              title.includes(query)
+            ) {
+
+              card.style.display = "";
+
+            } else {
+
+              card.style.display = "none";
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+  /* =====================================================
+     MOBILE MENU
+  ===================================================== */
+
+  function toggleMenu() {
+
+    const nav =
+      document.querySelector(
+        ".main-nav"
+      );
+
+
+    if (
+      nav.style.display === "flex"
+    ) {
+
+      nav.style.display = "none";
+
+    } else {
+
+      nav.style.display = "flex";
+
+      nav.style.position = "absolute";
+      nav.style.top = "72px";
+      nav.style.left = "0";
+      nav.style.right = "0";
+
+      nav.style.padding = "20px";
+
+      nav.style.background = "#090b10";
+
+      nav.style.flexDirection = "column";
+
+      nav.style.borderBottom =
+        "1px solid rgba(255,255,255,.09)";
+
+    }
+
+  }
+
+
+  /* =====================================================
+     CLOSE MODAL
+  ===================================================== */
+
+  document
+    .getElementById("authModal")
+    .addEventListener(
+      "click",
+      function(event) {
+
+        if (
+          event.target === this
+        ) {
+
+          closeAuth();
+
+        }
+
+      }
+    );
+
+</script>
+
+</body>
+</html>
