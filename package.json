@@ -1,0 +1,8 @@
+{
+  "name": "@net-simulizi/web",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo BUILD_PLACEHOLDER - connect implementation source from integration project"
+  }
+}
