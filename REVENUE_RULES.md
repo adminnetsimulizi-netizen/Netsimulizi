@@ -1,5 +1,5 @@
 # Revenue
-Standard story: Author 70% / Net Simulizi 30%.
-Promoted story: Author 50% / Net Simulizi 50%.
-Withdrawal button is available only when available balance >= TSh 50,000.
-Promotion: author requests -> admin review -> approval/schedule -> promotion.
+Standard: author 70% / platform 30%.
+Promoted: author 50% / platform 50%.
+Minimum withdrawal: TSh 50,000.
+All calculations are server-side.

@@ -1,10 +1,8 @@
 {
-  "name": "net-simulizi",
+  "name": "net-simulizi-full-source",
   "private": true,
   "version": "1.0.0",
-  "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*"
-  ]
+  "scripts": {
+    "test:revenue": "node backend/tests/revenue.test.js"
+  }
 }

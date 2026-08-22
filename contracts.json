@@ -1,0 +1,24 @@
+{
+  "roles": [
+    "reader",
+    "author",
+    "editor",
+    "admin",
+    "super_admin"
+  ],
+  "languages": [
+    "sw",
+    "en"
+  ],
+  "withdrawalMinimumTsh": 50000,
+  "revenue": {
+    "standard": {
+      "author": 70,
+      "platform": 30
+    },
+    "promoted": {
+      "author": 50,
+      "platform": 50
+    }
+  }
+}
