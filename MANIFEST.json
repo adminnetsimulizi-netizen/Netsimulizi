@@ -1,0 +1,41 @@
+{
+  "project": "Net Simulizi",
+  "scope": [
+    "Web",
+    "Mobile",
+    "Backend",
+    "Database",
+    "Admin",
+    "Author Portal",
+    "Payments",
+    "QA",
+    "Production"
+  ],
+  "payment": {
+    "primary": "Flutterwave",
+    "secondary": "PayPal",
+    "future": [
+      "NALA",
+      "Selcom"
+    ]
+  },
+  "revenue": {
+    "normal": {
+      "author": 70,
+      "platform": 30
+    },
+    "promoted": {
+      "author": 50,
+      "platform": 50
+    }
+  },
+  "withdrawalMinimumTsh": 50000,
+  "finalExternalDependencies": [
+    "Flutterwave merchant/test and production credentials",
+    "PayPal merchant eligibility/credentials if enabled",
+    "hosting/domain/cloud accounts",
+    "production database/storage",
+    "Android/iOS signing accounts",
+    "final staging and production QA"
+  ]
+}

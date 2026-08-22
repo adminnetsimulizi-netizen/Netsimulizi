@@ -1,0 +1,19 @@
+{
+  "project": "Net Simulizi",
+  "version": "1.0.0",
+  "modules": [
+    "web",
+    "mobile",
+    "admin",
+    "author-portal",
+    "api",
+    "database",
+    "shared",
+    "reader",
+    "security",
+    "infra"
+  ],
+  "standardRevenue": "70/30",
+  "promotedRevenue": "50/50",
+  "withdrawalMinimumTsh": 50000
+}

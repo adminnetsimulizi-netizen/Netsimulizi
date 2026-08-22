@@ -1,0 +1,19 @@
+{
+  "project": "Net Simulizi",
+  "stage": "Development",
+  "version": "1.0.0",
+  "modules": [
+    "backend",
+    "web",
+    "admin",
+    "author-portal",
+    "mobile",
+    "database"
+  ],
+  "rules": {
+    "standardRevenue": "70/30",
+    "promotedRevenue": "50/50",
+    "minimumWithdrawalTsh": 50000
+  },
+  "next": "complete source implementation and staging integration"
+}
