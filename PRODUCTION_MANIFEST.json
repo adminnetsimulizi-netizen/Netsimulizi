@@ -1,0 +1,16 @@
+{
+  "project": "Net Simulizi",
+  "release": "1.0.0",
+  "status": "production-ready checklist",
+  "revenue": {
+    "standard": "70/30",
+    "promoted": "50/50"
+  },
+  "withdrawalMinimumTsh": 50000,
+  "platforms": [
+    "web",
+    "android",
+    "ios"
+  ],
+  "next": "configure real infrastructure/credentials, execute go-live checklist, store submission"
+}

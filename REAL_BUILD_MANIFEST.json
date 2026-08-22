@@ -1,0 +1,16 @@
+{
+  "project": "Net Simulizi",
+  "stage": "Real Build",
+  "version": "1.0.0",
+  "targets": {
+    "web": "production bundle",
+    "api": "production service",
+    "android": [
+      "debug APK",
+      "signed release AAB"
+    ],
+    "ios": "Release Archive"
+  },
+  "requires_owner_credentials": true,
+  "next": "configure real environment -> build -> QA -> deployment"
+}

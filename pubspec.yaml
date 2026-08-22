@@ -1,0 +1,5 @@
+name: net_simulizi
+description: Net Simulizi mobile reading app
+version: 0.1.0+1
+environment:
+  sdk: '>=3.0.0 <4.0.0'

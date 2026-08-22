@@ -1,0 +1,10 @@
+{
+  "project": "Net Simulizi",
+  "stage": "Payment Gateway Integration",
+  "primaryProvider": "Selcom Business API",
+  "currency": "TZS",
+  "standardRevenue": "70/30",
+  "promotedRevenue": "50/50",
+  "withdrawalMinimumTsh": 50000,
+  "status": "integration foundation ready; merchant credentials required for live activation"
+}

@@ -1,0 +1,13 @@
+{
+  "project": "Net Simulizi",
+  "stage": "Release Candidate & Deployment Preparation",
+  "status": "release checklist prepared",
+  "next_real_world_actions": [
+    "staging deployment",
+    "real integration QA",
+    "production credentials/configuration",
+    "signed Android AAB and iOS release archive",
+    "store submission",
+    "production launch"
+  ]
+}

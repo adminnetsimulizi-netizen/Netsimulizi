@@ -1,0 +1,12 @@
+{
+  "project": "Net Simulizi",
+  "stage": "Staging Integration & Full QA",
+  "status": "QA handoff package",
+  "releaseGate": "zero unresolved Critical/High defects",
+  "rules": {
+    "standard": "70/30",
+    "promoted": "50/50",
+    "withdrawalMinimumTsh": 50000
+  },
+  "next": "defect fixes -> release candidate -> production build/deployment"
+}

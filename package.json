@@ -1,8 +1,11 @@
 {
-  "name": "net-simulizi-full-source",
+  "name": "net-simulizi-web",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "description": "Net Simulizi web client",
   "scripts": {
-    "test:revenue": "node backend/tests/revenue.test.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   }
 }

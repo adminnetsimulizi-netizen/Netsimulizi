@@ -1,4 +1,4 @@
-# Net Simulizi — Full Source Implementation Foundation
+# Net Simulizi — Staging Integration & Full QA
 
-Unified implementation layer for backend, database, web, admin, author portal and mobile.
-Production credentials, cloud resources, payment provider accounts and store signing remain environment-specific.
+Staging handoff package for connecting the implementation to isolated test infrastructure
+before production.
