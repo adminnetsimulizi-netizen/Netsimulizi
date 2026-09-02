@@ -171,7 +171,7 @@ body.dark{
     </p>
 
 
-    <form id="registerForm">
+    <form onsubmit="...">
 
       <label for="username">
         Username
@@ -395,7 +395,57 @@ registerForm.addEventListener("submit", async function(event) {
 });
 
 </script>
+<script>
+const registerForm = document.getElementById("registerForm");
 
+registerForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const message = document.getElementById("registerMessage");
+
+    if (password !== confirmPassword) {
+        message.textContent = "Passwords hazifanani.";
+        return;
+    }
+
+    message.textContent = "Inasajili akaunti...";
+
+    try {
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            message.textContent = data.message || "Usajili umeshindikana.";
+            return;
+        }
+
+        message.textContent = "Akaunti imefanikiwa kutengenezwa.";
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 1500);
+
+    } catch (error) {
+        console.error(error);
+        message.textContent = "Imeshindikana kuwasiliana na Net Simulizi API.";
+    }
+});
+</script>
 </body>
 </html>
 ```
