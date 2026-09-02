@@ -516,106 +516,71 @@ export async function onRequest(context) {
 
 if (path === "/register") {
 
-    const body = await readJson(request);
-
-    if (!body) {
-        return errorResponse(
-            "Invalid JSON request",
-            400
-        );
-    }
-
-    let {
-        username,
-        email,
-        password
-    } = body;
-
-    if (
-        typeof username !== "string" ||
-        typeof email !== "string" ||
-        typeof password !== "string"
-    ) {
-        return errorResponse(
-            "Username, email and password are required",
-            400
-        );
-    }
-
-    username = username.trim();
-    email = email.trim().toLowerCase();
-
-    if (username.length < 3) {
-        return errorResponse(
-            "Username must be at least 3 characters",
-            400
-        );
-    }
-
-    if (username.length > 30) {
-        return errorResponse(
-            "Username must not exceed 30 characters",
-            400
-        );
-    }
-
-    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        return errorResponse(
-            "Username can only contain letters, numbers and underscore",
-            400
-        );
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return errorResponse(
-            "Invalid email address",
-            400
-        );
-    }
-
-    if (password.length < 8) {
-        return errorResponse(
-            "Password must be at least 8 characters",
-            400
-        );
-    }
-
     try {
+
+        const body = await readJson(request);
+
+        if (!body) {
+            return errorResponse("Invalid JSON request", 400);
+        }
+
+        const {
+            username,
+            email,
+            password
+        } = body;
+
+        if (
+            typeof username !== "string" ||
+            typeof email !== "string" ||
+            typeof password !== "string"
+        ) {
+            return errorResponse(
+                "Username, email and password are required",
+                400
+            );
+        }
+
+        const cleanUsername = username.trim();
+        const cleanEmail = email.trim().toLowerCase();
+
+        if (cleanUsername.length < 3) {
+            return errorResponse(
+                "Username must be at least 3 characters",
+                400
+            );
+        }
+
+        if (password.length < 8) {
+            return errorResponse(
+                "Password must be at least 8 characters",
+                400
+            );
+        }
 
         const existingUser = await env.D1
             .prepare(`
-                SELECT id, username, email
+                SELECT id
                 FROM users
                 WHERE username = ? OR email = ?
                 LIMIT 1
             `)
-            .bind(username, email)
+            .bind(cleanUsername, cleanEmail)
             .first();
 
         if (existingUser) {
-
-            if (
-                existingUser.username.toLowerCase() ===
-                username.toLowerCase()
-            ) {
-                return errorResponse(
-                    "Username already exists",
-                    409
-                );
-            }
-
-            if (
-                existingUser.email.toLowerCase() ===
-                email.toLowerCase()
-            ) {
-                return errorResponse(
-                    "Email already exists",
-                    409
-                );
-            }
+            return errorResponse(
+                "Username or email already exists",
+                409
+            );
         }
 
-        const passwordHash = await hashPassword(password);
+        /*
+         * TEMPORARY INTEGRATION TEST
+         * Hashing imeondolewa kwa muda.
+         */
+
+        const passwordHash = "TEST_HASH";
 
         const result = await env.D1
             .prepare(`
@@ -629,8 +594,8 @@ if (path === "/register") {
                 VALUES (?, ?, ?, 'reader', 'active')
             `)
             .bind(
-                username,
-                email,
+                cleanUsername,
+                cleanEmail,
                 passwordHash
             )
             .run();
@@ -640,8 +605,8 @@ if (path === "/register") {
             message: "Account created successfully",
             user: {
                 id: result.meta.last_row_id,
-                username,
-                email,
+                username: cleanUsername,
+                email: cleanEmail,
                 role: "reader",
                 status: "active"
             }
