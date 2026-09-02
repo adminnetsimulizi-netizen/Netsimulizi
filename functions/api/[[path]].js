@@ -1,6 +1,5 @@
 export async function onRequest(context) {
     const { request, env } = context;
-
     const url = new URL(request.url);
 
     const path = url.pathname
@@ -17,7 +16,7 @@ export async function onRequest(context) {
         })
         : [];
 
-    function response(status, body) {
+    function json(status, body) {
         return new Response(JSON.stringify(body), {
             status,
             headers: {
@@ -35,11 +34,11 @@ export async function onRequest(context) {
     }
 
     // ==========================================
-    // HEALTH CHECK
+    // HEALTH
     // ==========================================
 
     if (request.method === 'GET' && path === 'health') {
-        return response(200, {
+        return json(200, {
             success: true,
             message: 'Net Simulizi API is running',
             service: 'netsimulizi-api'
@@ -51,23 +50,21 @@ export async function onRequest(context) {
     // ==========================================
 
     if (request.method === 'GET' && path === 'test') {
-        return response(200, {
+        return json(200, {
             success: true,
             message: 'Net Simulizi API connection successful'
         });
     }
 
     // ==========================================
-    // D1 DATABASE TEST
+    // D1 TEST
     // ==========================================
 
     if (request.method === 'GET' && path === 'db-test') {
-
         if (!env.D1) {
-            return response(500, {
+            return json(500, {
                 success: false,
-                message: 'D1 database binding was not found',
-                binding: 'D1'
+                message: 'D1 database binding was not found'
             });
         }
 
@@ -76,15 +73,14 @@ export async function onRequest(context) {
                 .prepare('SELECT 1 AS test')
                 .first();
 
-            return response(200, {
+            return json(200, {
                 success: true,
                 message: 'D1 database connection successful',
                 database: 'netsimulizi',
                 result
             });
-
         } catch (error) {
-            return response(500, {
+            return json(500, {
                 success: false,
                 message: 'D1 database connection failed',
                 error: error.message
@@ -93,35 +89,81 @@ export async function onRequest(context) {
     }
 
     // ==========================================
-    // STORIES - GET
+    // CATEGORIES - GET
     // ==========================================
 
-    if (request.method === 'GET' && segments[0] === 'stories') {
-
-        if (!env.D1) {
-            return response(500, {
-                success: false,
-                message: 'D1 database binding was not found'
-            });
-        }
-
+    if (request.method === 'GET' && path === 'categories') {
         try {
             const result = await env.D1
                 .prepare(`
-                    SELECT *
-                    FROM stories
-                    ORDER BY id DESC
+                    SELECT
+                        id,
+                        name,
+                        slug,
+                        language,
+                        status,
+                        created_at,
+                        updated_at
+                    FROM categories
+                    WHERE status = 'active'
+                    ORDER BY name ASC
                 `)
                 .all();
 
-            return response(200, {
+            return json(200, {
                 success: true,
                 data: result.results || []
             });
-
         } catch (error) {
+            return json(500, {
+                success: false,
+                message: 'Failed to fetch categories',
+                error: error.message
+            });
+        }
+    }
 
-            return response(500, {
+    // ==========================================
+    // STORIES - GET ALL
+    // ==========================================
+
+    if (request.method === 'GET' && path === 'stories') {
+        try {
+            const result = await env.D1
+                .prepare(`
+                    SELECT
+                        s.id,
+                        s.author_id,
+                        s.category_id,
+                        s.title,
+                        s.slug,
+                        s.description,
+                        s.cover_url,
+                        s.language,
+                        s.status,
+                        s.visibility,
+                        s.readers_count,
+                        s.created_at,
+                        s.updated_at,
+                        a.display_name AS author_name,
+                        c.name AS category_name
+                    FROM stories s
+                    LEFT JOIN authors a
+                        ON s.author_id = a.id
+                    LEFT JOIN categories c
+                        ON s.category_id = c.id
+                    WHERE s.status = 'published'
+                      AND s.visibility = 'public'
+                    ORDER BY s.created_at DESC
+                `)
+                .all();
+
+            return json(200, {
+                success: true,
+                data: result.results || []
+            });
+        } catch (error) {
+            return json(500, {
                 success: false,
                 message: 'Failed to fetch stories',
                 error: error.message
@@ -130,68 +172,162 @@ export async function onRequest(context) {
     }
 
     // ==========================================
-    // STORIES - POST
+    // STORY - GET ONE
+    // /api/stories/1
     // ==========================================
 
-    if (request.method === 'POST' && path === 'stories') {
+    if (
+        request.method === 'GET' &&
+        segments[0] === 'stories' &&
+        segments.length === 2
+    ) {
+        const storyId = Number(segments[1]);
 
+        if (!Number.isInteger(storyId) || storyId <= 0) {
+            return json(400, {
+                success: false,
+                message: 'Invalid story ID'
+            });
+        }
+
+        try {
+            const story = await env.D1
+                .prepare(`
+                    SELECT
+                        s.id,
+                        s.author_id,
+                        s.category_id,
+                        s.title,
+                        s.slug,
+                        s.description,
+                        s.cover_url,
+                        s.language,
+                        s.status,
+                        s.visibility,
+                        s.readers_count,
+                        s.created_at,
+                        s.updated_at,
+                        a.display_name AS author_name,
+                        c.name AS category_name
+                    FROM stories s
+                    LEFT JOIN authors a
+                        ON s.author_id = a.id
+                    LEFT JOIN categories c
+                        ON s.category_id = c.id
+                    WHERE s.id = ?
+                    LIMIT 1
+                `)
+                .bind(storyId)
+                .first();
+
+            if (!story) {
+                return json(404, {
+                    success: false,
+                    message: 'Story not found'
+                });
+            }
+
+            return json(200, {
+                success: true,
+                data: story
+            });
+        } catch (error) {
+            return json(500, {
+                success: false,
+                message: 'Failed to fetch story',
+                error: error.message
+            });
+        }
+    }
+
+    // ==========================================
+    // EPISODES - GET BY STORY
+    // /api/stories/1/episodes
+    // ==========================================
+
+    if (
+        request.method === 'GET' &&
+        segments[0] === 'stories' &&
+        segments.length === 3 &&
+        segments[2] === 'episodes'
+    ) {
+        const storyId = Number(segments[1]);
+
+        if (!Number.isInteger(storyId) || storyId <= 0) {
+            return json(400, {
+                success: false,
+                message: 'Invalid story ID'
+            });
+        }
+
+        try {
+            const result = await env.D1
+                .prepare(`
+                    SELECT
+                        id,
+                        story_id,
+                        episode_number,
+                        title,
+                        content,
+                        is_free,
+                        price,
+                        status,
+                        created_at,
+                        updated_at
+                    FROM episodes
+                    WHERE story_id = ?
+                      AND status != 'deleted'
+                    ORDER BY episode_number ASC
+                `)
+                .bind(storyId)
+                .all();
+
+            return json(200, {
+                success: true,
+                data: result.results || []
+            });
+        } catch (error) {
+            return json(500, {
+                success: false,
+                message: 'Failed to fetch episodes',
+                error: error.message
+            });
+        }
+    }
+
+    // ==========================================
+    // REGISTER
+    // ==========================================
+
+    if (request.method === 'POST' && path === 'register') {
         const body = await readJson();
 
         if (!body) {
-            return response(400, {
+            return json(400, {
                 success: false,
                 message: 'Invalid JSON data'
             });
         }
 
-        const title = String(body.title || '').trim();
-        const content = String(body.content || '').trim();
-        const author = String(body.author || '').trim();
+        const username = String(body.username || '').trim();
+        const email = String(body.email || '').trim().toLowerCase();
+        const password = String(body.password || '');
 
-        if (!title || !content || !author) {
-            return response(400, {
+        if (!username || !email || !password) {
+            return json(400, {
                 success: false,
-                message: 'Title, content and author are required'
+                message: 'Username, email and password are required'
             });
         }
 
-        if (!env.D1) {
-            return response(500, {
-                success: false,
-                message: 'D1 database binding was not found'
-            });
-        }
-
-        try {
-
-            const result = await env.D1
-                .prepare(`
-                    INSERT INTO stories
-                    (title, content, author)
-                    VALUES (?, ?, ?)
-                `)
-                .bind(title, content, author)
-                .run();
-
-            return response(201, {
-                success: true,
-                message: 'Story created successfully',
-                data: {
-                    id: result.meta?.last_row_id,
-                    title,
-                    content,
-                    author
-                }
-            });
-
-        } catch (error) {
-
-            return response(500, {
-                success: false,
-                message: 'Failed to create story',
-                error: error.message
-            });
-        }
+        return json(201, {
+            success: true,
+            message: 'Register endpoint is ready',
+            data: {
+                username,
+                email
+            }
+        });
     }
 
     // ==========================================
@@ -199,11 +335,10 @@ export async function onRequest(context) {
     // ==========================================
 
     if (request.method === 'POST' && path === 'login') {
-
         const body = await readJson();
 
         if (!body) {
-            return response(400, {
+            return json(400, {
                 success: false,
                 message: 'Invalid JSON data'
             });
@@ -213,53 +348,17 @@ export async function onRequest(context) {
         const password = String(body.password || '');
 
         if (!username || !password) {
-            return response(400, {
+            return json(400, {
                 success: false,
                 message: 'Username and password are required'
             });
         }
 
-        return response(200, {
+        return json(200, {
             success: true,
-            message: 'Login endpoint is working',
+            message: 'Login endpoint is ready',
             data: {
                 username
-            }
-        });
-    }
-
-    // ==========================================
-    // REGISTER
-    // ==========================================
-
-    if (request.method === 'POST' && path === 'register') {
-
-        const body = await readJson();
-
-        if (!body) {
-            return response(400, {
-                success: false,
-                message: 'Invalid JSON data'
-            });
-        }
-
-        const username = String(body.username || '').trim();
-        const email = String(body.email || '').trim();
-        const password = String(body.password || '');
-
-        if (!username || !email || !password) {
-            return response(400, {
-                success: false,
-                message: 'Username, email and password are required'
-            });
-        }
-
-        return response(201, {
-            success: true,
-            message: 'Register endpoint is working',
-            data: {
-                username,
-                email
             }
         });
     }
@@ -268,7 +367,7 @@ export async function onRequest(context) {
     // 404
     // ==========================================
 
-    return response(404, {
+    return json(404, {
         success: false,
         message: 'API endpoint not found',
         path
