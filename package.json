@@ -1,11 +1,12 @@
 {
-  "name": "net-simulizi-web",
-  "private": true,
-  "version": "0.1.0",
-  "description": "Net Simulizi web client",
+  "name": "netsimulizi-api",
+  "version": "1.0.0",
+  "description": "Net Simulizi API",
+  "main": "src/functions/*.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.7.2"
   }
 }
