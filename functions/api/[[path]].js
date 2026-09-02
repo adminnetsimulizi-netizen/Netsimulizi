@@ -590,7 +590,7 @@ if (path === "/register") {
          * Hashing imeondolewa kwa muda.
          */
 
-        const passwordHash = "TEST_HASH";
+       const passwordHash = await hashPassword(password);
 
         const result = await env.D1
             .prepare(`
