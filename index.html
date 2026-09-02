@@ -160,7 +160,13 @@ footer{background:#07090d;border-top:1px solid var(--border)}.footer-inner{max-w
 <a class="story-card" href="forever-you-live.html" data-title="FOREVER YOU LIVE"><div class="story-cover"><div><h3>FOREVER YOU LIVE</h3><small>Romance</small></div></div><div class="story-content"><h3>FOREVER YOU LIVE</h3><p>Hadithi ya mapenzi yanayovuka mipaka.</p><div class="story-meta"><span>English</span><span>★ 4.8</span></div></div></a>
 </div>
 </section>
+<div style="padding:20px;">
+    <button onclick="testRegister()">
+        TEST REGISTER
+    </button>
 
+    <pre id="register-result"></pre>
+</div>
 <section class="section" id="categories">
 <div class="section-heading"><h2>Categories</h2><a href="categories.html" class="view-all">View all →</a></div>
 <div class="categories">
@@ -254,6 +260,33 @@ card.style.display=title.includes(query)?"":"none";
 });
 });
 document.getElementById("authModal").addEventListener("click",function(e){if(e.target===this)closeAuth()});
+</script>
+<script>
+async function testRegister() {
+    const result = document.getElementById("register-result");
+
+    result.textContent = "Inatuma...";
+
+    try {
+        const response = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: "testuser10",
+                email: "testuser10@netsimulizi.com",
+                password: "TestPassword123!"
+            })
+        });
+
+        const data = await response.json();
+
+        result.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+        result.textContent = "ERROR: " + error.message;
+    }
+}
 </script>
 </body>
 </html>
