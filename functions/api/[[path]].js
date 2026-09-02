@@ -492,19 +492,29 @@ export async function onRequest(context) {
        POST REQUEST
     ========================= */
 
-    if (request.method === "POST") {
+ if (request.method === "POST") {
 
-        const url = new URL(request.url);
+    const url = new URL(request.url);
 
-        let path = url.pathname;
+    let path = url.pathname;
 
-        if (path.startsWith("/api")) {
-            path = path.substring(4);
-        }
+    if (path.startsWith("/api")) {
+        path = path.substring(4);
+    }
 
-        if (path === "") {
-            path = "/";
-        }
+    if (path === "") {
+        path = "/";
+    }
+
+    // TEMP DEBUG
+    if (path !== "/register" && path !== "/login") {
+        return json({
+            success: false,
+            message: "POST endpoint not found",
+            received_path: path,
+            received_url: url.href
+        }, 404);
+    }
 
         /* =========================
            REGISTER
