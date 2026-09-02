@@ -510,183 +510,151 @@ export async function onRequest(context) {
            REGISTER
         ========================= */
 
-        if (path === "/register") {
+     /* =========================
+   REGISTER
+========================= */
 
-            const body = await readJson(request);
+if (path === "/register") {
 
-            if (!body) {
-                return errorResponse(
-                    "Invalid JSON request",
-                    400
-                );
-            }
+    const body = await readJson(request);
 
-            let {
-                username,
-                email,
-                password
-            } = body;
+    if (!body) {
+        return errorResponse(
+            "Invalid JSON request",
+            400
+        );
+    }
 
-            /* =========================
-               VALIDATION
-            ========================= */
+    let {
+        username,
+        email,
+        password
+    } = body;
+
+    if (
+        typeof username !== "string" ||
+        typeof email !== "string" ||
+        typeof password !== "string"
+    ) {
+        return errorResponse(
+            "Username, email and password are required",
+            400
+        );
+    }
+
+    username = username.trim();
+    email = email.trim().toLowerCase();
+
+    if (username.length < 3) {
+        return errorResponse(
+            "Username must be at least 3 characters",
+            400
+        );
+    }
+
+    if (username.length > 30) {
+        return errorResponse(
+            "Username must not exceed 30 characters",
+            400
+        );
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        return errorResponse(
+            "Username can only contain letters, numbers and underscore",
+            400
+        );
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return errorResponse(
+            "Invalid email address",
+            400
+        );
+    }
+
+    if (password.length < 8) {
+        return errorResponse(
+            "Password must be at least 8 characters",
+            400
+        );
+    }
+
+    try {
+
+        const existingUser = await env.D1
+            .prepare(`
+                SELECT id, username, email
+                FROM users
+                WHERE username = ? OR email = ?
+                LIMIT 1
+            `)
+            .bind(username, email)
+            .first();
+
+        if (existingUser) {
 
             if (
-                typeof username !== "string" ||
-                typeof email !== "string" ||
-                typeof password !== "string"
+                existingUser.username.toLowerCase() ===
+                username.toLowerCase()
             ) {
                 return errorResponse(
-                    "Username, email and password are required",
-                    400
-                );
-            }
-
-            username = username.trim();
-            email = email.trim().toLowerCase();
-
-            if (username.length < 3) {
-                return errorResponse(
-                    "Username must be at least 3 characters",
-                    400
-                );
-            }
-
-            if (username.length > 30) {
-                return errorResponse(
-                    "Username must not exceed 30 characters",
-                    400
-                );
-            }
-
-            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-                return errorResponse(
-                    "Username can only contain letters, numbers and underscore",
-                    400
+                    "Username already exists",
+                    409
                 );
             }
 
             if (
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+                existingUser.email.toLowerCase() ===
+                email.toLowerCase()
             ) {
                 return errorResponse(
-                    "Invalid email address",
-                    400
-                );
-            }
-
-            if (password.length < 8) {
-                return errorResponse(
-                    "Password must be at least 8 characters",
-                    400
-                );
-            }
-
-            if (password.length > 128) {
-                return errorResponse(
-                    "Password is too long",
-                    400
-                );
-            }
-
-            /* =========================
-               CHECK DATABASE
-            ========================= */
-
-            try {
-
-                const existingUser = await env.D1
-                    .prepare(`
-                        SELECT
-                            id,
-                            username,
-                            email
-                        FROM users
-                        WHERE username = ?
-                        OR email = ?
-                        LIMIT 1
-                    `)
-                    .bind(username, email)
-                    .first();
-
-                if (existingUser) {
-
-                    if (
-                        existingUser.username.toLowerCase() ===
-                        username.toLowerCase()
-                    ) {
-                        return errorResponse(
-                            "Username already exists",
-                            409
-                        );
-                    }
-
-                    if (
-                        existingUser.email.toLowerCase() ===
-                        email.toLowerCase()
-                    ) {
-                        return errorResponse(
-                            "Email already exists",
-                            409
-                        );
-                    }
-
-                    return errorResponse(
-                        "Account already exists",
-                        409
-                    );
-                }
-
-                /* =========================
-                   HASH PASSWORD
-                ========================= */
-
-                const passwordHash =
-                    await hashPassword(password);
-
-                /* =========================
-                   CREATE USER
-                ========================= */
-
-                const result = await env.D1
-                    .prepare(`
-                        INSERT INTO users (
-                            username,
-                            email,
-                            password_hash,
-                            role,
-                            status
-                        )
-                        VALUES (?, ?, ?, 'reader', 'active')
-                    `)
-                    .bind(
-                        username,
-                        email,
-                        passwordHash
-                    )
-                    .run();
-
-                return json({
-                    success: true,
-                    message: "Account created successfully",
-                    user: {
-                        id: result.meta.last_row_id,
-                        username,
-                        email,
-                        role: "reader",
-                        status: "active"
-                    }
-                }, 201);
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Failed to create account",
-                    500
+                    "Email already exists",
+                    409
                 );
             }
         }
 
+        const passwordHash = await hashPassword(password);
+
+        const result = await env.D1
+            .prepare(`
+                INSERT INTO users (
+                    username,
+                    email,
+                    password_hash,
+                    role,
+                    status
+                )
+                VALUES (?, ?, ?, 'reader', 'active')
+            `)
+            .bind(
+                username,
+                email,
+                passwordHash
+            )
+            .run();
+
+        return json({
+            success: true,
+            message: "Account created successfully",
+            user: {
+                id: result.meta.last_row_id,
+                username,
+                email,
+                role: "reader",
+                status: "active"
+            }
+        }, 201);
+
+    } catch (error) {
+
+        return errorResponse(
+            "Registration failed: " + error.message,
+            500
+        );
+    }
+}
         /* =========================
            LOGIN
         ========================= */
