@@ -67,7 +67,7 @@ async function hashPassword(password) {
         ["deriveBits"]
     );
 
-    const iterations = 100000;
+const iterations = 1000;
 
     const hash = await crypto.subtle.deriveBits(
         {
