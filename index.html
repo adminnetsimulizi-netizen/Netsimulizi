@@ -7,7 +7,11 @@
 <title>Net Simulizi</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{
+box-sizing:border-box;
+margin:0;
+padding:0
+}
 
 :root{
 --bg:#090b10;
@@ -28,14 +32,18 @@ body{
 font-family:Arial,Helvetica,sans-serif;
 background:var(--bg);
 color:var(--text);
-line-height:1.5
+line-height:1.5;
+min-height:100vh
 }
 
-button,input,select{
+button,
+input,
+select{
 font:inherit
 }
 
-button,a{
+button,
+a{
 -webkit-tap-highlight-color:transparent
 }
 
@@ -45,7 +53,7 @@ color:inherit
 }
 
 /* =========================
-LANGUAGE
+LANGUAGE SCREEN
 ========================= */
 
 #languageScreen{
@@ -63,6 +71,12 @@ display:flex;
 align-items:center;
 justify-content:center;
 padding:25px
+}
+
+#languageScreen.hidden{
+display:none !important;
+visibility:hidden !important;
+pointer-events:none !important
 }
 
 .language-container{
@@ -648,7 +662,8 @@ STORIES
 .stories{
 display:grid;
 grid-template-columns:repeat(5,1fr);
-gap:18px
+gap:18px;
+align-items:start
 }
 
 .story-card{
@@ -657,7 +672,8 @@ background:var(--surface);
 border:1px solid var(--border);
 border-radius:12px;
 transition:.2s;
-display:block
+display:block;
+min-width:0
 }
 
 .story-card:hover{
@@ -1911,8 +1927,9 @@ document.getElementById(
 
 if(languageScreen){
 
-languageScreen.style.display =
-"none";
+languageScreen.classList.add(
+"hidden"
+);
 
 }
 
@@ -1932,6 +1949,10 @@ applyLanguage(language);
 
 }
 
+
+/* =========================
+LANGUAGE TEXT
+========================= */
 
 function applyLanguage(language){
 
@@ -2055,7 +2076,14 @@ try{
 
 const response =
 await fetch(
-API_BASE + "/categories"
+API_BASE + "/categories",
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
+}
 );
 
 const data =
@@ -2228,30 +2256,13 @@ data.message ||
 
 }
 
-
-/*
-API inatarajiwa kurudisha:
-
-{
-  success:true,
-  stories:[...]
-}
-
-*/
-
 const stories =
 Array.isArray(data.stories)
 ? data.stories
 : [];
 
-
 allStories =
 stories;
-
-
-/*
-KAMA HAKUNA STORIES
-*/
 
 if(!stories.length){
 
@@ -2275,34 +2286,21 @@ return;
 
 }
 
-
 /*
-IMPORTANT:
-Discover ina-render moja kwa moja hapa.
+DISCOVER
 */
 
-storyGrid.innerHTML = "";
-
-stories.forEach(
-function(story){
-
-const card =
-createStoryCard(
-story,
+renderStories(
+stories,
+storyGrid,
 false
 );
 
-storyGrid.appendChild(card);
-
-});
-
-
 /*
-Trending
+TRENDING
 */
 
 renderTrending(stories);
-
 
 }catch(error){
 
@@ -2392,39 +2390,32 @@ trending
 const storyId =
 story.id;
 
-
 const title =
 story.title ||
 "Untitled Story";
-
 
 const description =
 story.description ||
 "Hadithi kutoka Net Simulizi.";
 
-
 const language =
 story.language ||
 "";
-
 
 const readers =
 story.readers_count ??
 story.readersCount ??
 0;
 
-
 const category =
 story.category_name ||
 story.category ||
 "Story";
 
-
 const cover =
 story.cover_url ||
 story.coverUrl ||
 "";
-
 
 const card =
 document.createElement("a");
@@ -2441,9 +2432,7 @@ storyId
 card.dataset.title =
 String(title).toLowerCase();
 
-
 let coverHTML = "";
-
 
 if(cover){
 
@@ -2475,7 +2464,6 @@ ${escapeHTML(category)}
 
 }
 
-
 const languageText =
 language === "sw"
 ? "Swahili"
@@ -2483,12 +2471,10 @@ language === "sw"
 ? "English"
 : language || "—";
 
-
 const trendText =
 trending
 ? "Trending"
 : languageText;
-
 
 card.innerHTML = `
 ${coverHTML}
@@ -2522,7 +2508,6 @@ ${escapeHTML(trendText)}
 
 </div>
 `;
-
 
 return card;
 
@@ -2562,7 +2547,6 @@ return;
 
 }
 
-
 const trending =
 [...stories]
 .sort(
@@ -2587,7 +2571,6 @@ return bReaders - aReaders;
 })
 .slice(0,5);
 
-
 renderStories(
 trending,
 grid,
@@ -2606,10 +2589,7 @@ document.getElementById(
 "searchInput"
 );
 
-
 if(searchInput){
-
-searchInput.value = "";
 
 searchInput.addEventListener(
 "input",
@@ -2629,12 +2609,6 @@ if(!storyGrid){
 return;
 }
 
-
-/*
-Hakuna search:
-onyesha stories zote.
-*/
-
 if(query === ""){
 
 renderStories(
@@ -2646,11 +2620,6 @@ false
 return;
 
 }
-
-
-/*
-Search
-*/
 
 const filtered =
 allStories.filter(
@@ -2690,11 +2659,6 @@ author.includes(query)
 }
 );
 
-
-/*
-Hakuna result
-*/
-
 if(!filtered.length){
 
 storyGrid.innerHTML = `
@@ -2707,11 +2671,6 @@ Hakuna hadithi zilizopatikana kwa:
 return;
 
 }
-
-
-/*
-Results
-*/
 
 renderStories(
 filtered,
@@ -2743,7 +2702,6 @@ switchAuth(type);
 
 }
 
-
 function closeAuth(){
 
 document.getElementById(
@@ -2753,7 +2711,6 @@ document.getElementById(
 );
 
 }
-
 
 function switchAuth(type){
 
@@ -2774,7 +2731,6 @@ type === "register"
 : "none";
 
 }
-
 
 function showAuthMessage(
 id,
@@ -2797,7 +2753,6 @@ element.className =
 type;
 
 }
-
 
 function clearAuthMessages(){
 
@@ -3249,7 +3204,6 @@ document.getElementById(
 "mobileUser"
 );
 
-
 if(!storedUser){
 
 userMenu.classList.remove(
@@ -3284,7 +3238,6 @@ button.style.display =
 return;
 
 }
-
 
 try{
 
@@ -3399,7 +3352,6 @@ dropdown.classList.toggle(
 );
 
 }
-
 
 document.addEventListener(
 "click",
@@ -3549,7 +3501,6 @@ document.getElementById(
 
 }
 
-
 function closeMenu(){
 
 document.getElementById(
@@ -3606,7 +3557,6 @@ homeLogin();
 }
 );
 
-
 document.getElementById(
 "homeLoginPassword"
 ).addEventListener(
@@ -3621,7 +3571,6 @@ homeLogin();
 
 }
 );
-
 
 document.getElementById(
 "homeRegisterConfirm"
@@ -3697,7 +3646,6 @@ return String(value)
 
 }
 
-
 function truncateText(
 text,
 length
@@ -3723,7 +3671,6 @@ length
 
 }
 
-
 function formatNumber(
 number
 ){
@@ -3742,7 +3689,6 @@ return "0";
 return value.toLocaleString();
 
 }
-
 
 function safeURL(
 url
@@ -3776,24 +3722,30 @@ localStorage.getItem(
 "netsimulizi_language"
 );
 
-if(savedLanguage){
-
 const languageScreen =
 document.getElementById(
 "languageScreen"
 );
 
-if(languageScreen){
-
-languageScreen.style.display =
-"none";
-
-}
-
 const headerLanguage =
 document.getElementById(
 "headerLanguage"
 );
+
+
+/*
+KAMA LUGHA IMESHACHAGULIWA
+*/
+
+if(savedLanguage){
+
+if(languageScreen){
+
+languageScreen.classList.add(
+"hidden"
+);
+
+}
 
 if(headerLanguage){
 
@@ -3806,9 +3758,34 @@ applyLanguage(
 savedLanguage
 );
 
+}else{
+
+/*
+KAMA NI MARA YA KWANZA,
+LANGUAGE SCREEN IBaki.
+*/
+
+if(languageScreen){
+
+languageScreen.classList.remove(
+"hidden"
+);
+
 }
 
+}
+
+
+/*
+USER
+*/
+
 updateUserInterface();
+
+
+/*
+DATA
+*/
 
 loadCategories();
 
