@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - Net Simulizi</title>
+
+<style>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0
+}
+
+:root{
+--bg:#090b10;
+--surface:#11141b;
+--surface2:#171b24;
+--gold:#e5a51c;
+--gold-light:#f2bd3d;
+--text:#fff;
+--muted:#a8afbd;
+--border:rgba(255,255,255,.09);
+--danger:#d94b4b;
+}
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text);
+line-height:1.5;
+min-height:100vh;
+}
+
+a{
+text-decoration:none;
+color:inherit;
+}
+
+button,
+input{
+font:inherit;
+}
+
+/* HEADER */
+
+header{
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(9,11,16,.96);
+backdrop-filter:blur(12px);
+border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+max-width:1200px;
+min-height:72px;
+margin:auto;
+padding:10px 20px;
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.brand-logo{
+width:46px;
+height:46px;
+object-fit:contain;
+border-radius:10px;
+}
+
+.brand-name{
+font-size:21px;
+font-weight:900;
+}
+
+.brand-name span{
+color:var(--gold);
+}
+
+.header-right{
+margin-left:auto;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.home-btn{
+padding:10px 15px;
+border:1px solid var(--border);
+border-radius:8px;
+background:transparent;
+color:white;
+font-weight:700;
+cursor:pointer;
+}
+
+.home-btn:hover{
+border-color:var(--gold);
+color:var(--gold);
+}
+
+/* PAGE */
+
+.page{
+max-width:1100px;
+margin:auto;
+padding:45px 20px 80px;
+}
+
+.page-title{
+margin-bottom:28px;
+}
+
+.page-title h1{
+font-size:34px;
+margin-bottom:5px;
+}
+
+.page-title p{
+color:var(--muted);
+font-size:14px;
+}
+
+/* PROFILE TOP */
+
+.profile-card{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:18px;
+padding:30px;
+display:flex;
+align-items:center;
+gap:28px;
+margin-bottom:25px;
+}
+
+.avatar-section{
+width:150px;
+flex-shrink:0;
+text-align:center;
+}
+
+.avatar{
+width:125px;
+height:125px;
+border-radius:50%;
+background:var(--surface2);
+border:3px solid rgba(229,165,28,.55);
+display:flex;
+align-items:center;
+justify-content:center;
+margin:auto;
+overflow:hidden;
+}
+
+.avatar img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.avatar-letter{
+font-size:45px;
+font-weight:900;
+color:var(--gold);
+}
+
+.upload-btn{
+display:inline-block;
+margin-top:13px;
+padding:9px 13px;
+border-radius:8px;
+background:var(--gold);
+color:#111;
+font-size:12px;
+font-weight:800;
+cursor:pointer;
+}
+
+.upload-btn:hover{
+background:var(--gold-light);
+}
+
+#profileImageInput{
+display:none;
+}
+
+.profile-main{
+flex:1;
+}
+
+.profile-main h2{
+font-size:28px;
+margin-bottom:4px;
+}
+
+.profile-main .email{
+color:var(--muted);
+font-size:14px;
+margin-bottom:15px;
+}
+
+.member-badge{
+display:inline-block;
+padding:6px 11px;
+border-radius:20px;
+background:rgba(229,165,28,.12);
+color:var(--gold);
+border:1px solid rgba(229,165,28,.25);
+font-size:12px;
+font-weight:800;
+}
+
+/* GRID */
+
+.profile-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px;
+}
+
+.profile-box{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:14px;
+padding:22px;
+transition:.2s;
+}
+
+.profile-box:hover{
+border-color:rgba(229,165,28,.35);
+transform:translateY(-2px);
+}
+
+.profile-box a{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.box-icon{
+width:45px;
+height:45px;
+border-radius:10px;
+background:var(--surface2);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:21px;
+flex-shrink:0;
+}
+
+.box-text h3{
+font-size:16px;
+margin-bottom:3px;
+}
+
+.box-text p{
+font-size:12px;
+color:var(--muted);
+}
+
+.arrow{
+margin-left:auto;
+color:var(--muted);
+font-size:20px;
+}
+
+/* ACCOUNT INFO */
+
+.account-info{
+margin-top:25px;
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:14px;
+padding:25px;
+}
+
+.account-info h2{
+font-size:20px;
+margin-bottom:20px;
+}
+
+.info-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+.info-item{
+background:var(--surface2);
+border-radius:9px;
+padding:14px;
+}
+
+.info-label{
+font-size:11px;
+color:var(--muted);
+margin-bottom:4px;
+}
+
+.info-value{
+font-size:14px;
+font-weight:700;
+word-break:break-word;
+}
+
+/* LOGOUT */
+
+.logout-area{
+margin-top:25px;
+}
+
+.logout-btn{
+width:100%;
+padding:13px;
+border:1px solid rgba(217,75,75,.4);
+background:transparent;
+color:#ff8f8f;
+border-radius:9px;
+font-weight:800;
+cursor:pointer;
+}
+
+.logout-btn:hover{
+background:rgba(217,75,75,.1);
+}
+
+/* MESSAGE */
+
+.message{
+display:none;
+margin-top:15px;
+padding:10px 12px;
+border-radius:8px;
+font-size:13px;
+background:var(--surface2);
+border:1px solid var(--border);
+color:var(--muted);
+}
+
+.message.show{
+display:block;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+.header-inner{
+padding:10px 14px;
+}
+
+.brand-logo{
+width:40px;
+height:40px;
+}
+
+.brand-name{
+font-size:17px;
+}
+
+.home-btn{
+padding:8px 10px;
+font-size:12px;
+}
+
+.page{
+padding:30px 14px 60px;
+}
+
+.page-title h1{
+font-size:28px;
+}
+
+.profile-card{
+padding:24px 18px;
+flex-direction:column;
+text-align:center;
+}
+
+.profile-main h2{
+font-size:24px;
+}
+
+.profile-grid{
+grid-template-columns:1fr;
+}
+
+.info-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+@media(max-width:400px){
+
+.brand-name{
+font-size:15px;
+}
+
+.home-btn{
+font-size:11px;
+padding:7px 8px;
+}
+
+.avatar{
+width:110px;
+height:110px;
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="header-inner">
+
+<a href="index.html" class="brand">
+
+<img src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo">
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</a>
+
+<div class="header-right">
+
+<a href="index.html" class="home-btn">
+← Home
+</a>
+
+</div>
+
+</div>
+
+</header>
+
+<main class="page">
+
+<div class="page-title">
+
+<h1>My Profile</h1>
+
+<p>
+Simamia taarifa zako na akaunti yako ya Net Simulizi.
+</p>
+
+</div>
+
+<!-- PROFILE HEADER -->
+
+<section class="profile-card">
+
+<div class="avatar-section">
+
+<div class="avatar">
+
+<img id="profileImage"
+alt="Profile Picture">
+
+<div id="avatarLetter"
+class="avatar-letter">
+U
+</div>
+
+</div>
+
+<label for="profileImageInput" class="upload-btn">
+Upload Photo
+</label>
+
+<input
+type="file"
+id="profileImageInput"
+accept="image/*">
+
+<div id="uploadMessage" class="message">
+</div>
+
+</div>
+
+<div class="profile-main">
+
+<h2 id="profileUsername">
+User
+</h2>
+
+<div class="email" id="profileEmail">
+user@example.com
+</div>
+
+<span class="member-badge">
+Net Simulizi Reader
+</span>
+
+</div>
+
+</section>
+
+<!-- PROFILE MENU -->
+
+<section class="profile-grid">
+
+<div class="profile-box">
+
+<a href="library.html">
+
+<div class="box-icon">
+📚
+</div>
+
+<div class="box-text">
+
+<h3>My Library</h3>
+
+<p>
+Hadithi ulizohifadhi na kusoma.
+</p>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</a>
+
+</div>
+
+<div class="profile-box">
+
+<a href="bookmarks.html">
+
+<div class="box-icon">
+🔖
+</div>
+
+<div class="box-text">
+
+<h3>Bookmarks</h3>
+
+<p>
+Sehemu za hadithi ulizoweka bookmark.
+</p>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</a>
+
+</div>
+
+<div class="profile-box">
+
+<a href="history.html">
+
+<div class="box-icon">
+🕘
+</div>
+
+<div class="box-text">
+
+<h3>Reading History</h3>
+
+<p>
+Historia ya hadithi ulizosoma.
+</p>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</a>
+
+</div>
+
+<div class="profile-box">
+
+<a href="settings.html">
+
+<div class="box-icon">
+⚙️
+</div>
+
+<div class="box-text">
+
+<h3>Settings</h3>
+
+<p>
+Badili mipangilio ya akaunti yako.
+</p>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</a>
+
+</div>
+
+</section>
+
+<!-- ACCOUNT INFORMATION -->
+
+<section class="account-info">
+
+<h2>Account Information</h2>
+
+<div class="info-grid">
+
+<div class="info-item">
+
+<div class="info-label">
+USERNAME
+</div>
+
+<div
+class="info-value"
+id="infoUsername">
+-
+</div>
+
+</div>
+
+<div class="info-item">
+
+<div class="info-label">
+EMAIL
+</div>
+
+<div
+class="info-value"
+id="infoEmail">
+-
+</div>
+
+</div>
+
+<div class="info-item">
+
+<div class="info-label">
+ACCOUNT TYPE
+</div>
+
+<div
+class="info-value">
+Reader
+</div>
+
+</div>
+
+<div class="info-item">
+
+<div class="info-label">
+ACCOUNT STATUS
+</div>
+
+<div
+class="info-value">
+Active
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- LOGOUT -->
+
+<div class="logout-area">
+
+<button
+class="logout-btn"
+onclick="logoutUser()">
+Logout </button>
+
+</div>
+
+</main>
+
+<script>
+
+/* GET LOGGED USER */
+
+function getLoggedUser(){
+
+const savedUser=
+localStorage.getItem("netsimulizi_user");
+
+if(!savedUser){
+
+window.location.href="index.html";
+
+return null;
+
+}
+
+try{
+
+return JSON.parse(savedUser);
+
+}catch(error){
+
+localStorage.removeItem("netsimulizi_user");
+
+window.location.href="index.html";
+
+return null;
+
+}
+
+}
+
+
+/* DISPLAY USER */
+
+function loadProfile(){
+
+const user=getLoggedUser();
+
+if(!user)return;
+
+
+/*
+USER DATA FROM LOGIN API
+*/
+
+const username=
+user.username ||
+user.name ||
+"User";
+
+const email=
+user.email ||
+"";
+
+
+document.getElementById(
+"profileUsername"
+).textContent=username;
+
+
+document.getElementById(
+"profileEmail"
+).textContent=email;
+
+
+document.getElementById(
+"infoUsername"
+).textContent=username;
+
+
+document.getElementById(
+"infoEmail"
+).textContent=email;
+
+
+/*
+DEFAULT AVATAR LETTER
+*/
+
+const firstLetter=
+username.charAt(0).toUpperCase() || "U";
+
+document.getElementById(
+"avatarLetter"
+).textContent=firstLetter;
+
+
+/*
+LOAD LOCALLY SAVED AVATAR
+*/
+
+const savedImage=
+localStorage.getItem(
+"netsimulizi_profile_image"
+);
+
+if(savedImage){
+
+showProfileImage(savedImage);
+
+}
+
+}
+
+
+/* SHOW PROFILE IMAGE */
+
+function showProfileImage(image){
+
+const img=
+document.getElementById("profileImage");
+
+const letter=
+document.getElementById("avatarLetter");
+
+img.src=image;
+
+img.style.display="block";
+
+letter.style.display="none";
+
+}
+
+
+/* PROFILE IMAGE UPLOAD */
+
+document.getElementById(
+"profileImageInput"
+).addEventListener(
+"change",
+function(){
+
+const file=this.files[0];
+
+if(!file)return;
+
+
+/*
+CHECK IMAGE
+*/
+
+if(!file.type.startsWith("image/")){
+
+showUploadMessage(
+"Tafadhali chagua picha.",
+"error"
+);
+
+return;
+
+}
+
+
+/*
+LIMIT FOR FRONTEND TEST
+*/
+
+if(file.size>5*1024*1024){
+
+showUploadMessage(
+"Picha isiwe zaidi ya 5MB.",
+"error"
+);
+
+return;
+
+}
+
+
+const reader=
+new FileReader();
+
+
+reader.onload=function(e){
+
+const imageData=e.target.result;
+
+
+/*
+TEMPORARY LOCAL STORAGE
+
+Later this will be replaced
+with API + storage.
+*/
+
+try{
+
+localStorage.setItem(
+"netsimulizi_profile_image",
+imageData
+);
+
+showProfileImage(imageData);
+
+showUploadMessage(
+"Picha imewekwa kwenye profile.",
+"success"
+);
+
+}catch(error){
+
+showUploadMessage(
+"Picha ni kubwa sana kuhifadhiwa kwenye browser.",
+"error"
+);
+
+}
+
+};
+
+
+reader.readAsDataURL(file);
+
+});
+
+
+/* UPLOAD MESSAGE */
+
+function showUploadMessage(message,type){
+
+const element=
+document.getElementById("uploadMessage");
+
+element.textContent=message;
+
+element.style.display="block";
+
+if(type==="error"){
+
+element.style.color="#ff9c9c";
+element.style.borderColor="#6d3030";
+
+}else{
+
+element.style.color="#b8f5c8";
+element.style.borderColor="#28643a";
+
+}
+
+}
+
+
+/* LOGOUT */
+
+function logoutUser(){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+localStorage.removeItem(
+"netsimulizi_profile_image"
+);
+
+window.location.href="index.html";
+
+}
+
+
+/* START */
+
+window.addEventListener(
+"DOMContentLoaded",
+loadProfile
+);
+
+</script>
+
+</body>
+</html>
