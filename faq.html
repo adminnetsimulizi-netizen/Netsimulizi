@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Maswali ya Mara kwa Mara - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09)
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input{
+      font-family:inherit;
+    }
+
+    .topbar{
+      height:70px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .brand img{
+      width:42px;
+      height:42px;
+      object-fit:contain;
+      border-radius:8px;
+    }
+
+    .brand span{
+      color:var(--gold);
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .top-btn{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .top-btn:hover{
+      border-color:var(--gold);
+      color:var(--gold);
+    }
+
+    .layout{
+      display:flex;
+      min-height:calc(100vh - 70px);
+    }
+
+    .sidebar{
+      width:240px;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      padding:24px 14px;
+      flex-shrink:0;
+    }
+
+    .nav-title{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:10px 12px;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      margin-bottom:4px;
+      font-size:14px;
+      transition:.2s;
+    }
+
+    .nav-item:hover{
+      background:var(--surface-2);
+      color:var(--text);
+    }
+
+    .nav-item.active{
+      background:rgba(229,165,28,.12);
+      color:var(--gold);
+    }
+
+    .nav-icon{
+      width:20px;
+      text-align:center;
+    }
+
+    .main{
+      flex:1;
+      padding:35px;
+      min-width:0;
+    }
+
+    .page-header{
+      margin-bottom:28px;
+    }
+
+    .page-header h1{
+      font-size:32px;
+      margin-bottom:8px;
+    }
+
+    .page-header p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .content{
+      max-width:950px;
+    }
+
+    .search-box{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:22px;
+    }
+
+    .search-wrap{
+      position:relative;
+    }
+
+    .search-wrap span{
+      position:absolute;
+      left:15px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:18px;
+    }
+
+    #faqSearch{
+      width:100%;
+      height:48px;
+      padding:0 15px 0 45px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:9px;
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+
+    #faqSearch:focus{
+      border-color:var(--gold);
+    }
+
+    .categories{
+      display:flex;
+      flex-wrap:wrap;
+      gap:9px;
+      margin-top:15px;
+    }
+
+    .category-btn{
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      color:var(--muted);
+      padding:9px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:12px;
+    }
+
+    .category-btn:hover,
+    .category-btn.active{
+      background:rgba(229,165,28,.12);
+      border-color:rgba(229,165,28,.35);
+      color:var(--gold-light);
+    }
+
+    .faq-section{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      margin-bottom:20px;
+      overflow:hidden;
+    }
+
+    .faq-section-title{
+      padding:20px 22px;
+      border-bottom:1px solid var(--border);
+      color:var(--gold-light);
+      font-size:18px;
+    }
+
+    .faq-item{
+      border-bottom:1px solid var(--border);
+    }
+
+    .faq-item:last-child{
+      border-bottom:0;
+    }
+
+    .faq-question{
+      width:100%;
+      background:none;
+      border:0;
+      color:var(--text);
+      text-align:left;
+      padding:18px 22px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .faq-question:hover{
+      color:var(--gold-light);
+    }
+
+    .arrow{
+      flex-shrink:0;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .faq-answer{
+      display:none;
+      padding:0 22px 19px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+    }
+
+    .faq-item.open .faq-answer{
+      display:block;
+    }
+
+    .faq-item.open .arrow{
+      transform:rotate(180deg);
+      color:var(--gold);
+    }
+
+    .no-results{
+      display:none;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:40px 20px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .no-results .icon{
+      font-size:35px;
+      margin-bottom:12px;
+    }
+
+    .contact-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:25px;
+      text-align:center;
+      margin-top:22px;
+    }
+
+    .contact-card h2{
+      font-size:19px;
+      margin-bottom:8px;
+    }
+
+    .contact-card p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      margin-bottom:18px;
+    }
+
+    .contact-btn{
+      display:inline-block;
+      background:var(--gold);
+      color:#090b10;
+      padding:11px 20px;
+      border-radius:8px;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .contact-btn:hover{
+      background:var(--gold-light);
+    }
+
+    footer{
+      margin-top:35px;
+      border-top:1px solid var(--border);
+      padding:25px 0;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    footer a{
+      color:var(--muted);
+      margin:0 8px;
+    }
+
+    footer a:hover{
+      color:var(--gold);
+    }
+
+    .mobile-nav{
+      display:none;
+    }
+
+    @media(max-width:800px){
+
+      .topbar{
+        height:62px;
+        padding:0 15px;
+      }
+
+      .brand{
+        font-size:17px;
+      }
+
+      .brand img{
+        width:36px;
+        height:36px;
+      }
+
+      .layout{
+        display:block;
+      }
+
+      .sidebar{
+        display:none;
+      }
+
+      .main{
+        padding:22px 15px 85px;
+      }
+
+      .page-header h1{
+        font-size:26px;
+      }
+
+      .search-box{
+        padding:15px;
+      }
+
+      .faq-section-title{
+        padding:17px;
+        font-size:17px;
+      }
+
+      .faq-question{
+        padding:16px 17px;
+        font-size:13px;
+      }
+
+      .faq-answer{
+        padding:0 17px 17px;
+        font-size:13px;
+      }
+
+      .mobile-nav{
+        position:fixed;
+        display:flex;
+        left:0;
+        right:0;
+        bottom:0;
+        height:62px;
+        background:var(--surface);
+        border-top:1px solid var(--border);
+        z-index:200;
+        justify-content:space-around;
+        align-items:center;
+      }
+
+      .mobile-nav a{
+        color:var(--muted);
+        font-size:10px;
+        text-align:center;
+      }
+
+      .mobile-nav .m-icon{
+        display:block;
+        font-size:19px;
+        margin-bottom:3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="Net Simulizi">
+      <div>Net <span>Simulizi</span></div>
+    </a>
+
+    <div class="top-actions">
+      <button class="top-btn" onclick="toggleDark()" title="Muonekano">☾</button>
+      <button class="top-btn" onclick="goProfile()" title="Akaunti">👤</button>
+    </div>
+
+  </header>
+
+
+  <div class="layout">
+
+    <aside class="sidebar">
+
+      <div class="nav-title">Menyu</div>
+
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">⌂</span>
+        <span>Nyumbani</span>
+      </a>
+
+      <a href="discover.html" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span>Gundua</span>
+      </a>
+
+      <a href="search.html" class="nav-item">
+        <span class="nav-icon">⌕</span>
+        <span>Tafuta</span>
+      </a>
+
+      <a href="categories.html" class="nav-item">
+        <span class="nav-icon">☷</span>
+        <span>Makundi</span>
+      </a>
+
+      <a href="trending.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>Trending</span>
+      </a>
+
+      <div class="nav-title">Maktaba</div>
+
+      <a href="library.html" class="nav-item">
+        <span class="nav-icon">▣</span>
+        <span>Maktaba Yangu</span>
+      </a>
+
+      <a href="history.html" class="nav-item">
+        <span class="nav-icon">◷</span>
+        <span>Historia</span>
+      </a>
+
+      <div class="nav-title">Akaunti</div>
+
+      <a href="profile.html" class="nav-item">
+        <span class="nav-icon">♙</span>
+        <span>Wasifu</span>
+      </a>
+
+      <a href="notifications.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Taarifa</span>
+      </a>
+
+      <a href="settings.html" class="nav-item">
+        <span class="nav-icon">⚙</span>
+        <span>Mipangilio</span>
+      </a>
+
+      <div class="nav-title">Msaada</div>
+
+      <a href="about.html" class="nav-item">
+        <span class="nav-icon">ⓘ</span>
+        <span>Kuhusu Sisi</span>
+      </a>
+
+      <a href="contact.html" class="nav-item">
+        <span class="nav-icon">✉</span>
+        <span>Wasiliana Nasi</span>
+      </a>
+
+      <a href="help.html" class="nav-item">
+        <span class="nav-icon">?</span>
+        <span>Msaada</span>
+      </a>
+
+      <a href="faq.html" class="nav-item active">
+        <span class="nav-icon">❔</span>
+        <span>Maswali</span>
+      </a>
+
+      <a href="privacy.html" class="nav-item">
+        <span class="nav-icon">🔒</span>
+        <span>Faragha</span>
+      </a>
+
+      <a href="terms.html" class="nav-item">
+        <span class="nav-icon">📄</span>
+        <span>Masharti</span>
+      </a>
+
+      <a href="copyright.html" class="nav-item">
+        <span class="nav-icon">©</span>
+        <span>Hakimiliki</span>
+      </a>
+
+    </aside>
+
+
+    <main class="main">
+
+      <div class="page-header">
+        <h1>Maswali Yanayoulizwa Mara kwa Mara</h1>
+        <p>Pata majibu ya maswali ya kawaida kuhusu Net Simulizi.</p>
+      </div>
+
+
+      <div class="content">
+
+        <div class="search-box">
+
+          <div class="search-wrap">
+            <span>⌕</span>
+
+            <input
+              type="text"
+              id="faqSearch"
+              placeholder="Tafuta swali..."
+              oninput="searchFaq()"
+            >
+
+          </div>
+
+
+          <div class="categories">
+
+            <button
+              class="category-btn active"
+              onclick="filterFaq('all',this)"
+            >
+              Yote
+            </button>
+
+            <button
+              class="category-btn"
+              onclick="filterFaq('account',this)"
+            >
+              Akaunti
+            </button>
+
+            <button
+              class="category-btn"
+              onclick="filterFaq('reading',this)"
+            >
+              Kusoma
+            </button>
+
+            <button
+              class="category-btn"
+              onclick="filterFaq('payment',this)"
+            >
+              Malipo
+            </button>
+
+            <button
+              class="category-btn"
+              onclick="filterFaq('author',this)"
+            >
+              Waandishi
+            </button>
+
+            <button
+              class="category-btn"
+              onclick="filterFaq('security',this)"
+            >
+              Usalama
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div id="faqContainer">
+
+
+          <section class="faq-section" data-section="account">
+
+            <h2 class="faq-section-title">
+              👤 Akaunti
+            </h2>
+
+
+            <div class="faq-item" data-category="account">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Ninawezaje kutengeneza akaunti?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Fungua ukurasa wa kujiandikisha, jaza taarifa zinazohitajika
+                na fuata hatua zinazoonyeshwa na mfumo.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="account">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Nimesahau taarifa za akaunti yangu. Nifanye nini?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Tumia njia ya kurejesha akaunti itakayopatikana kwenye
+                mfumo au wasiliana na Net Simulizi kupitia ukurasa wa
+                mawasiliano.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="account">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Naweza kubadilisha taarifa za wasifu?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Ndiyo. Taarifa zinazoweza kubadilishwa zitasimamiwa
+                kupitia ukurasa wa Wasifu au Mipangilio.
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section class="faq-section" data-section="reading">
+
+            <h2 class="faq-section-title">
+              📖 Kusoma Hadithi
+            </h2>
+
+
+            <div class="faq-item" data-category="reading">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Ninawezaje kupata hadithi?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Unaweza kutumia Gundua, Makundi, Trending au Tafuta
+                ili kupata hadithi unayotaka kusoma.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="reading">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Hadithi zote zinapatikana bure?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Hapana. Baadhi ya hadithi au sura zinaweza kuwa bure,
+                na nyingine zinaweza kuwa za kulipia.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="reading">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Ninawezaje kuendelea nilipoishia?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Mfumo unaweza kuhifadhi maendeleo yako ya usomaji.
+                Unaweza pia kutumia sehemu ya Historia kuendelea na
+                hadithi ulizowahi kusoma.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="reading">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Ninawezaje kuhifadhi hadithi ninayoipenda?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Tumia chaguo la kuongeza hadithi kwenye Maktaba yako.
+                Hadithi zilizohifadhiwa zinaweza kuonekana kwenye
+                ukurasa wa Maktaba.
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section class="faq-section" data-section="payment">
+
+            <h2 class="faq-section-title">
+              💳 Malipo
+            </h2>
+
+
+            <div class="faq-item" data-category="payment">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Nitalipaje hadithi au sura ya kulipia?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Chagua maudhui ya kulipia na fuata hatua za malipo
+                zinazoonyeshwa na mfumo.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="payment">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Je malipo yangu yanaweza kuthibitishwa baadaye?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Upatikanaji wa maudhui ya kulipia hutegemea uthibitisho
+                wa malipo kutoka kwenye mfumo wa malipo.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="payment">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Je kila hadithi ina bei sawa?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Hapana. Bei inaweza kutofautiana kulingana na hadithi,
+                sura na masharti yaliyowekwa kwenye mfumo.
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section class="faq-section" data-section="author">
+
+            <h2 class="faq-section-title">
+              ✍️ Waandishi
+            </h2>
+
+
+            <div class="faq-item" data-category="author">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Ninawezaje kuwa mwandishi wa Net Simulizi?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Akaunti za waandishi zinasimamiwa na Net Simulizi.
+                Mwandishi anaweza kupewa akaunti na ruhusa baada ya
+                kufuata taratibu za jukwaa.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="author">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Je mwandishi anaweza kuwasilisha hadithi?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Ndiyo. Waandishi walioidhinishwa wanaweza kutumia
+                mfumo wa uwasilishaji wa hadithi kulingana na ruhusa
+                za akaunti yao.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="author">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Nani anamiliki hakimiliki ya hadithi?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Kwa kawaida haki za kazi zinabaki kwa mwenye haki husika,
+                isipokuwa kama kuna makubaliano mengine yanayotumika.
+                Waandishi wanapaswa kuhakikisha kuwa wana haki za
+                kuchapisha kazi wanazowasilisha.
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <section class="faq-section" data-section="security">
+
+            <h2 class="faq-section-title">
+              🔒 Usalama na Faragha
+            </h2>
+
+
+            <div class="faq-item" data-category="security">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Je taarifa za akaunti yangu zinalindwa?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Net Simulizi inalenga kutumia hatua zinazofaa za
+                kiusalama kulinda taarifa za watumiaji na huduma.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="security">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Kwa nini siwezi kunakili maandishi ya hadithi?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Baadhi ya hatua za kiusalama zinaweza kutumika kupunguza
+                kunakili au kusambaza maudhui bila ruhusa na kusaidia
+                kulinda kazi za waandishi.
+              </div>
+
+            </div>
+
+
+            <div class="faq-item" data-category="security">
+
+              <button class="faq-question" onclick="toggleFaq(this)">
+                <span>Nawezaje kusoma kuhusu sera ya faragha?</span>
+                <span class="arrow">▼</span>
+              </button>
+
+              <div class="faq-answer">
+                Tembelea ukurasa wa Faragha ili kuona maelezo kuhusu
+                taarifa zinazokusanywa na namna zinavyotumika.
+              </div>
+
+            </div>
+
+          </section>
+
+
+        </div>
+
+
+        <div class="no-results" id="noResults">
+
+          <div class="icon">🔎</div>
+
+          <h3>Hakuna swali lililopatikana</h3>
+
+          <p style="margin-top:8px;">
+            Jaribu kutumia maneno mengine ya kutafuta.
+          </p>
+
+        </div>
+
+
+        <div class="contact-card">
+
+          <h2>Bado una swali?</h2>
+
+          <p>
+            Ikiwa hujapata jibu unalotafuta, unaweza kuwasiliana
+            moja kwa moja na Net Simulizi.
+          </p>
+
+          <a href="contact.html" class="contact-btn">
+            Wasiliana Nasi
+          </a>
+
+        </div>
+
+      </div>
+
+
+      <footer>
+
+        <div>
+          © 2026 Net Simulizi. Haki zote zimehifadhiwa.
+        </div>
+
+        <div style="margin-top:10px;">
+          <a href="about.html">Kuhusu Sisi</a>
+          <a href="contact.html">Mawasiliano</a>
+          <a href="help.html">Msaada</a>
+          <a href="privacy.html">Faragha</a>
+          <a href="terms.html">Masharti</a>
+          <a href="copyright.html">Hakimiliki</a>
+        </div>
+
+      </footer>
+
+    </main>
+
+  </div>
+
+
+  <nav class="mobile-nav">
+
+    <a href="index.html">
+      <span class="m-icon">⌂</span>
+      Nyumbani
+    </a>
+
+    <a href="discover.html">
+      <span class="m-icon">✦</span>
+      Gundua
+    </a>
+
+    <a href="library.html">
+      <span class="m-icon">▣</span>
+      Maktaba
+    </a>
+
+    <a href="notifications.html">
+      <span class="m-icon">🔔</span>
+      Taarifa
+    </a>
+
+    <a href="profile.html">
+      <span class="m-icon">♙</span>
+      Wasifu
+    </a>
+
+  </nav>
+
+
+  <script>
+
+    function goProfile(){
+      window.location.href = "profile.html";
+    }
+
+
+    function toggleFaq(button){
+
+      const item = button.parentElement;
+
+      document.querySelectorAll(".faq-item").forEach(function(faq){
+
+        if(faq !== item){
+          faq.classList.remove("open");
+        }
+
+      });
+
+      item.classList.toggle("open");
+    }
+
+
+    function filterFaq(category, button){
+
+      document.querySelectorAll(".category-btn").forEach(function(btn){
+        btn.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      const sections = document.querySelectorAll(".faq-section");
+
+      sections.forEach(function(section){
+
+        const items = section.querySelectorAll(".faq-item");
+
+        let visible = 0;
+
+        items.forEach(function(item){
+
+          if(category === "all" || item.dataset.category === category){
+            item.style.display = "";
+            visible++;
+          }else{
+            item.style.display = "none";
+          }
+
+        });
+
+        section.style.display = visible > 0 ? "" : "none";
+
+      });
+
+      document.getElementById("faqSearch").value = "";
+
+      document.getElementById("noResults").style.display = "none";
+    }
+
+
+    function searchFaq(){
+
+      const input = document.getElementById("faqSearch");
+      const search = input.value.toLowerCase().trim();
+
+      document.querySelectorAll(".category-btn").forEach(function(btn){
+        btn.classList.remove("active");
+      });
+
+      document.querySelector(".category-btn").classList.add("active");
+
+      let found = 0;
+
+      document.querySelectorAll(".faq-section").forEach(function(section){
+
+        let sectionFound = 0;
+
+        section.querySelectorAll(".faq-item").forEach(function(item){
+
+          const question =
+            item.querySelector(".faq-question").innerText.toLowerCase();
+
+          const answer =
+            item.querySelector(".faq-answer").innerText.toLowerCase();
+
+          if(
+            search === "" ||
+            question.includes(search) ||
+            answer.includes(search)
+          ){
+
+            item.style.display = "";
+            sectionFound++;
+            found++;
+
+          }else{
+
+            item.style.display = "none";
+
+          }
+
+        });
+
+        section.style.display = sectionFound > 0 ? "" : "none";
+
+      });
+
+      document.getElementById("noResults").style.display =
+        found === 0 ? "block" : "none";
+    }
+
+
+    function toggleDark(){
+
+      const current = localStorage.getItem("netsimulizi_theme");
+
+      if(current === "light"){
+
+        localStorage.setItem("netsimulizi_theme","dark");
+
+        document.body.style.background = "#090b10";
+        document.body.style.color = "#fff";
+
+      }else{
+
+        localStorage.setItem("netsimulizi_theme","light");
+
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+
+      }
+
+    }
+
+
+    function loadTheme(){
+
+      const theme = localStorage.getItem("netsimulizi_theme");
+
+      if(theme === "light"){
+
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+
+      }
+
+    }
+
+    loadTheme();
+
+  </script>
+
+</body>
+</html>
