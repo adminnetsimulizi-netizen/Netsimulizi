@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Notifications - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+      --danger:#e74c3c;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input{
+      font:inherit;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .login-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .register-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    /* =========================
+       SIDE NAV
+    ========================= */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main{
+      width:100%;
+      max-width:1000px;
+      margin:0 auto;
+      padding:32px 28px 70px;
+    }
+
+    .page-title{
+      margin-bottom:25px;
+    }
+
+    .page-title h1{
+      font-size:32px;
+      margin-bottom:7px;
+    }
+
+    .page-title p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    /* =========================
+       NOTIFICATION TOP
+    ========================= */
+
+    .notification-tools{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      margin-bottom:18px;
+    }
+
+    .notification-count{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    .mark-all{
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--gold-light);
+      padding:9px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .mark-all:hover{
+      border-color:var(--gold);
+    }
+
+    /* =========================
+       NOTIFICATIONS
+    ========================= */
+
+    .notifications{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      overflow:hidden;
+    }
+
+    .notification{
+      display:flex;
+      align-items:flex-start;
+      gap:15px;
+      padding:18px;
+      border-bottom:1px solid var(--border);
+      transition:.2s;
+      cursor:pointer;
+      position:relative;
+    }
+
+    .notification:last-child{
+      border-bottom:none;
+    }
+
+    .notification:hover{
+      background:var(--surface-2);
+    }
+
+    .notification.unread{
+      background:rgba(229,165,28,.045);
+    }
+
+    .notification.unread:hover{
+      background:rgba(229,165,28,.075);
+    }
+
+    .notification-icon{
+      width:45px;
+      height:45px;
+      flex-shrink:0;
+      border-radius:11px;
+      background:var(--surface-2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:21px;
+    }
+
+    .notification-content{
+      flex:1;
+      min-width:0;
+    }
+
+    .notification-title{
+      font-size:15px;
+      font-weight:800;
+      margin-bottom:5px;
+      line-height:1.35;
+    }
+
+    .notification-message{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin-bottom:7px;
+    }
+
+    .notification-time{
+      color:#777f8e;
+      font-size:11px;
+    }
+
+    .unread-dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:var(--gold);
+      flex-shrink:0;
+      margin-top:6px;
+    }
+
+    /* =========================
+       EMPTY
+    ========================= */
+
+    .empty{
+      display:none;
+      text-align:center;
+      padding:70px 20px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+    }
+
+    .empty-icon{
+      font-size:45px;
+      margin-bottom:14px;
+    }
+
+    .empty h2{
+      font-size:20px;
+      margin-bottom:8px;
+    }
+
+    .empty p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    /* =========================
+       LOGIN NOTICE
+    ========================= */
+
+    .login-notice{
+      display:none;
+      text-align:center;
+      padding:50px 20px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+    }
+
+    .login-notice-icon{
+      font-size:43px;
+      margin-bottom:13px;
+    }
+
+    .login-notice h2{
+      margin-bottom:8px;
+    }
+
+    .login-notice p{
+      color:var(--muted);
+      margin-bottom:20px;
+    }
+
+    .primary-button{
+      display:inline-block;
+      background:var(--gold);
+      color:#111;
+      border:none;
+      border-radius:8px;
+      padding:11px 20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .primary-button:hover{
+      background:var(--gold-light);
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media(max-width:700px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      .header-right .login-btn,
+      .header-right .register-btn{
+        padding:8px 10px;
+        font-size:12px;
+      }
+
+      main{
+        padding:24px 14px 55px;
+      }
+
+      .page-title h1{
+        font-size:27px;
+      }
+
+      .notification{
+        padding:15px;
+        gap:12px;
+      }
+
+      .notification-icon{
+        width:41px;
+        height:41px;
+        font-size:19px;
+      }
+
+      .notification-title{
+        font-size:14px;
+      }
+
+      .notification-message{
+        font-size:12px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+    }
+
+    @media(max-width:480px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+      .notification-tools{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .mark-all{
+        width:100%;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="notifications.html" class="active">
+          <span class="nav-icon">🔔</span>
+          <span>Notifications</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="settings.html">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <section class="page-title">
+
+      <h1>Notifications</h1>
+
+      <p>
+        Habari na taarifa muhimu kutoka Net Simulizi.
+      </p>
+
+    </section>
+
+    <!-- LOGIN -->
+
+    <section
+      class="login-notice"
+      id="loginNotice"
+    >
+
+      <div class="login-notice-icon">
+        🔔
+      </div>
+
+      <h2>
+        Ingia kwenye akaunti
+      </h2>
+
+      <p>
+        Ingia ili uweze kuona notifications zako.
+      </p>
+
+      <a href="login.html">
+
+        <button class="primary-button">
+          Ingia
+        </button>
+
+      </a>
+
+    </section>
+
+    <!-- CONTENT -->
+
+    <section id="notificationArea">
+
+      <div class="notification-tools">
+
+        <span
+          class="notification-count"
+          id="notificationCount"
+        >
+          0 notifications
+        </span>
+
+        <button
+          class="mark-all"
+          id="markAll"
+          type="button"
+        >
+          ✓ Soma zote
+        </button>
+
+      </div>
+
+      <div
+        class="notifications"
+        id="notifications"
+      ></div>
+
+      <div
+        class="empty"
+        id="emptyState"
+      >
+
+        <div class="empty-icon">
+          🔔
+        </div>
+
+        <h2>
+          Hakuna notifications
+        </h2>
+
+        <p>
+          Kwa sasa huna taarifa mpya.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    /* =========================
+       USER
+    ========================= */
+
+    function getUser(){
+
+      try{
+
+        return JSON.parse(
+          localStorage.getItem(
+            "netsimulizi_user"
+          )
+        );
+
+      }catch(error){
+
+        return null;
+
+      }
+
+    }
+
+    function loadUser(){
+
+      const user =
+        getUser();
+
+      const guestButtons =
+        document.getElementById(
+          "guestButtons"
+        );
+
+      const userBox =
+        document.getElementById(
+          "userBox"
+        );
+
+      const userName =
+        document.getElementById(
+          "userName"
+        );
+
+      const userAvatar =
+        document.getElementById(
+          "userAvatar"
+        );
+
+      const loginNotice =
+        document.getElementById(
+          "loginNotice"
+        );
+
+      const notificationArea =
+        document.getElementById(
+          "notificationArea"
+        );
+
+      if(user){
+
+        guestButtons.style.display =
+          "none";
+
+        userBox.style.display =
+          "flex";
+
+        loginNotice.style.display =
+          "none";
+
+        notificationArea.style.display =
+          "block";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent =
+          name;
+
+        userAvatar.textContent =
+          name
+            .charAt(0)
+            .toUpperCase();
+
+      }else{
+
+        guestButtons.style.display =
+          "flex";
+
+        userBox.style.display =
+          "none";
+
+        loginNotice.style.display =
+          "block";
+
+        notificationArea.style.display =
+          "none";
+
+      }
+
+    }
+
+    /* =========================
+       DEFAULT NOTIFICATIONS
+    ========================= */
+
+    function getNotifications(){
+
+      let notifications = [];
+
+      try{
+
+        notifications =
+          JSON.parse(
+            localStorage.getItem(
+              "netsimulizi_notifications"
+            )
+          ) || [];
+
+      }catch(error){
+
+        notifications = [];
+
+      }
+
+      /*
+        Hatujazalisha notifications
+        za uongo hapa.
+        Data halisi itaingia kupitia
+        backend/database baadaye.
+      */
+
+      return notifications;
+
+    }
+
+    /* =========================
+       FORMAT TIME
+    ========================= */
+
+    function formatTime(value){
+
+      if(!value){
+        return "";
+      }
+
+      const date =
+        new Date(value);
+
+      if(
+        Number.isNaN(
+          date.getTime()
+        )
+      ){
+
+        return String(value);
+
+      }
+
+      return date.toLocaleString(
+        "sw-TZ",
+        {
+          dateStyle:"medium",
+          timeStyle:"short"
+        }
+      );
+
+    }
+
+    /* =========================
+       ESCAPE
+    ========================= */
+
+    function escapeHTML(value){
+
+      return String(
+        value ?? ""
+      )
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+    }
+
+    /* =========================
+       RENDER
+    ========================= */
+
+    function renderNotifications(){
+
+      const notifications =
+        getNotifications();
+
+      const container =
+        document.getElementById(
+          "notifications"
+        );
+
+      const emptyState =
+        document.getElementById(
+          "emptyState"
+        );
+
+      const count =
+        document.getElementById(
+          "notificationCount"
+        );
+
+      container.innerHTML = "";
+
+      const unread =
+        notifications.filter(
+          item => !item.read
+        ).length;
+
+      count.textContent =
+        unread === 1
+          ? "1 notification mpya"
+          : `${unread} notifications mpya`;
+
+      if(!notifications.length){
+
+        container.style.display =
+          "none";
+
+        emptyState.style.display =
+          "block";
+
+        return;
+
+      }
+
+      container.style.display =
+        "block";
+
+      emptyState.style.display =
+        "none";
+
+      notifications.forEach(
+        (item,index) => {
+
+          const notification =
+            document.createElement(
+              "div"
+            );
+
+          notification.className =
+            "notification" +
+            (
+              item.read
+                ? ""
+                : " unread"
+            );
+
+          const icon =
+            item.icon ||
+            "🔔";
+
+          const title =
+            item.title ||
+            "Notification";
+
+          const message =
+            item.message ||
+            "";
+
+          const time =
+            formatTime(
+              item.created_at ||
+              item.createdAt ||
+              item.time
+            );
+
+          notification.innerHTML = `
+
+            <div class="notification-icon">
+              ${escapeHTML(icon)}
+            </div>
+
+            <div class="notification-content">
+
+              <div class="notification-title">
+                ${escapeHTML(title)}
+              </div>
+
+              <div class="notification-message">
+                ${escapeHTML(message)}
+              </div>
+
+              <div class="notification-time">
+                ${escapeHTML(time)}
+              </div>
+
+            </div>
+
+            ${
+              item.read
+                ? ""
+                : `
+                  <span
+                    class="unread-dot"
+                    title="Haijasomwa"
+                  ></span>
+                `
+            }
+
+          `;
+
+          notification.addEventListener(
+            "click",
+            function(){
+
+              markNotificationRead(
+                index
+              );
+
+              if(item.url){
+
+                window.location.href =
+                  item.url;
+
+              }
+
+            }
+          );
+
+          container.appendChild(
+            notification
+          );
+
+        }
+      );
+
+    }
+
+    /* =========================
+       MARK ONE READ
+    ========================= */
+
+    function markNotificationRead(index){
+
+      const notifications =
+        getNotifications();
+
+      if(
+        !notifications[index]
+      ){
+
+        return;
+
+      }
+
+      notifications[index].read =
+        true;
+
+      localStorage.setItem(
+        "netsimulizi_notifications",
+        JSON.stringify(
+          notifications
+        )
+      );
+
+      renderNotifications();
+
+    }
+
+    /* =========================
+       MARK ALL
+    ========================= */
+
+    document
+      .getElementById("markAll")
+      .addEventListener(
+        "click",
+        function(){
+
+          const notifications =
+            getNotifications();
+
+          notifications.forEach(
+            item => {
+              item.read = true;
+            }
+          );
+
+          localStorage.setItem(
+            "netsimulizi_notifications",
+            JSON.stringify(
+              notifications
+            )
+          );
+
+          renderNotifications();
+
+        }
+      );
+
+    /* =========================
+       SIDE MENU
+    ========================= */
+
+    const menuBtn =
+      document.getElementById(
+        "menuBtn"
+      );
+
+    const closeNav =
+      document.getElementById(
+        "closeNav"
+      );
+
+    const sideNav =
+      document.getElementById(
+        "sideNav"
+      );
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+    function openMenu(){
+
+      sideNav.classList.add(
+        "open"
+      );
+
+      overlay.classList.add(
+        "show"
+      );
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove(
+        "open"
+      );
+
+      overlay.classList.remove(
+        "show"
+      );
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(
+        ".nav-list a"
+      )
+      .forEach(
+        link => {
+
+          link.addEventListener(
+            "click",
+            closeMenu
+          );
+
+        }
+      );
+
+    /* =========================
+       START
+    ========================= */
+
+    loadUser();
+
+    renderNotifications();
+
+  </script>
+
+</body>
+</html>
