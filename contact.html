@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Wasiliana Nasi - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+      --danger:#e74c3c;
+      --success:#2ecc71;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input,
+    textarea{
+      font:inherit;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .login-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .register-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    /* =========================
+       SIDE NAV
+    ========================= */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main{
+      width:100%;
+      max-width:1050px;
+      margin:0 auto;
+      padding:38px 28px 70px;
+    }
+
+    .page-title{
+      text-align:center;
+      margin-bottom:35px;
+    }
+
+    .page-title h1{
+      font-size:34px;
+      margin-bottom:9px;
+    }
+
+    .page-title h1 span{
+      color:var(--gold-light);
+    }
+
+    .page-title p{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    /* =========================
+       CONTACT GRID
+    ========================= */
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns:1fr 1.4fr;
+      gap:20px;
+      align-items:start;
+    }
+
+    .contact-info{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:25px;
+    }
+
+    .contact-info h2{
+      font-size:21px;
+      margin-bottom:10px;
+    }
+
+    .contact-info > p{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+      margin-bottom:22px;
+    }
+
+    /* CONTACT ITEMS */
+
+    .contact-item{
+      display:flex;
+      gap:14px;
+      padding:15px 0;
+      border-bottom:1px solid var(--border);
+    }
+
+    .contact-item:last-child{
+      border-bottom:none;
+    }
+
+    .contact-icon{
+      width:43px;
+      height:43px;
+      border-radius:10px;
+      background:var(--surface-2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      flex-shrink:0;
+    }
+
+    .contact-item h3{
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .contact-item p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    /* =========================
+       FORM
+    ========================= */
+
+    .contact-form{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:25px;
+    }
+
+    .contact-form h2{
+      font-size:21px;
+      margin-bottom:7px;
+    }
+
+    .form-intro{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+      margin-bottom:22px;
+    }
+
+    .form-group{
+      margin-bottom:17px;
+    }
+
+    .form-group label{
+      display:block;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:7px;
+    }
+
+    .form-group input,
+    .form-group textarea{
+      width:100%;
+      background:var(--surface-2);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:9px;
+      padding:12px 13px;
+      outline:none;
+      transition:.2s;
+    }
+
+    .form-group input{
+      height:45px;
+    }
+
+    .form-group textarea{
+      min-height:150px;
+      resize:vertical;
+      line-height:1.5;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus{
+      border-color:var(--gold);
+    }
+
+    .submit-btn{
+      width:100%;
+      height:46px;
+      border:none;
+      border-radius:9px;
+      background:var(--gold);
+      color:#111;
+      font-weight:800;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .submit-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .submit-btn:disabled{
+      opacity:.6;
+      cursor:not-allowed;
+    }
+
+    .message{
+      display:none;
+      margin-top:15px;
+      padding:12px 14px;
+      border-radius:8px;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .message.success{
+      display:block;
+      background:rgba(46,204,113,.1);
+      border:1px solid rgba(46,204,113,.3);
+      color:#8ff0b5;
+    }
+
+    .message.error{
+      display:block;
+      background:rgba(231,76,60,.1);
+      border:1px solid rgba(231,76,60,.3);
+      color:#ff9c92;
+    }
+
+    /* =========================
+       FAQ
+    ========================= */
+
+    .faq-section{
+      margin-top:25px;
+    }
+
+    .section-title{
+      font-size:24px;
+      margin-bottom:15px;
+    }
+
+    .faq-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .faq{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:11px;
+      overflow:hidden;
+    }
+
+    .faq-question{
+      width:100%;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      padding:17px;
+      text-align:left;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    .faq-question:hover{
+      background:var(--surface-2);
+    }
+
+    .faq-arrow{
+      color:var(--gold-light);
+      font-size:19px;
+      transition:.2s;
+    }
+
+    .faq.open .faq-arrow{
+      transform:rotate(180deg);
+    }
+
+    .faq-answer{
+      display:none;
+      padding:0 17px 17px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+    }
+
+    .faq.open .faq-answer{
+      display:block;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media(max-width:800px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      main{
+        padding:28px 15px 55px;
+      }
+
+      .contact-grid{
+        grid-template-columns:1fr;
+      }
+
+      .page-title h1{
+        font-size:29px;
+      }
+
+    }
+
+    @media(max-width:480px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+      .header-right .register-btn{
+        padding:8px 11px;
+        font-size:12px;
+      }
+
+      .contact-info,
+      .contact-form{
+        padding:19px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="notifications.html">
+          <span class="nav-icon">🔔</span>
+          <span>Notifications</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="settings.html">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="about.html">
+          <span class="nav-icon">ℹ️</span>
+          <span>Kuhusu Net Simulizi</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="contact.html" class="active">
+          <span class="nav-icon">✉️</span>
+          <span>Wasiliana Nasi</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <section class="page-title">
+
+      <h1>
+        Wasiliana <span>Nasi</span>
+      </h1>
+
+      <p>
+        Una swali, maoni au unahitaji msaada?
+        Tuma ujumbe wako kwa Net Simulizi.
+      </p>
+
+    </section>
+
+    <!-- CONTACT -->
+
+    <section class="contact-grid">
+
+      <!-- INFO -->
+
+      <div class="contact-info">
+
+        <h2>
+          Tuwasiliane
+        </h2>
+
+        <p>
+          Tunathamini maoni yako. Taarifa utakazotuma
+          zinaweza kusaidia kuboresha huduma ya Net Simulizi.
+        </p>
+
+        <div class="contact-item">
+
+          <div class="contact-icon">
+            ✉️
+          </div>
+
+          <div>
+
+            <h3>
+              Barua pepe
+            </h3>
+
+            <p>
+              Taarifa ya mawasiliano itaongezwa hapa.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="contact-item">
+
+          <div class="contact-icon">
+            💬
+          </div>
+
+          <div>
+
+            <h3>
+              Msaada
+            </h3>
+
+            <p>
+              Wasiliana nasi kuhusu matatizo ya akaunti,
+              kusoma au matumizi ya jukwaa.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="contact-item">
+
+          <div class="contact-icon">
+            ✍️
+          </div>
+
+          <div>
+
+            <h3>
+              Waandishi
+            </h3>
+
+            <p>
+              Waandishi wanaweza kutumia njia rasmi
+              ya kuwasilisha kazi zao.
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="contact-item">
+
+          <div class="contact-icon">
+              🔐
+          </div>
+
+          <div>
+
+            <h3>
+              Hakimiliki
+            </h3>
+
+            <p>
+              Taarifa kuhusu kazi za ubunifu na masuala
+              ya hakimiliki zinaweza kuwasilishwa hapa.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- FORM -->
+
+      <div class="contact-form">
+
+        <h2>
+          Tuma ujumbe
+        </h2>
+
+        <p class="form-intro">
+          Jaza taarifa zako na ujumbe wako hapa chini.
+        </p>
+
+        <form id="contactForm">
+
+          <div class="form-group">
+
+            <label for="name">
+              Jina
+            </label>
+
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Andika jina lako"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="email">
+              Barua pepe
+            </label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="example@email.com"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="subject">
+              Mada
+            </label>
+
+            <input
+              type="text"
+              id="subject"
+              name="subject"
+              placeholder="Mada ya ujumbe"
+              required
+            >
+
+          </div>
+
+          <div class="form-group">
+
+            <label for="message">
+              Ujumbe
+            </label>
+
+            <textarea
+              id="message"
+              name="message"
+              placeholder="Andika ujumbe wako..."
+              required
+            ></textarea>
+
+          </div>
+
+          <button
+            type="submit"
+            class="submit-btn"
+            id="submitBtn"
+          >
+            Tuma Ujumbe
+          </button>
+
+          <div
+            class="message"
+            id="formMessage"
+          ></div>
+
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- FAQ -->
+
+    <section class="faq-section">
+
+      <h2 class="section-title">
+        Maswali ya kawaida
+      </h2>
+
+      <div class="faq-list">
+
+        <div class="faq">
+
+          <button
+            class="faq-question"
+            type="button"
+          >
+
+            <span>
+              Ninawezaje kusoma hadithi?
+            </span>
+
+            <span class="faq-arrow">
+              ▼
+            </span>
+
+          </button>
+
+          <div class="faq-answer">
+            Unaweza kuchagua hadithi kupitia Nyumbani,
+            Gundua, Categories au Tafuta, kisha ufungue
+            hadithi na uchague sura unayotaka kusoma.
+          </div>
+
+        </div>
+
+        <div class="faq">
+
+          <button
+            class="faq-question"
+            type="button"
+          >
+
+            <span>
+              Ninawezaje kuhifadhi hadithi?
+            </span>
+
+            <span class="faq-arrow">
+              ▼
+            </span>
+
+          </button>
+
+          <div class="faq-answer">
+            Fungua ukurasa wa hadithi unayotaka na tumia
+            chaguo la kuhifadhi ili iweze kuonekana kwenye
+            Maktaba Yangu.
+          </div>
+
+        </div>
+
+        <div class="faq">
+
+          <button
+            class="faq-question"
+            type="button"
+          >
+
+            <span>
+              Waandishi wanaweza kuwasilisha hadithi?
+            </span>
+
+            <span class="faq-arrow">
+              ▼
+            </span>
+
+          </button>
+
+          <div class="faq-answer">
+            Ndiyo. Mfumo wa Net Simulizi umeandaliwa
+            kwa ajili ya kuwawezesha waandishi kuwasilisha
+            kazi zao kupitia mchakato rasmi wa idhini.
+          </div>
+
+        </div>
+
+        <div class="faq">
+
+          <button
+            class="faq-question"
+            type="button"
+          >
+
+            <span>
+              Nifanye nini nikikumbana na tatizo?
+            </span>
+
+            <span class="faq-arrow">
+              ▼
+            </span>
+
+          </button>
+
+          <div class="faq-answer">
+            Tuma maelezo ya tatizo lako kupitia fomu
+            ya mawasiliano hapo juu ili liweze kushughulikiwa.
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    /* =========================
+       USER
+    ========================= */
+
+    function getUser(){
+
+      try{
+
+        return JSON.parse(
+          localStorage.getItem(
+            "netsimulizi_user"
+          )
+        );
+
+      }catch(error){
+
+        return null;
+
+      }
+
+    }
+
+    function loadUser(){
+
+      const user =
+        getUser();
+
+      const guestButtons =
+        document.getElementById(
+          "guestButtons"
+        );
+
+      const userBox =
+        document.getElementById(
+          "userBox"
+        );
+
+      const userName =
+        document.getElementById(
+          "userName"
+        );
+
+      const userAvatar =
+        document.getElementById(
+          "userAvatar"
+        );
+
+      if(user){
+
+        guestButtons.style.display =
+          "none";
+
+        userBox.style.display =
+          "flex";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent =
+          name;
+
+        userAvatar.textContent =
+          name
+            .charAt(0)
+            .toUpperCase();
+
+      }else{
+
+        guestButtons.style.display =
+          "flex";
+
+        userBox.style.display =
+          "none";
+
+      }
+
+    }
+
+    /* =========================
+       MENU
+    ========================= */
+
+    const menuBtn =
+      document.getElementById(
+        "menuBtn"
+      );
+
+    const closeNav =
+      document.getElementById(
+        "closeNav"
+      );
+
+    const sideNav =
+      document.getElementById(
+        "sideNav"
+      );
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+    function openMenu(){
+
+      sideNav.classList.add(
+        "open"
+      );
+
+      overlay.classList.add(
+        "show"
+      );
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove(
+        "open"
+      );
+
+      overlay.classList.remove(
+        "show"
+      );
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(
+        ".nav-list a"
+      )
+      .forEach(
+        link => {
+
+          link.addEventListener(
+            "click",
+            closeMenu
+          );
+
+        }
+      );
+
+    /* =========================
+       CONTACT FORM
+    ========================= */
+
+    const contactForm =
+      document.getElementById(
+        "contactForm"
+      );
+
+    const formMessage =
+      document.getElementById(
+        "formMessage"
+      );
+
+    const submitBtn =
+      document.getElementById(
+        "submitBtn"
+      );
+
+    contactForm.addEventListener(
+      "submit",
+      function(event){
+
+        event.preventDefault();
+
+        const name =
+          document.getElementById(
+            "name"
+          ).value.trim();
+
+        const email =
+          document.getElementById(
+            "email"
+          ).value.trim();
+
+        const subject =
+          document.getElementById(
+            "subject"
+          ).value.trim();
+
+        const message =
+          document.getElementById(
+            "message"
+          ).value.trim();
+
+        if(
+          !name ||
+          !email ||
+          !subject ||
+          !message
+        ){
+
+          formMessage.className =
+            "message error";
+
+          formMessage.textContent =
+            "Tafadhali jaza sehemu zote.";
+
+          return;
+
+        }
+
+        submitBtn.disabled =
+          true;
+
+        submitBtn.textContent =
+          "Inatuma...";
+
+        /*
+          Kwa sasa hakuna endpoint
+          ya /api/contact kwenye backend.
+
+          Ujumbe unawekwa localStorage
+          kwa ajili ya testing.
+        */
+
+        const messages =
+          JSON.parse(
+            localStorage.getItem(
+              "netsimulizi_contact_messages"
+            ) || "[]"
+          );
+
+        messages.push({
+
+          name:name,
+
+          email:email,
+
+          subject:subject,
+
+          message:message,
+
+          created_at:
+            new Date().toISOString()
+
+        });
+
+        localStorage.setItem(
+          "netsimulizi_contact_messages",
+          JSON.stringify(
+            messages
+          )
+        );
+
+        formMessage.className =
+          "message success";
+
+        formMessage.textContent =
+          "Ujumbe wako umehifadhiwa kwa ajili ya testing. Mfumo wa kutuma ujumbe kwenda backend utaunganishwa baadaye.";
+
+        contactForm.reset();
+
+        submitBtn.disabled =
+          false;
+
+        submitBtn.textContent =
+          "Tuma Ujumbe";
+
+      }
+    );
+
+    /* =========================
+       FAQ
+    ========================= */
+
+    document
+      .querySelectorAll(
+        ".faq-question"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            function(){
+
+              const faq =
+                this.parentElement;
+
+              faq.classList.toggle(
+                "open"
+              );
+
+            }
+          );
+
+        }
+      );
+
+    /* =========================
+       START
+    ========================= */
+
+    loadUser();
+
+  </script>
+
+</body>
+</html>
