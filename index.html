@@ -1922,7 +1922,7 @@ PROFILE
 
 function openProfile(){
 
-const storedUser=
+const storedUser =
 localStorage.getItem("netsimulizi_user");
 
 if(!storedUser){
@@ -1933,22 +1933,7 @@ return;
 
 }
 
-const user=JSON.parse(storedUser);
-
-const username=
-user.username ||
-user.name ||
-"User";
-
-const email=
-user.email ||
-"";
-
-alert(
-"MY PROFILE\n\n"+
-"Username: "+username+
-"\nEmail: "+email
-);
+window.location.href = "profile.html";
 
 }
 
