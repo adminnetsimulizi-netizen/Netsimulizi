@@ -1,0 +1,1642 @@
+```html
+<!doctype html>
+<html lang="sw">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Wallet — Net Simulizi</title>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#f6f0e5;
+  color:#191713;
+  font-family:Arial,sans-serif;
+  transition:.2s;
+}
+
+body.dark{
+  background:#111;
+  color:#eee;
+}
+
+.top{
+  background:#171512;
+  color:#fff;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.logo{
+  color:#d4aa43;
+  font-weight:900;
+  letter-spacing:2px;
+  text-decoration:none;
+}
+
+.top-right{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.btn{
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #d4aa43;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
+}
+
+.primary{
+  background:#d4aa43;
+  color:#171512;
+  border:0;
+  font-weight:700;
+}
+
+.disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.wrap{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.hero{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:16px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+.dark .hero{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.hero h1{
+  margin:0 0 8px;
+}
+
+.muted{
+  color:#777;
+}
+
+.dark .muted{
+  color:#aaa;
+}
+
+
+/* BALANCE */
+
+.balance-card{
+  background:#171512;
+  color:#fff;
+  border-radius:16px;
+  padding:25px;
+  margin-bottom:20px;
+}
+
+.balance-label{
+  color:#aaa;
+  font-size:13px;
+  margin-bottom:7px;
+}
+
+.balance{
+  color:#d4aa43;
+  font-size:38px;
+  font-weight:900;
+  margin-bottom:15px;
+}
+
+.balance-info{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.balance-info div{
+  font-size:13px;
+  color:#ccc;
+}
+
+.balance-info strong{
+  color:#fff;
+}
+
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:12px;
+  padding:17px;
+}
+
+.dark .stat{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.stat-number{
+  font-size:22px;
+  font-weight:900;
+  color:#a17a21;
+}
+
+.dark .stat-number{
+  color:#d4aa43;
+}
+
+.stat-label{
+  font-size:12px;
+  color:#777;
+  margin-top:5px;
+}
+
+.dark .stat-label{
+  color:#aaa;
+}
+
+
+/* GRID */
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+
+/* CARD */
+
+.card{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:14px;
+  padding:22px;
+  margin-bottom:20px;
+}
+
+.dark .card{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.card h2{
+  margin:0 0 17px;
+  font-size:19px;
+}
+
+
+/* REVENUE */
+
+.revenue-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 0;
+  border-bottom:1px solid #e8dfd1;
+  font-size:14px;
+}
+
+.dark .revenue-row{
+  border-color:#37332d;
+}
+
+.revenue-row:last-child{
+  border-bottom:0;
+}
+
+.author-share{
+  color:#27733c;
+  font-weight:700;
+}
+
+.app-share{
+  color:#9a3d2e;
+  font-weight:700;
+}
+
+.dark .author-share{
+  color:#8bd59d;
+}
+
+.dark .app-share{
+  color:#ff9d8d;
+}
+
+
+/* WITHDRAWAL */
+
+.withdraw-box{
+  padding:16px;
+  background:#f4ecdc;
+  border:1px solid #e4d5b9;
+  border-radius:10px;
+  margin-bottom:15px;
+}
+
+.dark .withdraw-box{
+  background:#25221d;
+  border-color:#484136;
+}
+
+.withdraw-status{
+  font-size:13px;
+  line-height:1.6;
+  margin-bottom:15px;
+}
+
+.minimum{
+  font-weight:900;
+  color:#a17a21;
+}
+
+.dark .minimum{
+  color:#d4aa43;
+}
+
+
+/* PAYMENT */
+
+.form-group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:7px;
+}
+
+input,
+select{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid #ddd;
+  border-radius:8px;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  outline:none;
+}
+
+.dark input,
+.dark select{
+  border-color:#403b33;
+}
+
+select option{
+  background:#fffdf8;
+  color:#191713;
+}
+
+.dark select option{
+  background:#1d1b18;
+  color:#eee;
+}
+
+input:focus,
+select:focus{
+  border-color:#d4aa43;
+}
+
+
+/* HISTORY */
+
+.history{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.history th,
+.history td{
+  padding:12px 8px;
+  text-align:left;
+  border-bottom:1px solid #e8dfd1;
+}
+
+.dark .history th,
+.dark .history td{
+  border-color:#37332d;
+}
+
+.history th{
+  color:#777;
+  font-size:11px;
+  text-transform:uppercase;
+}
+
+.dark .history th{
+  color:#aaa;
+}
+
+.status{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+}
+
+.status.pending{
+  background:#fff0c9;
+  color:#765500;
+}
+
+.status.paid{
+  background:#dff3e4;
+  color:#216b35;
+}
+
+.status.rejected{
+  background:#ffe0e0;
+  color:#922c2c;
+}
+
+.dark .status.pending{
+  background:#3a3018;
+  color:#e5c66d;
+}
+
+.dark .status.paid{
+  background:#193523;
+  color:#9be0ad;
+}
+
+.dark .status.rejected{
+  background:#3b1d1d;
+  color:#ffaaaa;
+}
+
+
+/* NOTICE */
+
+.notice{
+  background:#f4ecdc;
+  border:1px solid #e4d5b9;
+  padding:14px;
+  border-radius:10px;
+  font-size:13px;
+  line-height:1.6;
+  margin-bottom:20px;
+}
+
+.dark .notice{
+  background:#25221d;
+  border-color:#484136;
+}
+
+
+/* MESSAGE */
+
+.message{
+  display:none;
+  padding:13px;
+  border-radius:9px;
+  margin-bottom:15px;
+  font-size:13px;
+}
+
+.message.success{
+  display:block;
+  background:#e5f8eb;
+  border:1px solid #a7d9b5;
+  color:#176b32;
+}
+
+.message.error{
+  display:block;
+  background:#ffe7e7;
+  border:1px solid #e2aaaa;
+  color:#9b2222;
+}
+
+.dark .message.success{
+  background:#193221;
+  border-color:#315f3d;
+  color:#9be0ad;
+}
+
+.dark .message.error{
+  background:#351b1b;
+  border-color:#653333;
+  color:#ffaaaa;
+}
+
+
+/* EMPTY */
+
+.empty{
+  padding:25px 10px;
+  text-align:center;
+  color:#777;
+}
+
+.dark .empty{
+  color:#aaa;
+}
+
+
+/* FOOTER */
+
+.footer{
+  background:#171512;
+  color:#aaa;
+  text-align:center;
+  padding:30px;
+  margin-top:30px;
+}
+
+.footer p{
+  margin:8px 0;
+}
+
+
+/* MOBILE */
+
+@media(max-width:800px){
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+    gap:0;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .wrap{
+    padding:15px;
+  }
+
+  .hero{
+    padding:18px;
+  }
+
+  .balance{
+    font-size:31px;
+  }
+
+  .balance-info{
+    gap:10px;
+  }
+
+  .top{
+    padding:13px;
+  }
+
+  .top-right .btn{
+    padding:8px 10px;
+  }
+
+  .history{
+    min-width:600px;
+  }
+
+  .history-wrap{
+    overflow-x:auto;
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="top">
+
+  <a
+    href="author-dashboard.html"
+    class="logo"
+  >
+    NET SIMULIZI
+  </a>
+
+  <div class="top-right">
+
+    <button
+      class="btn"
+      id="darkBtn"
+      type="button"
+    >
+      ◐
+    </button>
+
+    <a
+      href="author-dashboard.html"
+      class="btn"
+    >
+      Dashboard
+    </a>
+
+  </div>
+
+</header>
+
+
+<main class="wrap">
+
+
+  <section class="hero">
+
+    <h1>
+      My Wallet
+    </h1>
+
+    <p class="muted">
+      Angalia mapato yako, revenue share na
+      historia ya withdrawals.
+    </p>
+
+  </section>
+
+
+  <!-- BALANCE -->
+
+  <section class="balance-card">
+
+    <div class="balance-label">
+      Available Balance
+    </div>
+
+    <div
+      class="balance"
+      id="balance"
+    >
+      TSh 0
+    </div>
+
+    <div class="balance-info">
+
+      <div>
+        Author Share:
+        <strong>70%</strong>
+      </div>
+
+      <div>
+        Net Simulizi:
+        <strong>30%</strong>
+      </div>
+
+      <div>
+        Minimum Withdrawal:
+        <strong>TSh 50,000</strong>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- STATS -->
+
+  <section class="stats">
+
+    <div class="stat">
+
+      <div
+        class="stat-number"
+        id="totalEarned"
+      >
+        TSh 0
+      </div>
+
+      <div class="stat-label">
+        Total Earned
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div
+        class="stat-number"
+        id="authorEarnings"
+      >
+        TSh 0
+      </div>
+
+      <div class="stat-label">
+        Your 70%
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div
+        class="stat-number"
+        id="withdrawn"
+      >
+        TSh 0
+      </div>
+
+      <div class="stat-label">
+        Withdrawn
+      </div>
+
+    </div>
+
+
+    <div class="stat">
+
+      <div
+        class="stat-number"
+        id="pending"
+      >
+        TSh 0
+      </div>
+
+      <div class="stat-label">
+        Pending
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <div id="message" class="message"></div>
+
+
+  <div class="grid">
+
+
+    <!-- REVENUE -->
+
+    <section class="card">
+
+      <h2>
+        Revenue Share
+      </h2>
+
+
+      <div class="revenue-row">
+
+        <span>
+          Story Sales
+        </span>
+
+        <span class="author-share">
+          70% Author
+        </span>
+
+      </div>
+
+
+      <div class="revenue-row">
+
+        <span>
+          Net Simulizi
+        </span>
+
+        <span class="app-share">
+          30%
+        </span>
+
+      </div>
+
+
+      <div class="revenue-row">
+
+        <span>
+          Paid Story Recommendation
+        </span>
+
+        <span>
+          50% / 50%
+        </span>
+
+      </div>
+
+
+      <div class="revenue-row">
+
+        <span>
+          Withdrawal Minimum
+        </span>
+
+        <strong>
+          TSh 50,000
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- WITHDRAW -->
+
+    <section class="card">
+
+      <h2>
+        Withdraw
+      </h2>
+
+
+      <div class="withdraw-box">
+
+        <div
+          class="withdraw-status"
+          id="withdrawStatus"
+        >
+          Balance yako bado haijafikia
+          minimum ya withdrawal.
+        </div>
+
+
+        <button
+          id="withdrawBtn"
+          class="btn primary disabled"
+          type="button"
+          disabled
+        >
+          Withdraw
+        </button>
+
+      </div>
+
+
+      <div class="muted" style="font-size:12px;">
+
+        Withdraw button itafunguka pale balance
+        itakapofikia TSh 50,000.
+
+      </div>
+
+    </section>
+
+
+  </div>
+
+
+  <!-- PAYMENT METHOD -->
+
+  <section class="card">
+
+    <h2>
+      Payment Method
+    </h2>
+
+
+    <div class="notice">
+
+      Weka njia ya malipo utakayotumia kupokea
+      earnings zako. Taarifa hizi zitatumika
+      wakati mfumo wa withdrawal utakapoamilishwa.
+
+    </div>
+
+
+    <form id="paymentForm">
+
+
+      <div class="grid">
+
+
+        <div class="form-group">
+
+          <label for="paymentMethod">
+            Payment Method
+          </label>
+
+          <select
+            id="paymentMethod"
+          >
+
+            <option value="">
+              Chagua njia
+            </option>
+
+            <option value="mpesa">
+              M-Pesa
+            </option>
+
+            <option value="airtel">
+              Airtel Money
+            </option>
+
+            <option value="tigopesa">
+              Tigo Pesa
+            </option>
+
+            <option value="halopesa">
+              HaloPesa
+            </option>
+
+            <option value="bank">
+              Bank Account
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="accountName">
+            Account Name
+          </label>
+
+          <input
+            id="accountName"
+            type="text"
+            placeholder="Jina la mwenye account"
+          >
+
+        </div>
+
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="accountNumber">
+          Account / Phone Number
+        </label>
+
+        <input
+          id="accountNumber"
+          type="text"
+          placeholder="Mfano: 07XXXXXXXX"
+        >
+
+      </div>
+
+
+      <button
+        type="submit"
+        class="btn primary"
+      >
+        Save Payment Method
+      </button>
+
+
+    </form>
+
+  </section>
+
+
+  <!-- WITHDRAWAL HISTORY -->
+
+  <section class="card">
+
+    <h2>
+      Withdrawal History
+    </h2>
+
+
+    <div
+      class="history-wrap"
+    >
+
+      <table class="history">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Date
+            </th>
+
+            <th>
+              Amount
+            </th>
+
+            <th>
+              Method
+            </th>
+
+            <th>
+              Status
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="historyBody">
+
+          <tr>
+
+            <td colspan="4">
+
+              <div class="empty">
+                Hakuna withdrawal history.
+              </div>
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+</main>
+
+
+<footer class="footer">
+
+  <b class="logo">
+    NET SIMULIZI
+  </b>
+
+  <p>
+    Author Wallet
+  </p>
+
+  <p>
+    © 2026 Net Simulizi
+  </p>
+
+</footer>
+
+
+<script>
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+const darkBtn =
+  document.getElementById("darkBtn");
+
+
+if(
+  localStorage.getItem("netsimulizi_dark") === "1"
+){
+
+  document.body.classList.add("dark");
+
+}
+
+
+darkBtn.addEventListener(
+  "click",
+  function(){
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+      "netsimulizi_dark",
+      document.body.classList.contains("dark")
+        ? "1"
+        : "0"
+    );
+
+  }
+);
+
+
+/* =========================
+   USER CHECK
+========================= */
+
+let user = null;
+
+
+try{
+
+  user =
+    JSON.parse(
+      localStorage.getItem("netsimulizi_user")
+    );
+
+}catch(error){
+
+  user = null;
+
+}
+
+
+if(!user){
+
+  window.location.href =
+    "author-login.html";
+
+}
+
+
+const role =
+  String(user?.role || "")
+    .trim()
+    .toLowerCase();
+
+
+if(
+  user &&
+  role !== "author" &&
+  role !== "admin"
+){
+
+  localStorage.removeItem(
+    "netsimulizi_user"
+  );
+
+  window.location.href =
+    "author-login.html";
+
+}
+
+
+/* =========================
+   FORMAT MONEY
+========================= */
+
+function money(value){
+
+  const number =
+    Number(value || 0);
+
+  return "TSh " +
+    number.toLocaleString("en-TZ");
+
+}
+
+
+/* =========================
+   DEMO WALLET DATA
+========================= */
+
+let wallet = {
+
+  totalEarned:0,
+
+  authorEarnings:0,
+
+  withdrawn:0,
+
+  pending:0,
+
+  balance:0
+
+};
+
+
+/*
+ * Baadaye data hizi zitatoka D1 kupitia API.
+ * Kwa sasa tunatumia localStorage kama
+ * testing fallback.
+ */
+
+try{
+
+  const saved =
+    JSON.parse(
+      localStorage.getItem(
+        "netsimulizi_wallet"
+      )
+    );
+
+
+  if(saved){
+
+    wallet = {
+      ...wallet,
+      ...saved
+    };
+
+  }
+
+}catch(error){
+
+  console.log(
+    "Wallet storage not available."
+  );
+
+}
+
+
+/* =========================
+   UPDATE WALLET
+========================= */
+
+function updateWallet(){
+
+  document.getElementById(
+    "balance"
+  ).textContent =
+    money(wallet.balance);
+
+
+  document.getElementById(
+    "totalEarned"
+  ).textContent =
+    money(wallet.totalEarned);
+
+
+  document.getElementById(
+    "authorEarnings"
+  ).textContent =
+    money(wallet.authorEarnings);
+
+
+  document.getElementById(
+    "withdrawn"
+  ).textContent =
+    money(wallet.withdrawn);
+
+
+  document.getElementById(
+    "pending"
+  ).textContent =
+    money(wallet.pending);
+
+
+  const withdrawBtn =
+    document.getElementById(
+      "withdrawBtn"
+    );
+
+
+  const withdrawStatus =
+    document.getElementById(
+      "withdrawStatus"
+    );
+
+
+  if(
+    Number(wallet.balance) >= 50000
+  ){
+
+    withdrawBtn.disabled =
+      false;
+
+    withdrawBtn.classList.remove(
+      "disabled"
+    );
+
+
+    withdrawStatus.innerHTML =
+      "Balance yako imefikia minimum ya withdrawal. " +
+      "<strong>Unaweza kuomba withdrawal.</strong>";
+
+  }else{
+
+    withdrawBtn.disabled =
+      true;
+
+    withdrawBtn.classList.add(
+      "disabled"
+    );
+
+
+    const remaining =
+      50000 -
+      Number(wallet.balance);
+
+
+    withdrawStatus.innerHTML =
+      "Bado unahitaji " +
+      "<strong>" +
+      money(remaining) +
+      "</strong> kufikia minimum ya withdrawal ya " +
+      "<strong>TSh 50,000</strong>.";
+
+  }
+
+}
+
+
+updateWallet();
+
+
+/* =========================
+   PAYMENT METHOD
+========================= */
+
+const paymentForm =
+  document.getElementById(
+    "paymentForm"
+  );
+
+
+const paymentMethod =
+  document.getElementById(
+    "paymentMethod"
+  );
+
+
+const accountName =
+  document.getElementById(
+    "accountName"
+  );
+
+
+const accountNumber =
+  document.getElementById(
+    "accountNumber"
+  );
+
+
+try{
+
+  const savedPayment =
+    JSON.parse(
+      localStorage.getItem(
+        "netsimulizi_payment_method"
+      )
+    );
+
+
+  if(savedPayment){
+
+    paymentMethod.value =
+      savedPayment.method || "";
+
+    accountName.value =
+      savedPayment.name || "";
+
+    accountNumber.value =
+      savedPayment.number || "";
+
+  }
+
+}catch(error){}
+
+
+paymentForm.addEventListener(
+  "submit",
+  function(event){
+
+    event.preventDefault();
+
+
+    if(!paymentMethod.value){
+
+      showMessage(
+        "Chagua payment method.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(!accountName.value.trim()){
+
+      showMessage(
+        "Weka jina la account.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    if(!accountNumber.value.trim()){
+
+      showMessage(
+        "Weka account au phone number.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    const payment = {
+
+      method:
+        paymentMethod.value,
+
+      name:
+        accountName.value.trim(),
+
+      number:
+        accountNumber.value.trim()
+
+    };
+
+
+    localStorage.setItem(
+      "netsimulizi_payment_method",
+      JSON.stringify(payment)
+    );
+
+
+    showMessage(
+      "Payment method imehifadhiwa kwa ajili ya testing.",
+      "success"
+    );
+
+  }
+);
+
+
+/* =========================
+   WITHDRAW
+========================= */
+
+document
+  .getElementById("withdrawBtn")
+  .addEventListener(
+    "click",
+    function(){
+
+      if(
+        Number(wallet.balance) < 50000
+      ){
+
+        showMessage(
+          "Balance bado haijafikia TSh 50,000.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      let payment = null;
+
+
+      try{
+
+        payment =
+          JSON.parse(
+            localStorage.getItem(
+              "netsimulizi_payment_method"
+            )
+          );
+
+      }catch(error){
+
+        payment = null;
+
+      }
+
+
+      if(
+        !payment ||
+        !payment.method ||
+        !payment.name ||
+        !payment.number
+      ){
+
+        showMessage(
+          "Kwanza weka Payment Method.",
+          "error"
+        );
+
+        document
+          .getElementById("paymentMethod")
+          .focus();
+
+        return;
+
+      }
+
+
+      showMessage(
+        "Withdrawal request itatumwa kwenye backend baada ya mfumo wa malipo kuunganishwa.",
+        "success"
+      );
+
+    }
+  );
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(
+  text,
+  type
+){
+
+  const box =
+    document.getElementById(
+      "message"
+    );
+
+
+  box.textContent =
+    text;
+
+
+  box.className =
+    "message " +
+    type;
+
+
+  setTimeout(
+    function(){
+
+      box.className =
+        "message";
+
+    },
+    5000
+  );
+
+}
+
+
+/* =========================
+   WITHDRAWAL HISTORY
+========================= */
+
+function loadHistory(){
+
+  let history = [];
+
+
+  try{
+
+    history =
+      JSON.parse(
+        localStorage.getItem(
+          "netsimulizi_withdrawals"
+        )
+      ) || [];
+
+  }catch(error){
+
+    history = [];
+
+  }
+
+
+  const body =
+    document.getElementById(
+      "historyBody"
+    );
+
+
+  if(!history.length){
+
+    body.innerHTML = `
+
+      <tr>
+
+        <td colspan="4">
+
+          <div class="empty">
+            Hakuna withdrawal history.
+          </div>
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+    history.map(
+      function(item){
+
+        let statusClass =
+          "pending";
+
+
+        const status =
+          String(
+            item.status || "Pending"
+          ).toLowerCase();
+
+
+        if(status === "paid"){
+
+          statusClass =
+            "paid";
+
+        }
+
+
+        if(status === "rejected"){
+
+          statusClass =
+            "rejected";
+
+        }
+
+
+        return `
+
+          <tr>
+
+            <td>
+              ${escapeHTML(
+                item.date || "—"
+              )}
+            </td>
+
+            <td>
+              ${money(
+                item.amount || 0
+              )}
+            </td>
+
+            <td>
+              ${escapeHTML(
+                item.method || "—"
+              )}
+            </td>
+
+            <td>
+
+              <span
+                class="status ${statusClass}"
+              >
+                ${escapeHTML(
+                  item.status || "Pending"
+                )}
+              </span>
+
+            </td>
+
+          </tr>
+
+        `;
+
+      }
+    ).join("");
+
+}
+
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+loadHistory();
+
+
+</script>
+
+</body>
+
+</html>
+```
