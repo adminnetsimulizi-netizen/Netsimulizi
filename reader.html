@@ -3,11 +3,11 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="UTF-8">
 
 <meta
     name="viewport"
-    content="width=device-width,initial-scale=1"
+    content="width=device-width, initial-scale=1.0"
 >
 
 <title>Reading Mode — Net Simulizi</title>
@@ -15,7 +15,7 @@
 <style>
 
 *{
-    box-sizing:border-box
+    box-sizing:border-box;
 }
 
 body{
@@ -33,7 +33,7 @@ body.dark{
 .top{
     background:#171512;
     color:#fff;
-    padding:16px;
+    padding:12px 16px;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -42,11 +42,10 @@ body.dark{
     z-index:100;
 }
 
-.logo{
-    color:#d4aa43;
-    font-weight:900;
-    letter-spacing:2px;
-    text-decoration:none;
+.logo-image{
+    height:42px;
+    width:auto;
+    display:block;
 }
 
 .btn{
@@ -56,6 +55,7 @@ body.dark{
     background:transparent;
     color:inherit;
     cursor:pointer;
+    font-size:14px;
 }
 
 .primary{
@@ -184,6 +184,12 @@ body.dark{
     padding:30px;
 }
 
+.footer-logo{
+    height:42px;
+    width:auto;
+    margin:auto;
+}
+
 .reader-tools{
     display:flex;
     justify-content:flex-end;
@@ -194,7 +200,11 @@ body.dark{
 @media(max-width:700px){
 
     .top{
-        padding:12px;
+        padding:10px 12px;
+    }
+
+    .logo-image{
+        height:36px;
     }
 
     .wrap{
@@ -218,6 +228,7 @@ body.dark{
     .btn{
         padding:9px 11px;
     }
+
 }
 
 </style>
@@ -230,11 +241,14 @@ body.dark{
 
 <header class="top">
 
-    <a
-        class="logo"
-        href="../public/index.html"
-    >
-        NET SIMULIZI
+    <a href="index.html">
+
+        <img
+            src="Logo.png"
+            alt="Net Simulizi"
+            class="logo-image"
+        >
+
     </a>
 
 
@@ -250,7 +264,7 @@ body.dark{
 
         <button
             class="btn"
-            onclick="location.href='../public/land.html'"
+            onclick="location.href='land.html'"
         >
             EN/SW
         </button>
@@ -263,9 +277,7 @@ body.dark{
 <main class="wrap">
 
 
-    <div
-        class="reader-tools"
-    >
+    <div class="reader-tools">
 
         <button
             class="btn"
@@ -291,9 +303,7 @@ body.dark{
     >
 
         <div class="loading">
-
             Inapakia sura...
-
         </div>
 
     </section>
@@ -304,9 +314,11 @@ body.dark{
 
 <footer class="footer">
 
-    <b class="logo">
-        NET SIMULIZI
-    </b>
+    <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="footer-logo"
+    >
 
     <p>
         Digital Storytelling Platform
@@ -324,12 +336,10 @@ body.dark{
 const API = "/api";
 
 let currentStoryId = 1;
-
 let currentEpisodeId = 1;
-
 let currentEpisodes = [];
-
 let fontSize = 19;
+let progressTimer = null;
 
 
 /* =========================
@@ -351,9 +361,7 @@ function toggleDark(){
 function loadDarkMode(){
 
     if(
-        localStorage.getItem(
-            "netsimulizi_dark"
-        ) === "true"
+        localStorage.getItem("netsimulizi_dark") === "true"
     ){
 
         document.body.classList.add("dark");
@@ -369,17 +377,13 @@ function loadDarkMode(){
 
 function loadFontSize(){
 
-    const saved =
-        Number(
-            localStorage.getItem(
-                "netsimulizi_reader_font"
-            )
-        );
+    const saved = Number(
+        localStorage.getItem(
+            "netsimulizi_reader_font"
+        )
+    );
 
-    if(
-        saved >= 15 &&
-        saved <= 28
-    ){
+    if(saved >= 15 && saved <= 28){
 
         fontSize = saved;
 
@@ -391,7 +395,9 @@ function loadFontSize(){
 function applyFontSize(){
 
     const content =
-        document.querySelector(".content");
+        document.getElementById(
+            "readingContent"
+        );
 
     if(content){
 
@@ -407,7 +413,7 @@ function increaseFont(){
 
     if(fontSize < 28){
 
-        fontSize += 1;
+        fontSize++;
 
         localStorage.setItem(
             "netsimulizi_reader_font",
@@ -425,7 +431,7 @@ function decreaseFont(){
 
     if(fontSize > 15){
 
-        fontSize -= 1;
+        fontSize--;
 
         localStorage.setItem(
             "netsimulizi_reader_font",
@@ -451,18 +457,22 @@ function getParameters(){
         );
 
 
+    const storyParam =
+        params.get("story") ||
+        params.get("id");
+
+
+    const episodeParam =
+        params.get("episode") ||
+        params.get("chapter");
+
+
     const story =
-        Number(
-            params.get("story") ||
-            params.get("id")
-        );
+        Number(storyParam);
 
 
     const episode =
-        Number(
-            params.get("episode") ||
-            params.get("chapter")
-        );
+        Number(episodeParam);
 
 
     currentStoryId =
@@ -487,42 +497,31 @@ function getParameters(){
 
 async function loadStory(){
 
-    try{
-
-        const response =
-            await fetch(
-                `${API}/stories/${currentStoryId}`
-            );
+    const response =
+        await fetch(
+            `${API}/stories/${currentStoryId}`
+        );
 
 
-        const data =
-            await response.json();
+    const data =
+        await response.json();
 
 
-        if(
-            !response.ok ||
-            !data.success ||
-            !data.story
-        ){
+    if(
+        !response.ok ||
+        !data.success ||
+        !data.story
+    ){
 
-            throw new Error(
-                data.message ||
-                "Story haijapatikana."
-            );
-
-        }
-
-
-        return data.story;
-
-
-    }catch(error){
-
-        console.error(error);
-
-        return null;
+        throw new Error(
+            data.message ||
+            "Story haijapatikana."
+        );
 
     }
+
+
+    return data.story;
 
 }
 
@@ -557,7 +556,9 @@ async function loadEpisodes(){
 
 
     currentEpisodes =
-        data.episodes || [];
+        Array.isArray(data.episodes)
+            ? data.episodes
+            : [];
 
 
     return currentEpisodes;
@@ -581,15 +582,6 @@ async function loadReader(){
 
         const story =
             await loadStory();
-
-
-        if(!story){
-
-            throw new Error(
-                "Story haijapatikana."
-            );
-
-        }
 
 
         const episodes =
@@ -653,16 +645,13 @@ async function loadReader(){
         );
 
 
-        saveProgress(
-            story.id,
-            episode.id,
-            0
-        );
-
-
     }catch(error){
 
-        console.error(error);
+        console.error(
+            "Reader error:",
+            error
+        );
+
 
         container.innerHTML = `
 
@@ -673,18 +662,23 @@ async function loadReader(){
                 </h2>
 
                 <p>
-                    ${escapeHtml(
-                        error.message
-                    )}
+                    ${escapeHtml(error.message)}
                 </p>
 
                 <br>
 
                 <button
                     class="btn"
-                    onclick="history.back()"
+                    onclick="location.reload()"
                 >
-                    ← Rudi
+                    Jaribu tena
+                </button>
+
+                <button
+                    class="btn"
+                    onclick="goToChapters()"
+                >
+                    ← Chapters
                 </button>
 
             </div>
@@ -711,14 +705,16 @@ function renderReader(
             "readerContainer"
         );
 
+
     const rawContent =
-        episode.content ??
-        episode.text ??
-        episode.body ??
-        "";
+        episode.content;
+
 
     const cleanContent =
-        String(rawContent).trim();
+        String(
+            rawContent ?? ""
+        ).trim();
+
 
     if(!cleanContent){
 
@@ -746,6 +742,7 @@ function renderReader(
         `;
 
         return;
+
     }
 
 
@@ -799,13 +796,16 @@ function renderReader(
             ${escapeHtml(story.title)}
 
             · CHAPTER
+
             ${Number(episode.episode_number)}
 
         </div>
 
 
         <h1>
+
             ${escapeHtml(episode.title)}
+
         </h1>
 
 
@@ -813,7 +813,9 @@ function renderReader(
             id="readingContent"
             class="content"
         >
+
             ${contentHtml}
+
         </div>
 
 
@@ -848,14 +850,18 @@ function renderReader(
 
             ${
                 previous
+
                 ?
+
                 `<button
                     class="btn"
-                    onclick="goToEpisode(${previous.id})"
+                    onclick="goToEpisode(${Number(previous.id)})"
                 >
                     ← Previous
                 </button>`
+
                 :
+
                 `<button
                     class="btn"
                     onclick="goToChapters()"
@@ -867,14 +873,18 @@ function renderReader(
 
             ${
                 next
+
                 ?
+
                 `<button
                     class="btn primary"
-                    onclick="goToEpisode(${next.id})"
+                    onclick="goToEpisode(${Number(next.id)})"
                 >
                     Next →
                 </button>`
+
                 :
+
                 `<button
                     class="btn primary"
                     onclick="goToChapters()"
@@ -902,180 +912,11 @@ function renderReader(
         episode.id
     );
 
-}
-    const container =
-        document.getElementById(
-            "readerContainer"
-        );
 
-
-    const paragraphs =
-        String(
-            episode.content || ""
-        )
-        .split(/\n+/)
-        .filter(
-            paragraph =>
-                paragraph.trim() !== ""
-        );
-
-
-    const contentHtml =
-        paragraphs
-            .map(
-                paragraph =>
-                    `<p>${escapeHtml(
-                        paragraph
-                    )}</p>`
-            )
-            .join("");
-
-
-    const currentIndex =
-        episodes.findIndex(
-            item =>
-                Number(item.id) ===
-                Number(episode.id)
-        );
-
-
-    const previous =
-        currentIndex > 0
-            ? episodes[currentIndex - 1]
-            : null;
-
-
-    const next =
-        currentIndex <
-        episodes.length - 1
-            ? episodes[currentIndex + 1]
-            : null;
-
-
-    container.innerHTML = `
-
-        <div class="meta">
-
-            ${escapeHtml(story.title)}
-
-            ·
-
-            CHAPTER
-            ${Number(
-                episode.episode_number
-            )}
-
-        </div>
-
-
-        <h1>
-            ${escapeHtml(
-                episode.title
-            )}
-        </h1>
-
-
-        <div
-            id="readingContent"
-            class="content"
-        >
-
-            ${contentHtml}
-
-        </div>
-
-
-        <div class="progress-area">
-
-            <div class="progress-label">
-
-                <span>
-                    Reading progress
-                </span>
-
-                <span id="progressText">
-                    0%
-                </span>
-
-            </div>
-
-
-            <div class="progress-bar">
-
-                <div
-                    id="progressFill"
-                    class="progress-fill"
-                ></div>
-
-            </div>
-
-        </div>
-
-
-        <div class="controls">
-
-            ${
-                previous
-
-                ?
-
-                `<button
-                    class="btn"
-                    onclick="goToEpisode(${previous.id})"
-                >
-                    ← Previous
-                </button>`
-
-                :
-
-                `<button
-                    class="btn"
-                    onclick="goToChapters()"
-                >
-                    ← Chapters
-                </button>`
-            }
-
-
-            ${
-                next
-
-                ?
-
-                `<button
-                    class="btn primary"
-                    onclick="goToEpisode(${next.id})"
-                >
-                    Next →
-                </button>`
-
-                :
-
-                `<button
-                    class="btn primary"
-                    onclick="goToChapters()"
-                >
-                    Chapters →
-                </button>`
-            }
-
-        </div>
-
-    `;
-
-
-    applyFontSize();
-
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-
-    restoreProgress(
+    saveProgress(
         story.id,
-        episode.id
+        episode.id,
+        0
     );
 
 }
@@ -1112,9 +953,11 @@ function showLockedEpisode(
 
 
             <h1>
+
                 ${escapeHtml(
                     episode.title
                 )}
+
             </h1>
 
 
@@ -1124,9 +967,8 @@ function showLockedEpisode(
                     story.title
                 )}
 
-                ·
+                · CHAPTER
 
-                CHAPTER
                 ${Number(
                     episode.episode_number
                 )}
@@ -1176,7 +1018,7 @@ function showLockedEpisode(
 
 
 /* =========================
-   PAYMENT PLACEHOLDER
+   PAYMENT
 ========================= */
 
 function paymentComingSoon(){
@@ -1235,7 +1077,7 @@ function getCurrentUser(){
             JSON.parse(stored);
 
 
-        if(!user.id){
+        if(!user || !user.id){
 
             return null;
 
@@ -1254,7 +1096,7 @@ function getCurrentUser(){
 
 
 /* =========================
-   SAVE READING PROGRESS
+   SAVE PROGRESS
 ========================= */
 
 async function saveProgress(
@@ -1288,11 +1130,14 @@ async function saveProgress(
 
                 body:JSON.stringify({
 
-                    user_id:user.id,
+                    user_id:
+                        Number(user.id),
 
-                    story_id:Number(storyId),
+                    story_id:
+                        Number(storyId),
 
-                    episode_id:Number(episodeId),
+                    episode_id:
+                        Number(episodeId),
 
                     progress_percent:
                         Math.max(
@@ -1397,7 +1242,7 @@ async function restoreProgress(
 
 
 /* =========================
-   PROGRESS CALCULATION
+   PROGRESS
 ========================= */
 
 function calculateProgress(){
@@ -1415,42 +1260,30 @@ function calculateProgress(){
     }
 
 
-    const rect =
-        content.getBoundingClientRect();
-
-
     const contentTop =
-        window.scrollY +
-        rect.top;
+        content.getBoundingClientRect().top +
+        window.scrollY;
 
 
     const contentHeight =
         content.offsetHeight;
 
 
-    const viewportBottom =
-        window.scrollY +
-        window.innerHeight;
+    if(contentHeight <= 0){
 
-
-    const total =
-        contentHeight -
-        window.innerHeight;
-
-
-    if(total <= 0){
-
-        return 100;
+        return 0;
 
     }
 
 
+    const viewed =
+        window.scrollY -
+        contentTop +
+        window.innerHeight;
+
+
     const progress =
-        (
-            (window.scrollY - contentTop + window.innerHeight)
-            /
-            contentHeight
-        ) * 100;
+        (viewed / contentHeight) * 100;
 
 
     return Math.max(
@@ -1462,9 +1295,6 @@ function calculateProgress(){
     );
 
 }
-
-
-let progressTimer = null;
 
 
 function updateReadingProgress(){
@@ -1485,7 +1315,7 @@ function updateReadingProgress(){
 
     progressTimer =
         setTimeout(
-            () => {
+            function(){
 
                 saveProgress(
                     currentStoryId,
@@ -1516,10 +1346,20 @@ function updateProgressUI(
         );
 
 
+    const value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(percent) || 0
+            )
+        );
+
+
     if(fill){
 
         fill.style.width =
-            percent + "%";
+            value + "%";
 
     }
 
@@ -1527,7 +1367,7 @@ function updateProgressUI(
     if(text){
 
         text.textContent =
-            Math.round(percent) + "%";
+            Math.round(value) + "%";
 
     }
 
@@ -1552,9 +1392,7 @@ document.addEventListener(
     function(event){
 
         if(
-            event.target.closest(
-                ".content"
-            )
+            event.target.closest(".content")
         ){
 
             event.preventDefault();
@@ -1570,9 +1408,7 @@ document.addEventListener(
     function(event){
 
         if(
-            event.target.closest(
-                ".content"
-            )
+            event.target.closest(".content")
         ){
 
             event.preventDefault();
@@ -1588,9 +1424,7 @@ document.addEventListener(
     function(event){
 
         if(
-            event.target.closest(
-                ".content"
-            )
+            event.target.closest(".content")
         ){
 
             event.preventDefault();
@@ -1606,9 +1440,7 @@ document.addEventListener(
     function(event){
 
         if(
-            event.target.closest(
-                ".content"
-            )
+            event.target.closest(".content")
         ){
 
             event.preventDefault();
