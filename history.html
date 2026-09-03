@@ -1,1 +1,1062 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Reading History — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="hero"><h1>Reading History</h1><p class="muted">Endelea pale ulipoishia.</p></section><section class="card"><p><b>FADHAA — Chapter 1</b> <button class="btn primary" onclick="location.href='reader.html?story=1&chapter=1'">Continue</button></p></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script></script></body></html>
+```html
+<!doctype html>
+<html lang="sw">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Reading History — Net Simulizi</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:#f6f0e5;
+    color:#191713;
+    font-family:Arial,sans-serif;
+    transition:.2s;
+}
+
+body.dark{
+    background:#111;
+    color:#eee;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.top{
+    background:#171512;
+    color:#fff;
+    padding:14px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+}
+
+.logo-image{
+    height:42px;
+    width:auto;
+    display:block;
+}
+
+.top-actions{
+    display:flex;
+    gap:8px;
+}
+
+.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #d4aa43;
+    background:transparent;
+    color:inherit;
+    cursor:pointer;
+}
+
+.primary{
+    background:#d4aa43;
+    color:#171512;
+    border:0;
+    font-weight:700;
+}
+
+.btn:hover{
+    opacity:.9;
+}
+
+
+/* =========================
+   MAIN
+========================= */
+
+.wrap{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+}
+
+.hero{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:20px;
+}
+
+.dark .hero{
+    background:#1d1b18;
+    border-color:#38342d;
+}
+
+.muted{
+    color:#777;
+}
+
+.dark .muted{
+    color:#aaa;
+}
+
+
+/* =========================
+   HISTORY LIST
+========================= */
+
+.history-list{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.history-card{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    gap:18px;
+    align-items:center;
+}
+
+.dark .history-card{
+    background:#1d1b18;
+    border-color:#38342d;
+}
+
+.history-cover{
+    width:90px;
+    height:125px;
+    flex-shrink:0;
+    border-radius:10px;
+    overflow:hidden;
+    background:linear-gradient(145deg,#211d17,#a47b28);
+    color:white;
+    display:flex;
+    align-items:flex-end;
+    padding:10px;
+    font-weight:900;
+}
+
+.history-cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.history-info{
+    flex:1;
+    min-width:0;
+}
+
+.history-title{
+    font-size:19px;
+    font-weight:800;
+    margin-bottom:7px;
+}
+
+.episode-title{
+    font-size:15px;
+    margin-bottom:8px;
+}
+
+.history-date{
+    color:#777;
+    font-size:13px;
+    margin-bottom:12px;
+}
+
+.dark .history-date{
+    color:#aaa;
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+.progress-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:8px;
+}
+
+.progress-bar{
+    height:8px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+    flex:1;
+    max-width:350px;
+}
+
+.dark .progress-bar{
+    background:#3a3731;
+}
+
+.progress-fill{
+    height:100%;
+    background:#d4aa43;
+    width:0%;
+    border-radius:20px;
+}
+
+.progress-text{
+    font-size:13px;
+    font-weight:bold;
+    min-width:45px;
+}
+
+
+/* =========================
+   EMPTY
+========================= */
+
+.empty{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:45px 20px;
+    text-align:center;
+}
+
+.dark .empty{
+    background:#1d1b18;
+    border-color:#38342d;
+}
+
+.empty-icon{
+    font-size:45px;
+    margin-bottom:10px;
+}
+
+.empty h2{
+    margin:10px 0;
+}
+
+.empty p{
+    color:#777;
+}
+
+.dark .empty p{
+    color:#aaa;
+}
+
+
+/* =========================
+   LOADING
+========================= */
+
+.loading{
+    text-align:center;
+    padding:50px 20px;
+    color:#777;
+}
+
+.dark .loading{
+    color:#aaa;
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+.error{
+    display:none;
+    background:#3a1717;
+    color:#fff;
+    padding:16px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    background:#171512;
+    color:#aaa;
+    text-align:center;
+    padding:30px;
+    margin-top:40px;
+}
+
+.footer-logo{
+    height:40px;
+    width:auto;
+    margin:auto;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    .wrap{
+        padding:15px;
+    }
+
+    .history-card{
+        align-items:flex-start;
+        padding:14px;
+    }
+
+    .history-cover{
+        width:75px;
+        height:105px;
+    }
+
+    .history-title{
+        font-size:16px;
+    }
+
+    .episode-title{
+        font-size:14px;
+    }
+
+    .progress-row{
+        flex-wrap:wrap;
+    }
+
+    .progress-bar{
+        max-width:none;
+        width:100%;
+        flex-basis:100%;
+        order:2;
+    }
+
+    .progress-text{
+        order:1;
+    }
+
+    .continue-btn{
+        width:100%;
+        margin-top:10px;
+    }
+
+    .logo-image{
+        height:36px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="top">
+
+
+<a class="brand" href="index.html">
+
+<img
+    src="Logo.png"
+    alt="Net Simulizi"
+    class="logo-image">
+
+</a>
+
+
+<div class="top-actions">
+
+<button
+    class="btn"
+    onclick="toggleDarkMode()">
+    ◐
+</button>
+
+
+<button
+    class="btn"
+    onclick="location.href='profile.html'">
+    Profile
+</button>
+
+</div>
+
+
+</header>
+
+
+
+<main class="wrap">
+
+
+<section class="hero">
+
+<h1>
+Reading History
+</h1>
+
+<p class="muted">
+Endelea pale ulipoishia.
+</p>
+
+</section>
+
+
+
+<div
+    id="errorBox"
+    class="error">
+</div>
+
+
+
+<div
+    id="loading"
+    class="loading">
+
+    Inapakia historia ya kusoma...
+
+</div>
+
+
+
+<section
+    id="historyList"
+    class="history-list"
+    style="display:none;">
+</section>
+
+
+
+<section
+    id="emptyBox"
+    class="empty"
+    style="display:none;">
+
+    <div class="empty-icon">
+        📖
+    </div>
+
+    <h2>
+        Hakuna historia bado
+    </h2>
+
+    <p>
+        Ukianza kusoma hadithi, historia yako
+        itaonekana hapa.
+    </p>
+
+    <button
+        class="btn primary"
+        onclick="location.href='index.html'">
+
+        Tafuta Hadithi
+
+    </button>
+
+</section>
+
+
+</main>
+
+
+
+<footer class="footer">
+
+
+<img
+    src="Logo.png"
+    alt="Net Simulizi"
+    class="footer-logo">
+
+
+<p>
+    Digital Storytelling Platform
+</p>
+
+
+<p>
+    © 2026 Net Simulizi
+</p>
+
+
+</footer>
+
+
+
+<script>
+
+
+const API = "/api";
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+function loadDarkMode(){
+
+    const dark =
+        localStorage.getItem(
+            "netsimulizi_dark"
+        ) === "true";
+
+
+    if(dark){
+
+        document.body.classList.add(
+            "dark"
+        );
+
+    }
+
+}
+
+
+function toggleDarkMode(){
+
+    document.body.classList.toggle(
+        "dark"
+    );
+
+
+    localStorage.setItem(
+        "netsimulizi_dark",
+        document.body.classList.contains(
+            "dark"
+        )
+    );
+
+}
+
+
+/* =========================
+   USER
+========================= */
+
+function getCurrentUser(){
+
+    try{
+
+        const saved =
+            localStorage.getItem(
+                "netsimulizi_user"
+            );
+
+
+        if(!saved){
+
+            return null;
+
+        }
+
+
+        return JSON.parse(saved);
+
+    }catch(error){
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================
+   LOAD HISTORY
+========================= */
+
+async function loadHistory(){
+
+
+    const user =
+        getCurrentUser();
+
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+
+    const historyList =
+        document.getElementById(
+            "historyList"
+        );
+
+
+    const emptyBox =
+        document.getElementById(
+            "emptyBox"
+        );
+
+
+    if(!user || !user.id){
+
+        loading.style.display =
+            "none";
+
+
+        emptyBox.innerHTML = `
+
+            <div class="empty-icon">
+                🔐
+            </div>
+
+            <h2>
+                Ingia kwanza
+            </h2>
+
+            <p>
+                Ingia kwenye akaunti yako ili
+                kuona Reading History.
+            </p>
+
+            <button
+                class="btn primary"
+                onclick="location.href='login.html'">
+
+                Ingia
+
+            </button>
+
+        `;
+
+
+        emptyBox.style.display =
+            "block";
+
+
+        return;
+
+    }
+
+
+    try{
+
+
+        const response =
+            await fetch(
+                `${API}/reading-history/${user.id}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(!response.ok ||
+           !data.success){
+
+            throw new Error(
+                data.message ||
+                "Imeshindikana kupata historia."
+            );
+
+        }
+
+
+        loading.style.display =
+            "none";
+
+
+        /*
+         * API yetu inarudisha history.
+         * Tunakubali pia majina tofauti
+         * ya field ili UI isianguke endapo
+         * response ina story/episode details
+         * kwa muundo tofauti.
+         */
+
+        const history =
+            data.history ||
+            data.reading_history ||
+            data.items ||
+            [];
+
+
+        if(history.length === 0){
+
+            emptyBox.style.display =
+                "block";
+
+            return;
+
+        }
+
+
+        historyList.innerHTML = "";
+
+
+        history.forEach(item => {
+
+            renderHistoryItem(item);
+
+        });
+
+
+        historyList.style.display =
+            "flex";
+
+
+    }catch(error){
+
+        console.error(
+            "History error:",
+            error
+        );
+
+
+        loading.style.display =
+            "none";
+
+
+        const errorBox =
+            document.getElementById(
+                "errorBox"
+            );
+
+
+        errorBox.textContent =
+            error.message ||
+            "Imeshindikana kupakia Reading History.";
+
+
+        errorBox.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* =========================
+   RENDER HISTORY ITEM
+========================= */
+
+function renderHistoryItem(item){
+
+
+    const historyList =
+        document.getElementById(
+            "historyList"
+        );
+
+
+    const storyId =
+        item.story_id ||
+        item.storyId ||
+        item.id;
+
+
+    const episodeId =
+        item.episode_id ||
+        item.episodeId ||
+        item.episode_id;
+
+
+    const episodeNumber =
+        item.episode_number ||
+        item.episodeNumber ||
+        "";
+
+
+    const storyTitle =
+        item.story_title ||
+        item.storyTitle ||
+        item.title ||
+        "Hadithi";
+
+
+    const episodeTitle =
+        item.episode_title ||
+        item.episodeTitle ||
+        (
+            episodeNumber
+                ? `Episode ${episodeNumber}`
+                : "Sura"
+        );
+
+
+    const progress =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(
+                    item.progress_percent ??
+                    item.progressPercent ??
+                    0
+                )
+            )
+        );
+
+
+    const date =
+        item.last_read_at ||
+        item.lastReadAt ||
+        item.updated_at ||
+        item.created_at ||
+        "";
+
+
+    const cover =
+        item.cover_url ||
+        item.coverUrl ||
+        item.cover ||
+        "";
+
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+
+    card.className =
+        "history-card";
+
+
+    let coverHTML = "";
+
+
+    if(cover){
+
+        coverHTML = `
+
+            <img
+                src="${escapeHTML(cover)}"
+                alt="${escapeHTML(storyTitle)}"
+                onerror="
+                    this.style.display='none';
+                    this.parentElement
+                        .querySelector('.cover-fallback')
+                        .style.display='flex';
+                ">
+
+        `;
+
+    }
+
+
+    const readerURL =
+        storyId && episodeId
+            ? `reader.html?story=${encodeURIComponent(storyId)}&episode=${encodeURIComponent(episodeId)}`
+            : storyId
+                ? `reader.html?story=${encodeURIComponent(storyId)}`
+                : "index.html";
+
+
+    card.innerHTML = `
+
+        <a
+            href="${readerURL}"
+            style="
+                text-decoration:none;
+                color:inherit;
+                display:block;
+            ">
+
+            <div class="history-cover">
+
+                ${coverHTML}
+
+                <div
+                    class="cover-fallback"
+                    style="
+                        ${
+                            cover
+                                ? "display:none;"
+                                : "display:flex;"
+                        }
+                        width:100%;
+                        height:100%;
+                        align-items:flex-end;
+                    ">
+
+                    ${escapeHTML(storyTitle)}
+
+                </div>
+
+            </div>
+
+        </a>
+
+
+        <div class="history-info">
+
+
+            <div class="history-title">
+
+                ${escapeHTML(storyTitle)}
+
+            </div>
+
+
+            <div class="episode-title">
+
+                ${escapeHTML(episodeTitle)}
+
+            </div>
+
+
+            <div class="history-date">
+
+                Ilisomwa:
+                ${formatDate(date)}
+
+            </div>
+
+
+            <div class="progress-row">
+
+                <div class="progress-text">
+
+                    ${progress}%
+
+                </div>
+
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress-fill"
+                        style="width:${progress}%">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="btn primary continue-btn"
+                style="margin-top:12px;"
+                onclick="continueReading(event, '${escapeHTML(readerURL)}')">
+
+                Endelea Kusoma
+
+            </button>
+
+
+        </div>
+
+    `;
+
+
+    historyList.appendChild(
+        card
+    );
+
+}
+
+
+/* =========================
+   CONTINUE READING
+========================= */
+
+function continueReading(
+    event,
+    url
+){
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    window.location.href =
+        url;
+
+}
+
+
+/* =========================
+   DATE
+========================= */
+
+function formatDate(dateString){
+
+    if(!dateString){
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(
+            String(dateString)
+                .replace(" ","T") + "Z"
+        );
+
+
+    if(
+        isNaN(
+            date.getTime()
+        )
+    ){
+
+        return dateString;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-GB",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* =========================
+   ESCAPE
+========================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadDarkMode();
+
+loadHistory();
+
+</script>
+
+
+</body>
+</html>
+```
