@@ -1,4 +1,4 @@
-function json(data, status = 200) {
+const json = (data, status = 200) => {
     return new Response(JSON.stringify(data), {
         status,
         headers: {
@@ -8,38 +8,42 @@ function json(data, status = 200) {
             "Access-Control-Allow-Headers": "Content-Type"
         }
     });
-}
+};
 
-function errorResponse(message, status = 400) {
+const errorResponse = (message, status = 400) => {
     return json({
         success: false,
         message
     }, status);
-}
+};
 
-async function readJson(request) {
+const readJson = async (request) => {
     try {
         return await request.json();
     } catch {
         return null;
     }
-}
+};
 
-/* =========================
-   PASSWORD HASHING
-========================= */
 
-function bytesToBase64(bytes) {
+// ================================
+// PASSWORD FUNCTIONS
+// ================================
+
+const bytesToBase64 = (bytes) => {
     let binary = "";
+    const chunkSize = 0x8000;
 
-    for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(
+            ...bytes.subarray(i, i + chunkSize)
+        );
     }
 
     return btoa(binary);
-}
+};
 
-function base64ToBytes(base64) {
+const base64ToBytes = (base64) => {
     const binary = atob(base64);
     const bytes = new Uint8Array(binary.length);
 
@@ -48,95 +52,92 @@ function base64ToBytes(base64) {
     }
 
     return bytes;
-}
+};
 
-async function hashPassword(password) {
+const hashPassword = async (password) => {
     const encoder = new TextEncoder();
 
     const salt = crypto.getRandomValues(
         new Uint8Array(16)
     );
 
-    const key = await crypto.subtle.importKey(
+    const keyMaterial = await crypto.subtle.importKey(
         "raw",
         encoder.encode(password),
-        {
-            name: "PBKDF2"
-        },
+        "PBKDF2",
         false,
         ["deriveBits"]
     );
 
     const iterations = 1000;
 
-    const hash = await crypto.subtle.deriveBits(
+    const hashBuffer = await crypto.subtle.deriveBits(
         {
             name: "PBKDF2",
             salt,
             iterations,
             hash: "SHA-256"
         },
-        key,
+        keyMaterial,
         256
     );
 
-    return `pbkdf2$${iterations}$${bytesToBase64(salt)}$${bytesToBase64(new Uint8Array(hash))}`;
-}
+    const hash = new Uint8Array(hashBuffer);
 
-async function verifyPassword(password, storedHash) {
+    return [
+        "pbkdf2",
+        iterations,
+        bytesToBase64(salt),
+        bytesToBase64(hash)
+    ].join("$");
+};
+
+const verifyPassword = async (password, storedHash) => {
     try {
         const parts = storedHash.split("$");
 
-        if (parts.length !== 4) {
+        if (
+            parts.length !== 4 ||
+            parts[0] !== "pbkdf2"
+        ) {
             return false;
         }
 
-        const algorithm = parts[0];
         const iterations = Number(parts[1]);
         const salt = base64ToBytes(parts[2]);
-        const originalHash = base64ToBytes(parts[3]);
-
-        if (algorithm !== "pbkdf2") {
-            return false;
-        }
-
-        if (!Number.isInteger(iterations) || iterations <= 0) {
-            return false;
-        }
+        const expectedHash = base64ToBytes(parts[3]);
 
         const encoder = new TextEncoder();
 
-        const key = await crypto.subtle.importKey(
+        const keyMaterial = await crypto.subtle.importKey(
             "raw",
             encoder.encode(password),
-            {
-                name: "PBKDF2"
-            },
+            "PBKDF2",
             false,
             ["deriveBits"]
         );
 
-        const hash = await crypto.subtle.deriveBits(
+        const hashBuffer = await crypto.subtle.deriveBits(
             {
                 name: "PBKDF2",
                 salt,
                 iterations,
                 hash: "SHA-256"
             },
-            key,
+            keyMaterial,
             256
         );
 
-        const newHash = new Uint8Array(hash);
+        const actualHash = new Uint8Array(hashBuffer);
 
-        if (newHash.length !== originalHash.length) {
+        if (actualHash.length !== expectedHash.length) {
             return false;
         }
 
         let difference = 0;
 
-        for (let i = 0; i < newHash.length; i++) {
-            difference |= newHash[i] ^ originalHash[i];
+        for (let i = 0; i < actualHash.length; i++) {
+            difference |= actualHash[i] ^ expectedHash[i];
         }
 
         return difference === 0;
@@ -144,24 +145,31 @@ async function verifyPassword(password, storedHash) {
     } catch {
         return false;
     }
-}
+};
 
-/* =========================
-   MAIN API
-========================= */
+
+// ================================
+// MAIN API
+// ================================
 
 export async function onRequest(context) {
 
-    const {
-        request,
-        env
-    } = context;
+    const { request, env } = context;
 
-    /* =========================
-       CORS PREFLIGHT
-    ========================= */
+    const url = new URL(request.url);
 
-    if (request.method === "OPTIONS") {
+    const path = url.pathname
+        .replace(/^\/api/, "")
+        .replace(/\/+$/, "") || "/";
+
+    const method = request.method.toUpperCase();
+
+
+    // ================================
+    // CORS
+    // ================================
+
+    if (method === "OPTIONS") {
         return new Response(null, {
             status: 204,
             headers: {
@@ -172,27 +180,16 @@ export async function onRequest(context) {
         });
     }
 
-    /* =========================
-       GET REQUEST
-    ========================= */
 
-    if (request.method === "GET") {
+    // ================================
+    // GET REQUESTS
+    // ================================
 
-        const url = new URL(request.url);
+    if (method === "GET") {
 
-        let path = url.pathname;
-
-        if (path.startsWith("/api")) {
-            path = path.substring(4);
-        }
-
-        if (path === "") {
-            path = "/";
-        }
-
-        /* =========================
-           HEALTH
-        ========================= */
+        // ----------------------------
+        // HEALTH
+        // ----------------------------
 
         if (path === "/health") {
             return json({
@@ -202,9 +199,10 @@ export async function onRequest(context) {
             });
         }
 
-        /* =========================
-           TEST
-        ========================= */
+
+        // ----------------------------
+        // TEST
+        // ----------------------------
 
         if (path === "/test") {
             return json({
@@ -213,9 +211,10 @@ export async function onRequest(context) {
             });
         }
 
-        /* =========================
-           DATABASE TEST
-        ========================= */
+
+        // ----------------------------
+        // DATABASE TEST
+        // ----------------------------
 
         if (path === "/db-test") {
 
@@ -241,9 +240,10 @@ export async function onRequest(context) {
             }
         }
 
-        /* =========================
-           CATEGORIES
-        ========================= */
+
+        // ----------------------------
+        // CATEGORIES
+        // ----------------------------
 
         if (path === "/categories") {
 
@@ -267,8 +267,7 @@ export async function onRequest(context) {
 
                 return json({
                     success: true,
-                    count: result.results.length,
-                    categories: result.results
+                    categories: result.results || []
                 });
 
             } catch (error) {
@@ -280,9 +279,10 @@ export async function onRequest(context) {
             }
         }
 
-        /* =========================
-           STORIES
-        ========================= */
+
+        // ----------------------------
+        // STORIES
+        // ----------------------------
 
         if (path === "/stories") {
 
@@ -291,36 +291,33 @@ export async function onRequest(context) {
                 const result = await env.D1
                     .prepare(`
                         SELECT
-                            s.id,
-                            s.author_id,
-                            s.category_id,
-                            s.title,
-                            s.slug,
-                            s.description,
-                            s.cover_url,
-                            s.language,
-                            s.status,
-                            s.visibility,
-                            s.readers_count,
-                            s.created_at,
-                            s.updated_at,
-                            a.display_name AS author_name,
-                            c.name AS category_name
-                        FROM stories s
-                        LEFT JOIN authors a
-                            ON s.author_id = a.id
-                        LEFT JOIN categories c
-                            ON s.category_id = c.id
-                        WHERE s.status = 'published'
-                        AND s.visibility = 'public'
-                        ORDER BY s.created_at DESC
+                            stories.id,
+                            stories.title,
+                            stories.slug,
+                            stories.description,
+                            stories.cover_url,
+                            stories.language,
+                            stories.status,
+                            stories.visibility,
+                            stories.readers_count,
+                            stories.created_at,
+                            stories.updated_at,
+                            authors.display_name AS author_name,
+                            categories.name AS category_name
+                        FROM stories
+                        LEFT JOIN authors
+                            ON stories.author_id = authors.id
+                        LEFT JOIN categories
+                            ON stories.category_id = categories.id
+                        WHERE stories.status = 'published'
+                        AND stories.visibility = 'public'
+                        ORDER BY stories.created_at DESC
                     `)
                     .all();
 
                 return json({
                     success: true,
-                    count: result.results.length,
-                    stories: result.results
+                    stories: result.results || []
                 });
 
             } catch (error) {
@@ -332,163 +329,155 @@ export async function onRequest(context) {
             }
         }
 
-        /* =========================
-           SINGLE STORY
-        ========================= */
+
+        // ----------------------------
+        // STORY BY ID
+        // ----------------------------
 
         if (path.startsWith("/stories/")) {
 
-            const parts = path.split("/").filter(Boolean);
+            const parts = path
+                .split("/")
+                .filter(Boolean);
 
-            if (parts.length === 2) {
-
-                const storyId = Number(parts[1]);
-
-                if (!Number.isInteger(storyId)) {
-                    return errorResponse(
-                        "Invalid story ID",
-                        400
-                    );
-                }
-
-                try {
-
-                    const story = await env.D1
-                        .prepare(`
-                            SELECT
-                                s.id,
-                                s.author_id,
-                                s.category_id,
-                                s.title,
-                                s.slug,
-                                s.description,
-                                s.cover_url,
-                                s.language,
-                                s.status,
-                                s.visibility,
-                                s.readers_count,
-                                s.created_at,
-                                s.updated_at,
-                                a.display_name AS author_name,
-                                c.name AS category_name
-                            FROM stories s
-                            LEFT JOIN authors a
-                                ON s.author_id = a.id
-                            LEFT JOIN categories c
-                                ON s.category_id = c.id
-                            WHERE s.id = ?
-                            AND s.status = 'published'
-                            AND s.visibility = 'public'
-                            LIMIT 1
-                        `)
-                        .bind(storyId)
-                        .first();
-
-                    if (!story) {
-                        return errorResponse(
-                            "Story not found",
-                            404
-                        );
-                    }
-
-                    return json({
-                        success: true,
-                        story
-                    });
-
-                } catch (error) {
-
-                    return errorResponse(
-                        "Failed to load story",
-                        500
-                    );
-                }
-            }
-
-            /* =========================
-               STORY EPISODES
-            ========================= */
+            const storyId = Number(parts[1]);
 
             if (
-                parts.length === 3 &&
-                parts[2] === "episodes"
+                parts.length !== 2 ||
+                !Number.isInteger(storyId) ||
+                storyId <= 0
             ) {
+                return errorResponse(
+                    "Invalid story ID",
+                    400
+                );
+            }
 
-                const storyId = Number(parts[1]);
+            try {
 
-                if (!Number.isInteger(storyId)) {
+                const story = await env.D1
+                    .prepare(`
+                        SELECT
+                            stories.id,
+                            stories.title,
+                            stories.slug,
+                            stories.description,
+                            stories.cover_url,
+                            stories.language,
+                            stories.status,
+                            stories.visibility,
+                            stories.readers_count,
+                            stories.created_at,
+                            stories.updated_at,
+                            authors.display_name AS author_name,
+                            categories.name AS category_name
+                        FROM stories
+                        LEFT JOIN authors
+                            ON stories.author_id = authors.id
+                        LEFT JOIN categories
+                            ON stories.category_id = categories.id
+                        WHERE stories.id = ?
+                        AND stories.status = 'published'
+                        AND stories.visibility = 'public'
+                        LIMIT 1
+                    `)
+                    .bind(storyId)
+                    .first();
+
+                if (!story) {
                     return errorResponse(
-                        "Invalid story ID",
-                        400
+                        "Story not found",
+                        404
                     );
                 }
 
-                try {
+                return json({
+                    success: true,
+                    story
+                });
 
-                    const story = await env.D1
-                        .prepare(`
-                            SELECT id, title
-                            FROM stories
-                            WHERE id = ?
-                            AND status = 'published'
-                            AND visibility = 'public'
-                            LIMIT 1
-                        `)
-                        .bind(storyId)
-                        .first();
+            } catch (error) {
 
-                    if (!story) {
-                        return errorResponse(
-                            "Story not found",
-                            404
-                        );
-                    }
-
-                    const episodes = await env.D1
-                        .prepare(`
-                            SELECT
-                                id,
-                                story_id,
-                                episode_number,
-                                title,
-                                content,
-                                is_free,
-                                price,
-                                status,
-                                created_at,
-                                updated_at
-                            FROM episodes
-                            WHERE story_id = ?
-                            AND status = 'published'
-                            ORDER BY episode_number ASC
-                        `)
-                        .bind(storyId)
-                        .all();
-
-                    return json({
-                        success: true,
-                        story,
-                        count: episodes.results.length,
-                        episodes: episodes.results
-                    });
-
-                } catch (error) {
-
-                    return errorResponse(
-                        "Failed to load episodes",
-                        500
-                    );
-                }
+                return errorResponse(
+                    "Failed to load story",
+                    500
+                );
             }
         }
 
-        /* =========================
-           PROFILE
-        ========================= */
+
+        // ----------------------------
+        // STORY EPISODES
+        // ----------------------------
+
+        if (path.startsWith("/stories/") && path.endsWith("/episodes")) {
+
+            const parts = path
+                .split("/")
+                .filter(Boolean);
+
+            const storyId = Number(parts[1]);
+
+            if (
+                parts.length !== 3 ||
+                parts[2] !== "episodes" ||
+                !Number.isInteger(storyId) ||
+                storyId <= 0
+            ) {
+                return errorResponse(
+                    "Invalid story ID",
+                    400
+                );
+            }
+
+            try {
+
+                const result = await env.D1
+                    .prepare(`
+                        SELECT
+                            id,
+                            story_id,
+                            episode_number,
+                            title,
+                            content,
+                            is_free,
+                            price,
+                            status,
+                            created_at,
+                            updated_at
+                        FROM episodes
+                        WHERE story_id = ?
+                        AND status = 'published'
+                        ORDER BY episode_number ASC
+                    `)
+                    .bind(storyId)
+                    .all();
+
+                return json({
+                    success: true,
+                    episodes: result.results || []
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to load episodes",
+                    500
+                );
+            }
+        }
+
+
+        // ----------------------------
+        // PROFILE
+        // ----------------------------
 
         if (path.startsWith("/profile/")) {
 
-            const parts = path.split("/").filter(Boolean);
+            const parts = path
+                .split("/")
+                .filter(Boolean);
+
             const userId = Number(parts[1]);
 
             if (
@@ -542,92 +531,92 @@ export async function onRequest(context) {
             }
         }
 
+
+        // ----------------------------
+        // GET ENDPOINT NOT FOUND
+        // ----------------------------
+
         return errorResponse(
             "Endpoint not found",
             404
         );
     }
 
-    /* =========================
-       POST REQUEST
-    ========================= */
 
-    if (request.method === "POST") {
+    // ================================
+    // POST REQUESTS
+    // ================================
 
-        const url = new URL(request.url);
+    if (method === "POST") {
 
-        let path = url.pathname;
+        const body = await readJson(request);
 
-        if (path.startsWith("/api")) {
-            path = path.substring(4);
+        if (!body) {
+            return errorResponse(
+                "Invalid JSON request",
+                400
+            );
         }
 
-        if (path === "") {
-            path = "/";
-        }
 
-        /* =========================
-           REGISTER
-        ========================= */
+        // ----------------------------
+        // REGISTER
+        // ----------------------------
 
         if (path === "/register") {
 
+            const username = String(
+                body.username || ""
+            ).trim();
+
+            const email = String(
+                body.email || ""
+            ).trim().toLowerCase();
+
+            const password = String(
+                body.password || ""
+            );
+
+            if (!username) {
+                return errorResponse(
+                    "Username is required",
+                    400
+                );
+            }
+
+            if (!email) {
+                return errorResponse(
+                    "Email is required",
+                    400
+                );
+            }
+
+            if (!password) {
+                return errorResponse(
+                    "Password is required",
+                    400
+                );
+            }
+
+            if (password.length < 6) {
+                return errorResponse(
+                    "Password must be at least 6 characters",
+                    400
+                );
+            }
+
+
             try {
-
-                const body = await readJson(request);
-
-                if (!body) {
-                    return errorResponse(
-                        "Invalid JSON request",
-                        400
-                    );
-                }
-
-                const {
-                    username,
-                    email,
-                    password
-                } = body;
-
-                if (
-                    typeof username !== "string" ||
-                    typeof email !== "string" ||
-                    typeof password !== "string"
-                ) {
-                    return errorResponse(
-                        "Username, email and password are required",
-                        400
-                    );
-                }
-
-                const cleanUsername = username.trim();
-                const cleanEmail = email.trim().toLowerCase();
-
-                if (cleanUsername.length < 3) {
-                    return errorResponse(
-                        "Username must be at least 3 characters",
-                        400
-                    );
-                }
-
-                if (password.length < 8) {
-                    return errorResponse(
-                        "Password must be at least 8 characters",
-                        400
-                    );
-                }
 
                 const existingUser = await env.D1
                     .prepare(`
                         SELECT id
                         FROM users
-                        WHERE username = ? OR email = ?
+                        WHERE username = ?
+                        OR email = ?
                         LIMIT 1
                     `)
-                    .bind(
-                        cleanUsername,
-                        cleanEmail
-                    )
+                    .bind(username, email)
                     .first();
 
                 if (existingUser) {
@@ -637,8 +626,10 @@ export async function onRequest(context) {
                     );
                 }
 
+
                 const passwordHash =
                     await hashPassword(password);
+
 
                 const result = await env.D1
                     .prepare(`
@@ -652,19 +643,20 @@ export async function onRequest(context) {
                         VALUES (?, ?, ?, 'reader', 'active')
                     `)
                     .bind(
-                        cleanUsername,
-                        cleanEmail,
+                        username,
+                        email,
                         passwordHash
                     )
                     .run();
 
+
                 return json({
                     success: true,
-                    message: "Account created successfully",
+                    message: "Registration successful",
                     user: {
                         id: result.meta.last_row_id,
-                        username: cleanUsername,
-                        email: cleanEmail,
+                        username,
+                        email,
                         role: "reader",
                         status: "active"
                     }
@@ -673,50 +665,41 @@ export async function onRequest(context) {
             } catch (error) {
 
                 return errorResponse(
-                    "Registration failed: " + error.message,
+                    "Registration failed",
                     500
                 );
             }
         }
 
-        /* =========================
-           LOGIN
-        ========================= */
+
+        // ----------------------------
+        // LOGIN
+        // ----------------------------
 
         if (path === "/login") {
 
-            const body = await readJson(request);
+            const login = String(
+                body.login || ""
+            ).trim();
 
-            if (!body) {
+            const password = String(
+                body.password || ""
+            );
+
+            if (!login) {
                 return errorResponse(
-                    "Invalid JSON request",
+                    "Username or email is required",
                     400
                 );
             }
 
-            let {
-                login,
-                password
-            } = body;
-
-            if (
-                typeof login !== "string" ||
-                typeof password !== "string"
-            ) {
+            if (!password) {
                 return errorResponse(
-                    "Login and password are required",
+                    "Password is required",
                     400
                 );
             }
 
-            login = login.trim();
-
-            if (!login || !password) {
-                return errorResponse(
-                    "Login and password are required",
-                    400
-                );
-            }
 
             try {
 
@@ -728,17 +711,17 @@ export async function onRequest(context) {
                             email,
                             password_hash,
                             role,
-                            status
+                            status,
+                            created_at,
+                            updated_at
                         FROM users
                         WHERE username = ?
                         OR email = ?
                         LIMIT 1
                     `)
-                    .bind(
-                        login,
-                        login.toLowerCase()
-                    )
+                    .bind(login, login.toLowerCase())
                     .first();
+
 
                 if (!user) {
                     return errorResponse(
@@ -747,12 +730,14 @@ export async function onRequest(context) {
                     );
                 }
 
+
                 if (user.status !== "active") {
                     return errorResponse(
-                        "This account is not active",
+                        "Your account is not active",
                         403
                     );
                 }
+
 
                 const validPassword =
                     await verifyPassword(
@@ -760,12 +745,14 @@ export async function onRequest(context) {
                         user.password_hash
                     );
 
+
                 if (!validPassword) {
                     return errorResponse(
                         "Invalid username/email or password",
                         401
                     );
                 }
+
 
                 return json({
                     success: true,
@@ -775,7 +762,9 @@ export async function onRequest(context) {
                         username: user.username,
                         email: user.email,
                         role: user.role,
-                        status: user.status
+                        status: user.status,
+                        created_at: user.created_at,
+                        updated_at: user.updated_at
                     }
                 });
 
@@ -788,11 +777,21 @@ export async function onRequest(context) {
             }
         }
 
+
+        // ----------------------------
+        // POST ENDPOINT NOT FOUND
+        // ----------------------------
+
         return errorResponse(
             "Endpoint not found",
             404
         );
     }
+
+
+    // ================================
+    // METHOD NOT ALLOWED
+    // ================================
 
     return errorResponse(
         "Method not allowed",
