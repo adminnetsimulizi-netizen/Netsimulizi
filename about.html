@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Kuhusu Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button{
+      font:inherit;
+    }
+
+    /* HEADER */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .login-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .register-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    /* SIDE NAV */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* MAIN */
+
+    main{
+      max-width:1000px;
+      margin:0 auto;
+      padding:40px 28px 70px;
+    }
+
+    .hero{
+      text-align:center;
+      padding:35px 20px 45px;
+    }
+
+    .hero-logo{
+      width:100px;
+      height:100px;
+      object-fit:contain;
+      margin-bottom:20px;
+    }
+
+    .hero h1{
+      font-size:38px;
+      margin-bottom:12px;
+    }
+
+    .hero h1 span{
+      color:var(--gold-light);
+    }
+
+    .hero p{
+      max-width:700px;
+      margin:auto;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:15px;
+    }
+
+    /* CARDS */
+
+    .section{
+      margin-top:25px;
+    }
+
+    .section-title{
+      font-size:25px;
+      margin-bottom:15px;
+    }
+
+    .section-title span{
+      color:var(--gold-light);
+    }
+
+    .card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:25px;
+      margin-bottom:18px;
+    }
+
+    .card h2{
+      font-size:20px;
+      margin-bottom:12px;
+    }
+
+    .card p{
+      color:var(--muted);
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    /* FEATURES */
+
+    .features{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+    }
+
+    .feature{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:22px;
+    }
+
+    .feature-icon{
+      font-size:30px;
+      margin-bottom:12px;
+    }
+
+    .feature h3{
+      font-size:16px;
+      margin-bottom:8px;
+    }
+
+    .feature p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    /* AUTHOR */
+
+    .author{
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+
+    .author-avatar{
+      width:75px;
+      height:75px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:25px;
+      font-weight:900;
+      flex-shrink:0;
+    }
+
+    .author-info h3{
+      font-size:20px;
+      margin-bottom:5px;
+    }
+
+    .author-info p{
+      font-size:13px;
+    }
+
+    /* STATS */
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .stat{
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:20px 12px;
+      text-align:center;
+    }
+
+    .stat strong{
+      display:block;
+      color:var(--gold-light);
+      font-size:25px;
+      margin-bottom:5px;
+    }
+
+    .stat span{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    /* LINKS */
+
+    .quick-links{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    .quick-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:16px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:10px;
+      transition:.2s;
+    }
+
+    .quick-link:hover{
+      border-color:var(--gold);
+      transform:translateY(-1px);
+    }
+
+    .quick-link span:first-child{
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .arrow{
+      color:var(--gold-light);
+      font-size:20px;
+    }
+
+    /* FOOTER */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* MOBILE */
+
+    @media(max-width:750px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      .features{
+        grid-template-columns:1fr;
+      }
+
+      .stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .quick-links{
+        grid-template-columns:1fr;
+      }
+
+      main{
+        padding:25px 15px 55px;
+      }
+
+      .hero{
+        padding:25px 10px 35px;
+      }
+
+      .hero h1{
+        font-size:30px;
+      }
+
+      .author{
+        align-items:flex-start;
+      }
+
+    }
+
+    @media(max-width:480px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+      .header-right .register-btn{
+        padding:8px 11px;
+        font-size:12px;
+      }
+
+      .hero-logo{
+        width:80px;
+        height:80px;
+      }
+
+      .card{
+        padding:19px;
+      }
+
+      .stats strong{
+        font-size:21px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="notifications.html">
+          <span class="nav-icon">🔔</span>
+          <span>Notifications</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="settings.html">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="about.html" class="active">
+          <span class="nav-icon">ℹ️</span>
+          <span>Kuhusu Net Simulizi</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="hero-logo"
+      >
+
+      <h1>
+        Kuhusu <span>Net Simulizi</span>
+      </h1>
+
+      <p>
+        Net Simulizi ni jukwaa la kusoma na kugundua
+        hadithi mbalimbali kwa Kiswahili na English.
+        Tunawaleta pamoja wasomaji na waandishi katika
+        sehemu moja yenye hadithi za aina mbalimbali.
+      </p>
+
+    </section>
+
+    <!-- ABOUT -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Sisi ni <span>nani?</span>
+      </h2>
+
+      <div class="card">
+
+        <h2>
+          Net Simulizi
+        </h2>
+
+        <p>
+          Net Simulizi inalenga kujenga mazingira bora
+          kwa waandishi wa hadithi na wasomaji.
+          Wasomaji wanaweza kugundua hadithi mpya,
+          kuhifadhi hadithi wanazozipenda na kuendelea
+          kusoma walipoishia.
+        </p>
+
+        <br>
+
+        <p>
+          Waandishi wanaweza kuchapisha kazi zao kupitia
+          mfumo wa Net Simulizi baada ya kupitia mchakato
+          wa uthibitishaji na idhini.
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- FEATURES -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Tunachokupa
+      </h2>
+
+      <div class="features">
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            📚
+          </div>
+
+          <h3>
+            Hadithi mbalimbali
+          </h3>
+
+          <p>
+            Gundua hadithi za mapenzi, drama, fantasy,
+            mystery, action, horror na aina nyingine.
+          </p>
+
+        </div>
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            🔖
+          </div>
+
+          <h3>
+            Maktaba yako
+          </h3>
+
+          <p>
+            Hifadhi hadithi unazozipenda ili uweze
+            kuzirudia wakati wowote.
+          </p>
+
+        </div>
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            📖
+          </div>
+
+          <h3>
+            Endelea kusoma
+          </h3>
+
+          <p>
+            Mfumo unakusaidia kuendelea kusoma kutoka
+            sehemu uliyofikia.
+          </p>
+
+        </div>
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            🌍
+          </div>
+
+          <h3>
+            Lugha mbili
+          </h3>
+
+          <p>
+            Chagua Kiswahili au English kulingana na
+            lugha unayopendelea kutumia.
+          </p>
+
+        </div>
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            ✍️
+          </div>
+
+          <h3>
+            Waandishi
+          </h3>
+
+          <p>
+            Tunatoa nafasi kwa waandishi kuwasilisha
+            kazi zao kwa wasomaji.
+          </p>
+
+        </div>
+
+        <div class="feature">
+
+          <div class="feature-icon">
+            🔐
+          </div>
+
+          <h3>
+            Ulinzi wa kazi
+          </h3>
+
+          <p>
+            Tunajenga vipengele vya kusaidia kulinda
+            kazi za waandishi dhidi ya matumizi yasiyoruhusiwa.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- AUTHOR -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Mwanzilishi / Mwandishi
+      </h2>
+
+      <div class="card">
+
+        <div class="author">
+
+          <div class="author-avatar">
+            HM
+          </div>
+
+          <div class="author-info">
+
+            <h3>
+              HASSAN MAMBOSASA
+            </h3>
+
+            <p>
+              Mwandishi na mwanzilishi wa Net Simulizi.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- STATS -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Net Simulizi kwa <span>ufupi</span>
+      </h2>
+
+      <div class="stats">
+
+        <div class="stat">
+          <strong>2</strong>
+          <span>Lugha</span>
+        </div>
+
+        <div class="stat">
+          <strong>∞</strong>
+          <span>Hadithi</span>
+        </div>
+
+        <div class="stat">
+          <strong>24/7</strong>
+          <span>Kusoma</span>
+        </div>
+
+        <div class="stat">
+          <strong>🌍</strong>
+          <span>Kwa wasomaji</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- QUICK LINKS -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Tembelea
+      </h2>
+
+      <div class="quick-links">
+
+        <a
+          href="discover.html"
+          class="quick-link"
+        >
+
+          <span>
+            Gundua Hadithi
+          </span>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+        <a
+          href="categories.html"
+          class="quick-link"
+        >
+
+          <span>
+            Angalia Categories
+          </span>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+        <a
+          href="trending.html"
+          class="quick-link"
+        >
+
+          <span>
+            Hadithi Zinazovuma
+          </span>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+        <a
+          href="search.html"
+          class="quick-link"
+        >
+
+          <span>
+            Tafuta Hadithi
+          </span>
+
+          <span class="arrow">
+            →
+          </span>
+
+        </a>
+
+      </div>
+
+    </section>
+
+    <!-- CONTACT / INFO -->
+
+    <section class="section">
+
+      <h2 class="section-title">
+        Dira yetu
+      </h2>
+
+      <div class="card">
+
+        <p>
+          Dira ya Net Simulizi ni kuwa jukwaa linalosaidia
+          kukuza utamaduni wa kusoma na kuandika hadithi,
+          huku likiwapa waandishi nafasi ya kufikia
+          wasomaji wengi zaidi.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    /* USER */
+
+    function getUser(){
+
+      try{
+
+        return JSON.parse(
+          localStorage.getItem(
+            "netsimulizi_user"
+          )
+        );
+
+      }catch(error){
+
+        return null;
+
+      }
+
+    }
+
+    function loadUser(){
+
+      const user =
+        getUser();
+
+      const guestButtons =
+        document.getElementById(
+          "guestButtons"
+        );
+
+      const userBox =
+        document.getElementById(
+          "userBox"
+        );
+
+      const userName =
+        document.getElementById(
+          "userName"
+        );
+
+      const userAvatar =
+        document.getElementById(
+          "userAvatar"
+        );
+
+      if(user){
+
+        guestButtons.style.display =
+          "none";
+
+        userBox.style.display =
+          "flex";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent =
+          name;
+
+        userAvatar.textContent =
+          name
+            .charAt(0)
+            .toUpperCase();
+
+      }else{
+
+        guestButtons.style.display =
+          "block";
+
+        userBox.style.display =
+          "none";
+
+      }
+
+    }
+
+    /* MENU */
+
+    const menuBtn =
+      document.getElementById(
+        "menuBtn"
+      );
+
+    const closeNav =
+      document.getElementById(
+        "closeNav"
+      );
+
+    const sideNav =
+      document.getElementById(
+        "sideNav"
+      );
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+    function openMenu(){
+
+      sideNav.classList.add(
+        "open"
+      );
+
+      overlay.classList.add(
+        "show"
+      );
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove(
+        "open"
+      );
+
+      overlay.classList.remove(
+        "show"
+      );
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(
+        ".nav-list a"
+      )
+      .forEach(
+        link => {
+
+          link.addEventListener(
+            "click",
+            closeMenu
+          );
+
+        }
+      );
+
+    /* START */
+
+    loadUser();
+
+  </script>
+
+</body>
+</html>
