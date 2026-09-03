@@ -1,1 +1,955 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Authors — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="hero"><h1>Authors</h1><p class="muted">Author applications and management.</p></section><section class="card"><p>Data will load from the shared PHP API and MariaDB.</p></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script></script></body></html>
+```html
+<!doctype html>
+<html lang="sw">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Authors — Net Simulizi</title>
+
+<style>
+
+*{
+  box-sizing:border-box
+}
+
+body{
+  margin:0;
+  background:#f6f0e5;
+  color:#191713;
+  font-family:Arial,sans-serif;
+  transition:.2s
+}
+
+body.dark{
+  background:#111;
+  color:#eee
+}
+
+.top{
+  background:#171512;
+  color:#fff;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:50
+}
+
+.logo{
+  color:#d4aa43;
+  font-weight:900;
+  letter-spacing:2px;
+  text-decoration:none
+}
+
+.btn{
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #d4aa43;
+  background:transparent;
+  color:inherit;
+  cursor:pointer
+}
+
+.primary{
+  background:#d4aa43;
+  color:#171512;
+  border:0;
+  font-weight:700
+}
+
+.wrap{
+  max-width:1100px;
+  margin:auto;
+  padding:20px
+}
+
+.card,
+.hero{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:20px
+}
+
+.dark .card,
+.dark .hero{
+  background:#1d1b18;
+  border-color:#38342d
+}
+
+.hero{
+  text-align:center;
+  padding:35px 22px
+}
+
+.hero h1{
+  margin:0 0 10px;
+  font-size:32px
+}
+
+.muted{
+  color:#777
+}
+
+.dark .muted{
+  color:#aaa
+}
+
+
+/* SEARCH */
+
+.search-box{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px
+}
+
+.search-box input{
+  flex:1;
+  padding:13px;
+  border:1px solid #ddd;
+  border-radius:9px;
+  background:transparent;
+  color:inherit;
+  outline:none
+}
+
+.dark .search-box input{
+  border-color:#444
+}
+
+.search-box input:focus{
+  border-color:#d4aa43
+}
+
+
+/* AUTHORS GRID */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px
+}
+
+.author-card{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:14px;
+  padding:18px;
+  text-align:center;
+  transition:.2s
+}
+
+.dark .author-card{
+  background:#1d1b18;
+  border-color:#38342d
+}
+
+.author-card:hover{
+  transform:translateY(-3px);
+  border-color:#d4aa43
+}
+
+.avatar{
+  width:75px;
+  height:75px;
+  border-radius:50%;
+  margin:0 auto 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(145deg,#211d17,#a47b28);
+  color:#fff;
+  font-size:27px;
+  font-weight:900
+}
+
+.author-name{
+  font-size:17px;
+  font-weight:800;
+  margin-bottom:7px
+}
+
+.author-role{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  background:#f2e6c9;
+  color:#80601b;
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:10px
+}
+
+.dark .author-role{
+  background:#342b1d;
+  color:#d4aa43
+}
+
+.author-bio{
+  color:#777;
+  font-size:13px;
+  line-height:1.5;
+  min-height:40px
+}
+
+.dark .author-bio{
+  color:#aaa
+}
+
+.author-stats{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin:14px 0;
+  padding-top:12px;
+  border-top:1px solid #eee;
+  font-size:12px
+}
+
+.dark .author-stats{
+  border-color:#38342d
+}
+
+.stat strong{
+  display:block;
+  color:#a17a21;
+  font-size:16px
+}
+
+.dark .stat strong{
+  color:#d4aa43
+}
+
+.view-btn{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #d4aa43;
+  background:transparent;
+  color:inherit;
+  cursor:pointer
+}
+
+
+/* LOADING */
+
+.loading{
+  text-align:center;
+  padding:35px;
+  color:#777
+}
+
+.dark .loading{
+  color:#aaa
+}
+
+.spinner{
+  width:32px;
+  height:32px;
+  border:3px solid #ddd;
+  border-top-color:#d4aa43;
+  border-radius:50%;
+  margin:0 auto 12px;
+  animation:spin .8s linear infinite
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg)
+  }
+}
+
+
+/* EMPTY */
+
+.empty{
+  text-align:center;
+  padding:35px;
+  color:#777;
+  display:none
+}
+
+.dark .empty{
+  color:#aaa
+}
+
+
+/* ERROR */
+
+.error{
+  display:none;
+  padding:15px;
+  border-radius:9px;
+  background:#ffe7e7;
+  border:1px solid #e2aaaa;
+  color:#9b2222;
+  margin-bottom:20px
+}
+
+.dark .error{
+  background:#351b1b;
+  border-color:#653333;
+  color:#ffaaaa
+}
+
+
+/* FOOTER */
+
+.footer{
+  background:#171512;
+  color:#aaa;
+  text-align:center;
+  padding:30px;
+  margin-top:30px
+}
+
+.footer p{
+  margin:8px 0
+}
+
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+  .grid{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+}
+
+@media(max-width:700px){
+
+  .grid{
+    grid-template-columns:repeat(2,1fr)
+  }
+
+  .wrap{
+    padding:15px
+  }
+
+  .hero h1{
+    font-size:26px
+  }
+
+  .search-box{
+    flex-direction:column
+  }
+
+}
+
+@media(max-width:430px){
+
+  .grid{
+    grid-template-columns:1fr
+  }
+
+  .top{
+    padding:13px
+  }
+
+  .top .btn{
+    padding:8px 10px
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header class="top">
+
+  <a class="logo" href="index.html">
+    NET SIMULIZI
+  </a>
+
+  <div>
+
+    <button
+      class="btn"
+      id="darkBtn"
+      type="button"
+    >
+      ◐
+    </button>
+
+    <button
+      class="btn"
+      type="button"
+      onclick="location.href='index.html'"
+    >
+      Home
+    </button>
+
+  </div>
+
+</header>
+
+
+<!-- MAIN -->
+
+<main class="wrap">
+
+
+  <!-- HERO -->
+
+  <section class="hero">
+
+    <h1>Authors</h1>
+
+    <p class="muted">
+      Kutana na waandishi wanaochapisha hadithi
+      zao kupitia Net Simulizi.
+    </p>
+
+  </section>
+
+
+  <!-- SEARCH -->
+
+  <section class="card">
+
+    <div class="search-box">
+
+      <input
+        type="search"
+        id="authorSearch"
+        placeholder="Tafuta mwandishi..."
+      >
+
+      <button
+        class="btn primary"
+        id="searchBtn"
+        type="button"
+      >
+        Tafuta
+      </button>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div
+      id="errorBox"
+      class="error"
+    ></div>
+
+
+    <!-- LOADING -->
+
+    <div
+      id="loading"
+      class="loading"
+    >
+
+      <div class="spinner"></div>
+
+      Inapakia waandishi...
+
+    </div>
+
+
+    <!-- EMPTY -->
+
+    <div
+      id="empty"
+      class="empty"
+    >
+
+      <h3>Hakuna waandishi</h3>
+
+      <p>
+        Kwa sasa hakuna waandishi waliowekwa kwenye mfumo.
+      </p>
+
+    </div>
+
+
+    <!-- AUTHORS -->
+
+    <div
+      id="authorsGrid"
+      class="grid"
+    ></div>
+
+  </section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+  <b class="logo">
+    NET SIMULIZI
+  </b>
+
+  <p>
+    Digital Storytelling Platform
+  </p>
+
+  <p>
+    © 2026 Net Simulizi
+  </p>
+
+</footer>
+
+
+<script>
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+const darkBtn =
+  document.getElementById("darkBtn");
+
+
+if(
+  localStorage.getItem("netsimulizi_dark") === "1"
+){
+
+  document.body.classList.add("dark");
+
+}
+
+
+darkBtn.addEventListener("click",function(){
+
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem(
+    "netsimulizi_dark",
+    document.body.classList.contains("dark")
+      ? "1"
+      : "0"
+  );
+
+});
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const grid =
+  document.getElementById("authorsGrid");
+
+const loading =
+  document.getElementById("loading");
+
+const empty =
+  document.getElementById("empty");
+
+const errorBox =
+  document.getElementById("errorBox");
+
+const searchInput =
+  document.getElementById("authorSearch");
+
+const searchBtn =
+  document.getElementById("searchBtn");
+
+
+let allAuthors = [];
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   AUTHOR INITIAL
+========================= */
+
+function getInitial(name){
+
+  if(!name){
+    return "A";
+  }
+
+  return String(name)
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+
+}
+
+
+/* =========================
+   AUTHOR CARD
+========================= */
+
+function authorCard(author){
+
+  const id =
+    author.id ||
+    author.user_id ||
+    author.author_id ||
+    "";
+
+  const name =
+    author.name ||
+    author.username ||
+    author.display_name ||
+    "Unknown Author";
+
+  const bio =
+    author.bio ||
+    author.description ||
+    "Mwandishi wa Net Simulizi.";
+
+  const stories =
+    author.story_count ??
+    author.stories_count ??
+    0;
+
+  const followers =
+    author.followers ??
+    author.followers_count ??
+    0;
+
+  return `
+
+    <article class="author-card">
+
+      <div class="avatar">
+        ${escapeHTML(getInitial(name))}
+      </div>
+
+      <div class="author-name">
+        ${escapeHTML(name)}
+      </div>
+
+      <div class="author-role">
+        AUTHOR
+      </div>
+
+      <div class="author-bio">
+        ${escapeHTML(bio)}
+      </div>
+
+      <div class="author-stats">
+
+        <div class="stat">
+
+          <strong>
+            ${escapeHTML(stories)}
+          </strong>
+
+          Hadithi
+
+        </div>
+
+        <div class="stat">
+
+          <strong>
+            ${escapeHTML(followers)}
+          </strong>
+
+          Followers
+
+        </div>
+
+      </div>
+
+      <button
+        class="view-btn"
+        type="button"
+        onclick="openAuthor('${escapeHTML(id)}')"
+      >
+        Tazama Mwandishi
+      </button>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderAuthors(authors){
+
+  grid.innerHTML = "";
+
+  loading.style.display = "none";
+
+  errorBox.style.display = "none";
+
+
+  if(!authors || !authors.length){
+
+    empty.style.display = "block";
+
+    return;
+
+  }
+
+
+  empty.style.display = "none";
+
+
+  grid.innerHTML =
+    authors
+      .map(authorCard)
+      .join("");
+
+}
+
+
+/* =========================
+   LOAD AUTHORS
+========================= */
+
+async function loadAuthors(){
+
+  loading.style.display = "block";
+
+  empty.style.display = "none";
+
+  errorBox.style.display = "none";
+
+  grid.innerHTML = "";
+
+
+  try{
+
+    /*
+     * Endpoint ya authors.
+     *
+     * Ikiwa endpoint bado haijaongezwa
+     * backend, tutaendelea bila kuvunja page.
+     */
+
+    const response =
+      await fetch("/api/authors");
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Authors API haijapatikana bado."
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    /*
+     * Kubali formats mbalimbali za API.
+     */
+
+    if(Array.isArray(data)){
+
+      allAuthors = data;
+
+    }else if(Array.isArray(data.authors)){
+
+      allAuthors = data.authors;
+
+    }else if(Array.isArray(data.data)){
+
+      allAuthors = data.data;
+
+    }else{
+
+      allAuthors = [];
+
+    }
+
+
+    renderAuthors(allAuthors);
+
+
+  }catch(error){
+
+    console.error(
+      "Authors error:",
+      error
+    );
+
+    loading.style.display = "none";
+
+
+    /*
+     * Kwa sasa backend inaweza kuwa bado
+     * haijawa na /api/authors.
+     *
+     * Hatuonyeshi error kubwa kwa user.
+     */
+
+    empty.style.display = "block";
+
+    empty.innerHTML = `
+
+      <h3>Authors</h3>
+
+      <p>
+        Orodha ya waandishi itaonekana hapa
+        baada ya data ya waandishi kuunganishwa
+        kwenye mfumo.
+      </p>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================
+   SEARCH AUTHORS
+========================= */
+
+function searchAuthors(){
+
+  const keyword =
+    searchInput.value
+      .trim()
+      .toLowerCase();
+
+
+  if(!keyword){
+
+    renderAuthors(allAuthors);
+
+    return;
+
+  }
+
+
+  const filtered =
+    allAuthors.filter(author => {
+
+      const name =
+        String(
+          author.name ||
+          author.username ||
+          author.display_name ||
+          ""
+        ).toLowerCase();
+
+      const bio =
+        String(
+          author.bio ||
+          author.description ||
+          ""
+        ).toLowerCase();
+
+      return (
+        name.includes(keyword) ||
+        bio.includes(keyword)
+      );
+
+    });
+
+
+  renderAuthors(filtered);
+
+}
+
+
+searchBtn.addEventListener(
+  "click",
+  searchAuthors
+);
+
+
+searchInput.addEventListener(
+  "input",
+  searchAuthors
+);
+
+
+searchInput.addEventListener(
+  "keydown",
+  function(event){
+
+    if(event.key === "Enter"){
+
+      event.preventDefault();
+
+      searchAuthors();
+
+    }
+
+  }
+);
+
+
+/* =========================
+   OPEN AUTHOR
+========================= */
+
+function openAuthor(id){
+
+  if(!id){
+
+    return;
+
+  }
+
+
+  /*
+   * Ukurasa wa author profile
+   * unaweza kutumika baadaye.
+   */
+
+  window.location.href =
+    "author-profile.html?id=" +
+    encodeURIComponent(id);
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadAuthors();
+
+
+</script>
+
+</body>
+
+</html>
+```
