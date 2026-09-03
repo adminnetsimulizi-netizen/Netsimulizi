@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Privacy Policy - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      line-height:1.7;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button{
+      font:inherit;
+    }
+
+    /* HEADER */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    /* SIDE NAV */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* MAIN */
+
+    main{
+      max-width:900px;
+      margin:0 auto;
+      padding:40px 28px 70px;
+    }
+
+    .page-title{
+      text-align:center;
+      margin-bottom:35px;
+    }
+
+    .page-title h1{
+      font-size:34px;
+      margin-bottom:8px;
+    }
+
+    .page-title h1 span{
+      color:var(--gold-light);
+    }
+
+    .page-title p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    /* POLICY */
+
+    .policy{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:30px;
+    }
+
+    .updated{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:25px;
+      padding-bottom:18px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .policy-section{
+      margin-bottom:30px;
+    }
+
+    .policy-section:last-child{
+      margin-bottom:0;
+    }
+
+    .policy-section h2{
+      color:var(--gold-light);
+      font-size:20px;
+      margin-bottom:10px;
+    }
+
+    .policy-section p{
+      color:var(--muted);
+      font-size:14px;
+      margin-bottom:10px;
+    }
+
+    .policy-section ul{
+      padding-left:22px;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .policy-section li{
+      margin-bottom:7px;
+    }
+
+    .highlight{
+      background:var(--surface-2);
+      border-left:3px solid var(--gold);
+      border-radius:7px;
+      padding:15px 17px;
+      margin-top:12px;
+    }
+
+    .highlight p{
+      margin:0;
+    }
+
+    /* FOOTER */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* MOBILE */
+
+    @media(max-width:700px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      main{
+        padding:28px 14px 55px;
+      }
+
+      .page-title h1{
+        font-size:29px;
+      }
+
+      .policy{
+        padding:20px;
+      }
+
+      .policy-section h2{
+        font-size:18px;
+      }
+
+    }
+
+    @media(max-width:480px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+      .register-btn{
+        padding:8px 11px;
+        font-size:12px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="notifications.html">
+          <span class="nav-icon">🔔</span>
+          <span>Notifications</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="settings.html">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="about.html">
+          <span class="nav-icon">ℹ️</span>
+          <span>Kuhusu Net Simulizi</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="contact.html">
+          <span class="nav-icon">✉️</span>
+          <span>Wasiliana Nasi</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="privacy.html" class="active">
+          <span class="nav-icon">🔐</span>
+          <span>Privacy Policy</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <section class="page-title">
+
+      <h1>
+        Privacy <span>Policy</span>
+      </h1>
+
+      <p>
+        Sera ya faragha ya Net Simulizi
+      </p>
+
+    </section>
+
+    <article class="policy">
+
+      <div class="updated">
+        Toleo la sasa: 3 Septemba 2026
+      </div>
+
+      <section class="policy-section">
+
+        <h2>
+          1. Utangulizi
+        </h2>
+
+        <p>
+          Net Simulizi inaheshimu faragha ya watumiaji
+          wake. Sera hii inaeleza kwa ujumla aina ya
+          taarifa zinazoweza kukusanywa wakati wa kutumia
+          huduma zetu na namna taarifa hizo zinavyoweza
+          kutumika.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          2. Taarifa tunazokusanya
+        </h2>
+
+        <p>
+          Wakati wa kutumia baadhi ya huduma za Net Simulizi,
+          tunaweza kushughulikia taarifa zinazohitajika
+          kuendesha akaunti na huduma.
+        </p>
+
+        <ul>
+
+          <li>
+            Jina la mtumiaji (username).
+          </li>
+
+          <li>
+            Barua pepe inayohusishwa na akaunti.
+          </li>
+
+          <li>
+            Taarifa zinazohusiana na matumizi ya huduma.
+          </li>
+
+          <li>
+            Historia ya kusoma na maendeleo ya kusoma
+            pale kipengele hicho kinapotumika.
+          </li>
+
+          <li>
+            Hadithi zilizohifadhiwa kwenye Maktaba Yangu.
+          </li>
+
+        </ul>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          3. Jinsi tunavyotumia taarifa
+        </h2>
+
+        <p>
+          Taarifa zinaweza kutumika kwa madhumuni ya
+          kuendesha na kuboresha huduma ya Net Simulizi,
+          ikiwa ni pamoja na:
+        </p>
+
+        <ul>
+
+          <li>
+            Kusimamia akaunti ya mtumiaji.
+          </li>
+
+          <li>
+            Kuhifadhi maendeleo ya kusoma.
+          </li>
+
+          <li>
+            Kuonyesha Maktaba na Historia ya Kusoma.
+          </li>
+
+          <li>
+            Kuboresha utendaji na uzoefu wa mtumiaji.
+          </li>
+
+          <li>
+            Kusaidia usalama wa akaunti na mfumo.
+          </li>
+
+        </ul>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          4. Taarifa za waandishi
+        </h2>
+
+        <p>
+          Waandishi wanaotumia mfumo wanaweza kutoa
+          taarifa zinazohitajika kwa ajili ya usimamizi
+          wa akaunti ya mwandishi, uchapishaji wa kazi,
+          malipo na shughuli nyingine zinazohusiana
+          na huduma ya waandishi.
+        </p>
+
+        <div class="highlight">
+
+          <p>
+            Kazi zinazowasilishwa na waandishi zinapaswa
+            kuwa na haki halali za kuchapishwa na mwandishi
+            au mhusika mwenye haki hizo.
+          </p>
+
+        </div>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          5. Usalama
+        </h2>
+
+        <p>
+          Tunachukua hatua zinazofaa kusaidia kulinda
+          taarifa za akaunti na huduma dhidi ya matumizi
+          yasiyoruhusiwa. Hata hivyo, hakuna mfumo wa
+          mtandao unaoweza kuhakikishiwa kuwa salama kwa
+          asilimia mia moja.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          6. Cookies na teknolojia za kuhifadhi taarifa
+        </h2>
+
+        <p>
+          Net Simulizi inaweza kutumia teknolojia za
+          kuhifadhi taarifa kwenye kifaa, kama vile
+          local storage, kwa ajili ya vipengele kama
+          mipangilio ya kusoma, lugha, akaunti ya ndani
+          ya kifaa na mapendeleo ya mtumiaji.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          7. Historia ya kusoma
+        </h2>
+
+        <p>
+          Mtumiaji anaweza kutumia kipengele cha Historia
+          ya Kusoma ili kuona hadithi au sura alizosoma.
+          Mipangilio ya faragha inaweza kutumika kudhibiti
+          baadhi ya vipengele vya historia pale vinapopatikana.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          8. Kushirikisha taarifa
+        </h2>
+
+        <p>
+          Taarifa za watumiaji hazipaswi kushirikishwa
+          kiholela. Pale ambapo ushirikishaji wa taarifa
+          utahitajika kwa ajili ya kutoa huduma, usalama,
+          utekelezaji wa sheria au wajibu mwingine halali,
+          taarifa husika zinaweza kushughulikiwa kwa mujibu
+          wa sheria zinazotumika.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          9. Haki za mtumiaji
+        </h2>
+
+        <p>
+          Mtumiaji anaweza kuomba maelezo kuhusu taarifa
+          zinazohusiana na akaunti yake na, pale inapowezekana,
+          kuomba kusahihisha au kufuta taarifa hizo kulingana
+          na sheria na mahitaji ya huduma.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          10. Watoto
+        </h2>
+
+        <p>
+          Huduma inapaswa kutumiwa kwa kuzingatia umri
+          unaoruhusiwa na sheria za eneo husika. Maudhui
+          yenye vikwazo vya umri yanapaswa kushughulikiwa
+          kwa mujibu wa sheria na sera za Net Simulizi.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          11. Mabadiliko ya sera
+        </h2>
+
+        <p>
+          Net Simulizi inaweza kusasisha sera hii wakati
+          huduma, teknolojia au mahitaji ya kisheria
+          yanapobadilika. Toleo jipya litaonyeshwa kwenye
+          ukurasa huu.
+        </p>
+
+      </section>
+
+      <section class="policy-section">
+
+        <h2>
+          12. Wasiliana nasi
+        </h2>
+
+        <p>
+          Kwa maswali kuhusu faragha au matumizi ya taarifa
+          zako, tembelea ukurasa wa Wasiliana Nasi.
+        </p>
+
+        <p>
+          <a
+            href="contact.html"
+            style="color:var(--gold-light);font-weight:700;"
+          >
+            → Wasiliana Nasi
+          </a>
+        </p>
+
+      </section>
+
+    </article>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    /* USER */
+
+    function getUser(){
+
+      try{
+
+        return JSON.parse(
+          localStorage.getItem(
+            "netsimulizi_user"
+          )
+        );
+
+      }catch(error){
+
+        return null;
+
+      }
+
+    }
+
+    function loadUser(){
+
+      const user =
+        getUser();
+
+      const guestButtons =
+        document.getElementById(
+          "guestButtons"
+        );
+
+      const userBox =
+        document.getElementById(
+          "userBox"
+        );
+
+      const userName =
+        document.getElementById(
+          "userName"
+        );
+
+      const userAvatar =
+        document.getElementById(
+          "userAvatar"
+        );
+
+      if(user){
+
+        guestButtons.style.display =
+          "none";
+
+        userBox.style.display =
+          "flex";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent =
+          name;
+
+        userAvatar.textContent =
+          name
+            .charAt(0)
+            .toUpperCase();
+
+      }else{
+
+        guestButtons.style.display =
+          "flex";
+
+        userBox.style.display =
+          "none";
+
+      }
+
+    }
+
+    /* MENU */
+
+    const menuBtn =
+      document.getElementById(
+        "menuBtn"
+      );
+
+    const closeNav =
+      document.getElementById(
+        "closeNav"
+      );
+
+    const sideNav =
+      document.getElementById(
+        "sideNav"
+      );
+
+    const overlay =
+      document.getElementById(
+        "overlay"
+      );
+
+    function openMenu(){
+
+      sideNav.classList.add(
+        "open"
+      );
+
+      overlay.classList.add(
+        "show"
+      );
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove(
+        "open"
+      );
+
+      overlay.classList.remove(
+        "show"
+      );
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(
+        ".nav-list a"
+      )
+      .forEach(
+        link => {
+
+          link.addEventListener(
+            "click",
+            closeMenu
+          );
+
+        }
+      );
+
+    /* START */
+
+    loadUser();
+
+  </script>
+
+</body>
+</html>
