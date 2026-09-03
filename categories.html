@@ -1,0 +1,2663 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Categories - Net Simulizi</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0
+}
+
+:root{
+--bg:#090b10;
+--surface:#11141b;
+--surface-2:#171b24;
+--gold:#e5a51c;
+--gold-light:#f2bd3d;
+--text:#fff;
+--muted:#a8afbd;
+--border:rgba(255,255,255,.09)
+}
+
+html{
+scroll-behavior:smooth
+}
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text);
+line-height:1.5;
+min-height:100vh
+}
+
+button,
+input,
+select{
+font:inherit
+}
+
+button,
+a{
+-webkit-tap-highlight-color:transparent
+}
+
+a{
+text-decoration:none;
+color:inherit
+}
+
+/* HEADER */
+
+header{
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(9,11,16,.96);
+backdrop-filter:blur(12px);
+border-bottom:1px solid var(--border)
+}
+
+.header-inner{
+max-width:1280px;
+min-height:72px;
+margin:auto;
+padding:10px 20px;
+display:flex;
+align-items:center;
+gap:18px
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+min-width:220px
+}
+
+.brand-logo{
+width:46px;
+height:46px;
+object-fit:contain;
+border-radius:10px;
+flex-shrink:0
+}
+
+.brand-name{
+font-size:21px;
+font-weight:900
+}
+
+.brand-name span{
+color:var(--gold)
+}
+
+.main-nav{
+display:flex;
+align-items:center;
+gap:20px;
+flex:1
+}
+
+.main-nav a{
+color:#d9dde6;
+font-size:14px;
+font-weight:700
+}
+
+.main-nav a:hover{
+color:var(--gold)
+}
+
+.search{
+position:relative;
+width:210px
+}
+
+.search input{
+width:100%;
+height:40px;
+padding:0 14px 0 38px;
+border-radius:22px;
+border:1px solid var(--border);
+outline:none;
+background:var(--surface);
+color:white
+}
+
+.search-icon{
+position:absolute;
+left:14px;
+top:9px;
+color:#8f96a5;
+font-size:18px
+}
+
+.auth-buttons{
+display:flex;
+align-items:center;
+gap:8px
+}
+
+.btn{
+border:0;
+border-radius:8px;
+padding:10px 15px;
+cursor:pointer;
+font-weight:800;
+transition:.2s
+}
+
+.login-btn{
+background:transparent;
+color:white;
+border:1px solid var(--border)
+}
+
+.login-btn:hover{
+color:var(--gold);
+border-color:var(--gold)
+}
+
+.register-btn{
+background:var(--gold);
+color:#111
+}
+
+.register-btn:hover{
+background:var(--gold-light)
+}
+
+.language-select{
+height:40px;
+padding:0 8px;
+border-radius:8px;
+border:1px solid var(--border);
+background:var(--surface);
+color:white;
+cursor:pointer
+}
+
+.mobile-menu{
+display:none;
+border:0;
+background:transparent;
+color:white;
+font-size:25px;
+cursor:pointer
+}
+
+/* USER */
+
+.user-menu{
+display:none;
+position:relative
+}
+
+.user-menu.active{
+display:block
+}
+
+.user-button{
+display:flex;
+align-items:center;
+gap:9px;
+border:1px solid var(--border);
+background:var(--surface);
+color:white;
+border-radius:10px;
+padding:7px 10px;
+cursor:pointer
+}
+
+.user-avatar{
+width:32px;
+height:32px;
+border-radius:50%;
+background:var(--gold);
+color:#111;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900
+}
+
+.user-info{
+display:flex;
+flex-direction:column;
+align-items:flex-start;
+line-height:1.1
+}
+
+.user-info strong{
+font-size:13px
+}
+
+.user-info small{
+font-size:10px;
+color:var(--muted)
+}
+
+.user-dropdown{
+display:none;
+position:absolute;
+right:0;
+top:52px;
+width:230px;
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:12px;
+padding:10px;
+box-shadow:0 15px 40px rgba(0,0,0,.4);
+z-index:3000
+}
+
+.user-dropdown.active{
+display:block
+}
+
+.dropdown-user{
+padding:12px;
+border-bottom:1px solid var(--border);
+margin-bottom:7px
+}
+
+.dropdown-user strong{
+display:block;
+font-size:15px;
+margin-bottom:3px
+}
+
+.dropdown-user span{
+display:block;
+color:var(--muted);
+font-size:12px;
+word-break:break-word
+}
+
+.dropdown-link{
+display:block;
+width:100%;
+padding:10px;
+border-radius:7px;
+color:#ddd;
+background:transparent;
+border:0;
+text-align:left;
+cursor:pointer
+}
+
+.dropdown-link:hover{
+background:var(--surface-2);
+color:var(--gold)
+}
+
+.logout-link{
+color:#ffb0b0
+}
+
+/* SIDE NAV */
+
+.side-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.65);
+z-index:1998
+}
+
+.side-overlay.active{
+display:block
+}
+
+.side-nav{
+position:fixed;
+top:0;
+left:-310px;
+width:290px;
+height:100vh;
+z-index:1999;
+background:#0d1016;
+border-right:1px solid var(--border);
+padding:20px;
+transition:.25s;
+overflow-y:auto
+}
+
+.side-nav.active{
+left:0
+}
+
+.side-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:25px
+}
+
+.side-head .brand{
+min-width:0
+}
+
+.side-close{
+background:none;
+border:0;
+color:#fff;
+font-size:28px;
+cursor:pointer
+}
+
+.side-title{
+font-size:12px;
+color:var(--muted);
+font-weight:800;
+text-transform:uppercase;
+letter-spacing:1.2px;
+margin:18px 0 10px
+}
+
+.side-link{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px 10px;
+border-radius:8px;
+color:#dce0e8;
+font-weight:700
+}
+
+.side-link:hover{
+background:var(--surface-2);
+color:var(--gold)
+}
+
+.side-auth{
+display:grid;
+gap:9px;
+margin-top:10px
+}
+
+.side-auth button{
+width:100%
+}
+
+.mobile-user{
+display:none
+}
+
+.mobile-user.active{
+display:block
+}
+
+.mobile-user-card{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:10px;
+padding:13px;
+margin-bottom:12px
+}
+
+.mobile-user-name{
+font-weight:900;
+font-size:15px
+}
+
+.mobile-user-email{
+font-size:12px;
+color:var(--muted);
+word-break:break-word;
+margin-top:3px
+}
+
+/* PAGE HEADER */
+
+.page-header{
+background:
+radial-gradient(
+circle at 80% 30%,
+rgba(229,165,28,.13),
+transparent 30%
+),
+linear-gradient(120deg,#090b10,#12151d);
+padding:70px 20px 55px;
+border-bottom:1px solid var(--border)
+}
+
+.page-header-inner{
+max-width:1280px;
+margin:auto
+}
+
+.page-label{
+color:var(--gold);
+font-size:13px;
+font-weight:900;
+letter-spacing:2px;
+margin-bottom:12px
+}
+
+.page-header h1{
+font-size:clamp(34px,5vw,55px);
+margin-bottom:12px
+}
+
+.page-header p{
+max-width:680px;
+color:var(--muted);
+font-size:16px
+}
+
+/* MAIN */
+
+main{
+max-width:1280px;
+margin:auto;
+padding:45px 20px 80px
+}
+
+/* SEARCH */
+
+.category-search{
+position:relative;
+margin-bottom:35px
+}
+
+.category-search input{
+width:100%;
+height:46px;
+padding:0 15px 0 43px;
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:9px;
+color:white;
+outline:none
+}
+
+.category-search input:focus{
+border-color:var(--gold)
+}
+
+.category-search span{
+position:absolute;
+left:15px;
+top:11px;
+color:#8f96a5;
+font-size:19px
+}
+
+/* CATEGORIES */
+
+.categories{
+display:grid;
+grid-template-columns:repeat(6,1fr);
+gap:14px
+}
+
+.category{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:12px;
+padding:20px 12px;
+text-align:center;
+cursor:pointer;
+transition:.2s;
+min-height:120px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center
+}
+
+.category:hover{
+border-color:var(--gold);
+transform:translateY(-4px);
+background:var(--surface-2)
+}
+
+.category.active{
+border-color:var(--gold);
+box-shadow:0 0 0 1px rgba(229,165,28,.2)
+}
+
+.category-icon{
+font-size:29px;
+line-height:1;
+margin-bottom:10px
+}
+
+.category-name{
+font-size:14px;
+font-weight:800;
+color:#dce0e8
+}
+
+/* STORIES */
+
+.story-section{
+margin-top:55px
+}
+
+.section-heading{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:22px;
+gap:15px
+}
+
+.section-heading h2{
+font-size:27px
+}
+
+.story-count{
+font-size:13px;
+color:var(--muted)
+}
+
+.stories{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:18px;
+align-items:start
+}
+
+.story-card{
+overflow:hidden;
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:12px;
+transition:.2s;
+display:block;
+min-width:0
+}
+
+.story-card:hover{
+transform:translateY(-5px);
+border-color:rgba(229,165,28,.45)
+}
+
+.story-cover{
+height:245px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:15px;
+background:linear-gradient(145deg,#303542,#11131a)
+}
+
+.story-cover.has-image{
+background-size:cover;
+background-position:center
+}
+
+.story-cover h3{
+font-size:21px;
+letter-spacing:1px
+}
+
+.story-cover small{
+display:block;
+margin-top:6px;
+color:#c2c6d0
+}
+
+.story-content{
+padding:13px
+}
+
+.story-content h3{
+font-size:16px;
+margin-bottom:5px
+}
+
+.story-content p{
+color:var(--muted);
+font-size:12px
+}
+
+.story-meta{
+display:flex;
+justify-content:space-between;
+margin-top:10px;
+color:#8f96a5;
+font-size:11px
+}
+
+.loading-message,
+.empty-message{
+grid-column:1/-1;
+text-align:center;
+padding:35px 20px;
+color:var(--muted);
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:12px
+}
+
+/* FOOTER */
+
+footer{
+background:#07090d;
+border-top:1px solid var(--border)
+}
+
+.footer-inner{
+max-width:1280px;
+margin:auto;
+padding:38px 20px;
+display:flex;
+justify-content:space-between;
+gap:30px
+}
+
+.footer-description{
+color:var(--muted);
+max-width:450px;
+font-size:13px;
+margin-top:10px
+}
+
+.footer-links{
+display:flex;
+gap:20px;
+color:#aeb4c1;
+font-size:13px
+}
+
+.footer-links a:hover{
+color:var(--gold)
+}
+
+.copyright{
+border-top:1px solid var(--border);
+text-align:center;
+padding:18px;
+color:#707785;
+font-size:12px
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1080px){
+
+.main-nav{
+display:none
+}
+
+.search{
+margin-left:auto
+}
+
+.categories{
+grid-template-columns:repeat(4,1fr)
+}
+
+.stories{
+grid-template-columns:repeat(4,1fr)
+}
+
+.mobile-menu{
+display:block
+}
+
+}
+
+@media(max-width:760px){
+
+.header-inner{
+padding:10px 14px;
+gap:8px
+}
+
+.brand{
+min-width:auto
+}
+
+.brand-logo{
+width:40px;
+height:40px
+}
+
+.brand-name{
+font-size:18px
+}
+
+.search{
+display:none
+}
+
+.auth-buttons{
+margin-left:auto
+}
+
+.auth-buttons .login-btn,
+.auth-buttons .register-btn{
+display:block
+}
+
+.auth-buttons .btn{
+padding:8px 9px;
+font-size:12px
+}
+
+.user-info{
+display:none
+}
+
+.user-button{
+padding:6px
+}
+
+.language-select{
+height:36px;
+width:50px
+}
+
+.page-header{
+padding:50px 20px 40px
+}
+
+.page-header h1{
+font-size:38px
+}
+
+.page-header p{
+font-size:14px
+}
+
+main{
+padding:35px 14px 60px
+}
+
+.categories{
+grid-template-columns:repeat(2,1fr);
+gap:12px
+}
+
+.stories{
+grid-template-columns:repeat(2,1fr);
+gap:12px
+}
+
+.story-cover{
+height:205px
+}
+
+.footer-inner{
+flex-direction:column
+}
+
+}
+
+@media(max-width:420px){
+
+.brand-name{
+font-size:15px
+}
+
+.brand-logo{
+width:36px;
+height:36px
+}
+
+.auth-buttons .btn{
+padding:7px;
+font-size:11px
+}
+
+.language-select{
+width:45px;
+padding:0 3px
+}
+
+.categories{
+grid-template-columns:repeat(2,1fr)
+}
+
+.category{
+min-height:105px;
+padding:15px 8px
+}
+
+.category-icon{
+font-size:25px
+}
+
+.category-name{
+font-size:12px
+}
+
+.stories{
+grid-template-columns:repeat(2,1fr)
+}
+
+.story-cover{
+height:185px
+}
+
+.story-cover h3{
+font-size:17px
+}
+
+.story-content{
+padding:10px
+}
+
+.story-content h3{
+font-size:14px
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header>
+
+<div class="header-inner">
+
+<a href="index.html" class="brand">
+
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
+>
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</a>
+
+
+<nav class="main-nav">
+
+<a href="index.html">
+Home
+</a>
+
+<a href="discover.html">
+Discover
+</a>
+
+<a href="categories.html">
+Categories
+</a>
+
+<a href="trending.html">
+Trending
+</a>
+
+</nav>
+
+
+<div class="search">
+
+<span class="search-icon">
+⌕
+</span>
+
+<input
+id="headerSearch"
+type="search"
+placeholder="Tafuta hadithi..."
+autocomplete="off"
+>
+
+</div>
+
+
+<div class="auth-buttons" id="authButtons">
+
+<button
+class="btn login-btn"
+onclick="goLogin()"
+>
+Login
+</button>
+
+<button
+class="btn register-btn"
+onclick="goRegister()"
+>
+Register
+</button>
+
+
+<div
+class="user-menu"
+id="userMenu"
+>
+
+<button
+class="user-button"
+onclick="toggleUserDropdown()"
+>
+
+<div
+class="user-avatar"
+id="userAvatar"
+>
+U
+</div>
+
+<div class="user-info">
+
+<strong id="headerUsername">
+User
+</strong>
+
+<small>
+My Account
+</small>
+
+</div>
+
+</button>
+
+
+<div
+class="user-dropdown"
+id="userDropdown"
+>
+
+<div class="dropdown-user">
+
+<strong id="dropdownUsername">
+User
+</strong>
+
+<span id="dropdownEmail">
+email
+</span>
+
+</div>
+
+<button
+class="dropdown-link"
+onclick="openProfile()"
+>
+👤 My Profile
+</button>
+
+<button
+class="dropdown-link"
+onclick="openLibrary()"
+>
+📚 My Library
+</button>
+
+<button
+class="dropdown-link"
+onclick="openHistory()"
+>
+📖 Reading History
+</button>
+
+<button
+class="dropdown-link logout-link"
+onclick="logoutUser()"
+>
+↪ Logout
+</button>
+
+</div>
+
+</div>
+
+
+<select
+id="headerLanguage"
+class="language-select"
+>
+
+<option value="sw">
+SW
+</option>
+
+<option value="en">
+EN
+</option>
+
+</select>
+
+</div>
+
+
+<button
+class="mobile-menu"
+onclick="toggleMenu()"
+aria-label="Open menu"
+>
+☰
+</button>
+
+</div>
+
+</header>
+
+
+<!-- SIDE NAV -->
+
+<div
+class="side-overlay"
+id="sideOverlay"
+onclick="closeMenu()"
+></div>
+
+
+<aside
+class="side-nav"
+id="sideNav"
+>
+
+<div class="side-head">
+
+<a
+href="index.html"
+class="brand"
+onclick="closeMenu()"
+>
+
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
+>
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</a>
+
+<button
+class="side-close"
+onclick="closeMenu()"
+>
+×
+</button>
+
+</div>
+
+
+<a
+class="side-link"
+href="index.html"
+onclick="closeMenu()"
+>
+⌂ <span>Home</span>
+</a>
+
+<a
+class="side-link"
+href="discover.html"
+onclick="closeMenu()"
+>
+▣ <span>Discover</span>
+</a>
+
+<a
+class="side-link"
+href="categories.html"
+onclick="closeMenu()"
+>
+▦ <span>Categories</span>
+</a>
+
+<a
+class="side-link"
+href="trending.html"
+onclick="closeMenu()"
+>
+★ <span>Trending</span>
+</a>
+
+
+<div class="side-title">
+Account
+</div>
+
+
+<div
+class="mobile-user"
+id="mobileUser"
+>
+
+<div class="mobile-user-card">
+
+<div
+class="mobile-user-name"
+id="mobileUsername"
+>
+User
+</div>
+
+<div
+class="mobile-user-email"
+id="mobileEmail"
+>
+email
+</div>
+
+</div>
+
+
+<button
+class="btn login-btn side-link"
+onclick="openProfile();closeMenu()"
+>
+👤 My Profile
+</button>
+
+<button
+class="btn login-btn side-link"
+onclick="openLibrary();closeMenu()"
+>
+📚 My Library
+</button>
+
+<button
+class="btn login-btn side-link"
+onclick="openHistory();closeMenu()"
+>
+📖 Reading History
+</button>
+
+<button
+class="btn register-btn"
+onclick="logoutUser()"
+>
+Logout
+</button>
+
+</div>
+
+
+<div
+class="side-auth"
+id="sideAuth"
+>
+
+<button
+class="btn login-btn"
+onclick="goLogin();closeMenu()"
+>
+Login
+</button>
+
+<button
+class="btn register-btn"
+onclick="goRegister();closeMenu()"
+>
+Register
+</button>
+
+</div>
+
+</aside>
+
+
+<!-- PAGE HEADER -->
+
+<section class="page-header">
+
+<div class="page-header-inner">
+
+<div class="page-label">
+NET SIMULIZI
+</div>
+
+<h1>
+Categories
+</h1>
+
+<p>
+Chagua aina ya hadithi unayopenda na ugundue simulizi
+zinazokufaa kutoka Net Simulizi.
+</p>
+
+</div>
+
+</section>
+
+
+<!-- MAIN -->
+
+<main>
+
+
+<div class="category-search">
+
+<span>
+⌕
+</span>
+
+<input
+id="categorySearch"
+type="search"
+placeholder="Tafuta category..."
+autocomplete="off"
+>
+
+</div>
+
+
+<div
+class="categories"
+id="categoryGrid"
+>
+
+<div class="loading-message">
+Inapakia categories...
+</div>
+
+</div>
+
+
+<section class="story-section">
+
+<div class="section-heading">
+
+<h2 id="selectedCategoryTitle">
+Hadithi
+</h2>
+
+<div
+class="story-count"
+id="storyCount"
+>
+Chagua category
+</div>
+
+</div>
+
+
+<div
+class="stories"
+id="storyGrid"
+>
+
+<div class="empty-message">
+Chagua category ili kuona hadithi.
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+<div class="footer-inner">
+
+<div>
+
+<div class="brand">
+
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
+>
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</div>
+
+<p class="footer-description">
+Jukwaa la hadithi kwa wasomaji na waandishi.
+Soma, gundua na furahia simulizi zako.
+</p>
+
+</div>
+
+
+<div class="footer-links">
+
+<a href="about.html">
+About
+</a>
+
+<a href="terms.html">
+Terms
+</a>
+
+<a href="privacy.html">
+Privacy
+</a>
+
+<a href="contact.html">
+Contact
+</a>
+
+</div>
+
+</div>
+
+
+<div class="copyright">
+© 2026 Net Simulizi. All rights reserved.
+</div>
+
+</footer>
+
+
+<script>
+
+const API_BASE = "/api";
+
+let allCategories = [];
+let allStories = [];
+let selectedCategory = "";
+
+
+/* ESCAPE HTML */
+
+function escapeHTML(value){
+
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* SAFE URL */
+
+function safeURL(value){
+
+const url =
+String(value || "").trim();
+
+if(
+url.startsWith("https://") ||
+url.startsWith("http://") ||
+url.startsWith("/")
+){
+
+return url;
+
+}
+
+return "";
+
+}
+
+
+/* FORMAT NUMBER */
+
+function formatNumber(number){
+
+return Number(
+number || 0
+).toLocaleString();
+
+}
+
+
+/* TRUNCATE */
+
+function truncateText(text,length){
+
+const value =
+String(text || "");
+
+if(value.length <= length){
+return value;
+}
+
+return value.substring(0,length) + "...";
+
+}
+
+
+/* CATEGORY ICON */
+
+function getCategoryIcon(category){
+
+const value =
+String(
+category.name ||
+category.title ||
+category.slug ||
+""
+).toLowerCase();
+
+
+if(
+value.includes("romance") ||
+value.includes("mapenzi")
+){
+return "❤️";
+}
+
+if(
+value.includes("action") ||
+value.includes("vitendo")
+){
+return "⚔️";
+}
+
+if(
+value.includes("fantasy") ||
+value.includes("fantasia")
+){
+return "🧙";
+}
+
+if(
+value.includes("horror") ||
+value.includes("horror")
+){
+return "👻";
+}
+
+if(
+value.includes("mystery") ||
+value.includes("siri")
+){
+return "🔎";
+}
+
+if(
+value.includes("drama")
+){
+return "🎭";
+}
+
+if(
+value.includes("comedy") ||
+value.includes("vichekesho")
+){
+return "😂";
+}
+
+if(
+value.includes("crime") ||
+value.includes("uhalifu")
+){
+return "🔪";
+}
+
+if(
+value.includes("adventure") ||
+value.includes("mashujaa")
+){
+return "🌍";
+}
+
+if(
+value.includes("history") ||
+value.includes("historia")
+){
+return "📜";
+}
+
+return "📚";
+
+}
+
+
+/* RENDER CATEGORIES */
+
+function renderCategories(categories){
+
+const grid =
+document.getElementById(
+"categoryGrid"
+);
+
+if(!grid){
+return;
+}
+
+
+if(!Array.isArray(categories)){
+categories = [];
+}
+
+
+if(!categories.length){
+
+grid.innerHTML = `
+
+<div class="empty-message">
+
+Hakuna categories zilizopatikana.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+const fragment =
+document.createDocumentFragment();
+
+
+categories.forEach(
+function(category){
+
+const card =
+document.createElement("div");
+
+card.className =
+"category";
+
+
+const slug =
+String(
+category.slug ||
+category.id ||
+""
+);
+
+
+if(
+selectedCategory &&
+slug.toLowerCase() ===
+selectedCategory.toLowerCase()
+){
+
+card.classList.add("active");
+
+}
+
+
+card.innerHTML = `
+
+<div class="category-icon">
+${getCategoryIcon(category)}
+</div>
+
+<div class="category-name">
+${escapeHTML(
+category.name ||
+category.title ||
+"Category"
+)}
+</div>
+
+`;
+
+
+card.addEventListener(
+"click",
+function(){
+
+selectCategory(
+category
+);
+
+});
+
+
+fragment.appendChild(card);
+
+});
+
+
+grid.innerHTML = "";
+
+grid.appendChild(fragment);
+
+}
+
+
+/* SELECT CATEGORY */
+
+function selectCategory(category){
+
+selectedCategory =
+String(
+category.slug ||
+category.id ||
+""
+);
+
+
+document.getElementById(
+"selectedCategoryTitle"
+).textContent =
+category.name ||
+category.title ||
+"Hadithi";
+
+
+renderCategories(
+allCategories
+);
+
+
+const filtered =
+filterStoriesByCategory(
+allStories,
+category
+);
+
+
+renderStories(
+filtered
+);
+
+
+/* URL */
+
+const slug =
+category.slug ||
+category.id ||
+"";
+
+
+if(slug){
+
+history.replaceState(
+null,
+"",
+"categories.html?slug=" +
+encodeURIComponent(slug)
+);
+
+}
+
+}
+
+
+/* FILTER STORIES BY CATEGORY */
+
+function filterStoriesByCategory(
+stories,
+category
+){
+
+const slug =
+String(
+category.slug ||
+""
+).toLowerCase();
+
+
+const id =
+String(
+category.id ||
+""
+).toLowerCase();
+
+
+const name =
+String(
+category.name ||
+category.title ||
+""
+).toLowerCase();
+
+
+return stories.filter(
+function(story){
+
+const storySlug =
+String(
+story.category_slug ||
+""
+).toLowerCase();
+
+
+const storyId =
+String(
+story.category_id ||
+""
+).toLowerCase();
+
+
+const storyName =
+String(
+story.category_name ||
+story.category ||
+""
+).toLowerCase();
+
+
+return(
+(slug && storySlug === slug) ||
+(id && storyId === id) ||
+(name && storyName === name)
+);
+
+});
+
+}
+
+
+/* CREATE STORY CARD */
+
+function createStoryCard(story){
+
+const storyId =
+story.id;
+
+const title =
+story.title ||
+"Untitled Story";
+
+const description =
+story.description ||
+"Hadithi kutoka Net Simulizi.";
+
+const readers =
+story.readers_count ??
+story.readersCount ??
+0;
+
+const category =
+story.category_name ||
+story.category ||
+"Story";
+
+const author =
+story.author_name ||
+story.author ||
+"Net Simulizi";
+
+const cover =
+story.cover_url ||
+story.coverUrl ||
+"";
+
+
+const card =
+document.createElement("a");
+
+card.className =
+"story-card";
+
+card.href =
+"story.html?id=" +
+encodeURIComponent(storyId);
+
+
+let coverHTML = "";
+
+
+if(cover){
+
+coverHTML = `
+
+<div
+class="story-cover has-image"
+style="background-image:url('${safeURL(cover)}')"
+></div>
+
+`;
+
+}else{
+
+coverHTML = `
+
+<div class="story-cover">
+
+<div>
+
+<h3>
+${escapeHTML(title)}
+</h3>
+
+<small>
+${escapeHTML(category)}
+</small>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+card.innerHTML = `
+
+${coverHTML}
+
+<div class="story-content">
+
+<h3>
+${escapeHTML(title)}
+</h3>
+
+<p>
+${escapeHTML(
+truncateText(
+description,
+85
+)
+)}
+</p>
+
+<div class="story-meta">
+
+<span>
+${escapeHTML(author)}
+</span>
+
+<span>
+👁 ${formatNumber(readers)}
+</span>
+
+</div>
+
+</div>
+
+`;
+
+return card;
+
+}
+
+
+/* RENDER STORIES */
+
+function renderStories(stories){
+
+const grid =
+document.getElementById(
+"storyGrid"
+);
+
+if(!grid){
+return;
+}
+
+
+if(!Array.isArray(stories)){
+stories = [];
+}
+
+
+if(!stories.length){
+
+grid.innerHTML = `
+
+<div class="empty-message">
+
+Hakuna hadithi katika category hii.
+
+</div>
+
+`;
+
+document.getElementById(
+"storyCount"
+).textContent =
+"0 hadithi";
+
+return;
+
+}
+
+
+const fragment =
+document.createDocumentFragment();
+
+
+stories.forEach(
+function(story){
+
+fragment.appendChild(
+createStoryCard(story)
+);
+
+});
+
+
+grid.innerHTML = "";
+
+grid.appendChild(fragment);
+
+
+document.getElementById(
+"storyCount"
+).textContent =
+stories.length +
+" hadithi";
+
+}
+
+
+/* LOAD CATEGORIES */
+
+async function loadCategories(){
+
+try{
+
+const response =
+await fetch(
+API_BASE + "/categories",
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+const data =
+await response.json();
+
+
+console.log(
+"Net Simulizi categories:",
+data
+);
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+throw new Error(
+data.message ||
+"Categories hazikupatikana."
+);
+
+}
+
+
+allCategories =
+Array.isArray(data.categories)
+? data.categories
+: [];
+
+
+renderCategories(
+allCategories
+);
+
+
+/* CHECK URL CATEGORY */
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const slug =
+params.get("slug");
+
+
+if(slug){
+
+const category =
+allCategories.find(
+function(item){
+
+return String(
+item.slug ||
+item.id ||
+""
+).toLowerCase()
+===
+String(slug).toLowerCase();
+
+});
+
+
+if(category){
+
+selectCategory(
+category
+);
+
+}
+
+}
+
+
+}catch(error){
+
+console.error(
+"Categories error:",
+error
+);
+
+
+document.getElementById(
+"categoryGrid"
+).innerHTML = `
+
+<div class="empty-message">
+
+Imeshindikana kupakia categories.
+
+<br><br>
+
+<button
+class="btn register-btn"
+onclick="loadCategories()"
+>
+Jaribu tena
+</button>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* LOAD STORIES */
+
+async function loadStories(){
+
+try{
+
+const response =
+await fetch(
+API_BASE + "/stories",
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+const data =
+await response.json();
+
+
+console.log(
+"Net Simulizi category stories:",
+data
+);
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+throw new Error(
+data.message ||
+"Stories hazikupatikana."
+);
+
+}
+
+
+allStories =
+Array.isArray(data.stories)
+? data.stories
+: [];
+
+
+/* URL CATEGORY */
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const slug =
+params.get("slug");
+
+
+if(
+slug &&
+allCategories.length
+){
+
+const category =
+allCategories.find(
+function(item){
+
+return String(
+item.slug ||
+item.id ||
+""
+).toLowerCase()
+===
+String(slug).toLowerCase();
+
+});
+
+
+if(category){
+
+selectCategory(
+category
+);
+
+return;
+
+}
+
+}
+
+
+/* NO CATEGORY SELECTED */
+
+document.getElementById(
+"storyCount"
+).textContent =
+allStories.length +
+" hadithi";
+
+
+}catch(error){
+
+console.error(
+"Stories error:",
+error
+);
+
+}
+
+}
+
+
+/* CATEGORY SEARCH */
+
+const categorySearch =
+document.getElementById(
+"categorySearch"
+);
+
+
+if(categorySearch){
+
+categorySearch.addEventListener(
+"input",
+function(){
+
+const query =
+String(
+this.value || ""
+).toLowerCase()
+.trim();
+
+
+const filtered =
+allCategories.filter(
+function(category){
+
+const name =
+String(
+category.name ||
+category.title ||
+""
+).toLowerCase();
+
+
+const slug =
+String(
+category.slug ||
+""
+).toLowerCase();
+
+
+return(
+name.includes(query) ||
+slug.includes(query)
+);
+
+});
+
+
+renderCategories(
+filtered
+);
+
+});
+
+}
+
+
+/* HEADER SEARCH */
+
+const headerSearch =
+document.getElementById(
+"headerSearch"
+);
+
+
+if(headerSearch){
+
+headerSearch.addEventListener(
+"keydown",
+function(event){
+
+if(event.key !== "Enter"){
+return;
+}
+
+
+const value =
+String(
+this.value || ""
+).trim();
+
+
+if(!value){
+return;
+}
+
+
+window.location.href =
+"discover.html?search=" +
+encodeURIComponent(value);
+
+});
+
+}
+
+
+/* LOGIN */
+
+function goLogin(){
+
+window.location.href =
+"login.html";
+
+}
+
+
+/* REGISTER */
+
+function goRegister(){
+
+window.location.href =
+"register.html";
+
+}
+
+
+/* PROFILE */
+
+function openProfile(){
+
+window.location.href =
+"profile.html";
+
+}
+
+
+/* LIBRARY */
+
+function openLibrary(){
+
+window.location.href =
+"library.html";
+
+}
+
+
+/* HISTORY */
+
+function openHistory(){
+
+window.location.href =
+"history.html";
+
+}
+
+
+/* USER DROPDOWN */
+
+function toggleUserDropdown(){
+
+const dropdown =
+document.getElementById(
+"userDropdown"
+);
+
+if(!dropdown){
+return;
+}
+
+dropdown.classList.toggle(
+"active"
+);
+
+}
+
+
+/* LOGOUT */
+
+function logoutUser(){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+updateUserInterface();
+
+alert(
+"Umetoka kwenye akaunti."
+);
+
+}
+
+
+/* UPDATE USER */
+
+function updateUserInterface(){
+
+const rawUser =
+localStorage.getItem(
+"netsimulizi_user"
+);
+
+
+const userMenu =
+document.getElementById(
+"userMenu"
+);
+
+const sideAuth =
+document.getElementById(
+"sideAuth"
+);
+
+const mobileUser =
+document.getElementById(
+"mobileUser"
+);
+
+
+if(!rawUser){
+
+if(userMenu){
+userMenu.classList.remove(
+"active"
+);
+}
+
+if(sideAuth){
+sideAuth.style.display =
+"grid";
+}
+
+if(mobileUser){
+mobileUser.classList.remove(
+"active"
+);
+}
+
+return;
+
+}
+
+
+let user = null;
+
+
+try{
+
+user =
+JSON.parse(rawUser);
+
+}catch(error){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+return;
+
+}
+
+
+if(!user){
+return;
+}
+
+
+const username =
+user.username ||
+user.name ||
+"User";
+
+
+const email =
+user.email ||
+"";
+
+
+const avatar =
+username
+.charAt(0)
+.toUpperCase();
+
+
+document.getElementById(
+"userAvatar"
+).textContent =
+avatar;
+
+
+document.getElementById(
+"headerUsername"
+).textContent =
+username;
+
+
+document.getElementById(
+"dropdownUsername"
+).textContent =
+username;
+
+
+document.getElementById(
+"dropdownEmail"
+).textContent =
+email;
+
+
+document.getElementById(
+"mobileUsername"
+).textContent =
+username;
+
+
+document.getElementById(
+"mobileEmail"
+).textContent =
+email;
+
+
+if(userMenu){
+
+userMenu.classList.add(
+"active"
+);
+
+}
+
+
+if(sideAuth){
+
+sideAuth.style.display =
+"none";
+
+}
+
+
+if(mobileUser){
+
+mobileUser.classList.add(
+"active"
+);
+
+}
+
+}
+
+
+/* MOBILE MENU */
+
+function toggleMenu(){
+
+const nav =
+document.getElementById(
+"sideNav"
+);
+
+const overlay =
+document.getElementById(
+"sideOverlay"
+);
+
+
+nav.classList.toggle(
+"active"
+);
+
+overlay.classList.toggle(
+"active"
+);
+
+}
+
+
+/* CLOSE MENU */
+
+function closeMenu(){
+
+document.getElementById(
+"sideNav"
+).classList.remove(
+"active"
+);
+
+document.getElementById(
+"sideOverlay"
+).classList.remove(
+"active"
+);
+
+}
+
+
+/* LANGUAGE */
+
+const headerLanguage =
+document.getElementById(
+"headerLanguage"
+);
+
+
+if(headerLanguage){
+
+const savedLanguage =
+localStorage.getItem(
+"netsimulizi_language"
+);
+
+
+if(savedLanguage){
+
+headerLanguage.value =
+savedLanguage;
+
+}
+
+
+headerLanguage.addEventListener(
+"change",
+function(){
+
+localStorage.setItem(
+"netsimulizi_language",
+this.value
+);
+
+});
+
+}
+
+
+/* CLOSE DROPDOWN */
+
+document.addEventListener(
+"click",
+function(event){
+
+const userMenu =
+document.getElementById(
+"userMenu"
+);
+
+const dropdown =
+document.getElementById(
+"userDropdown"
+);
+
+
+if(
+userMenu &&
+dropdown &&
+!userMenu.contains(
+event.target
+)
+){
+
+dropdown.classList.remove(
+"active"
+);
+
+}
+
+});
+
+
+/* START */
+
+window.addEventListener(
+"DOMContentLoaded",
+function(){
+
+updateUserInterface();
+
+loadCategories();
+
+loadStories();
+
+});
+
+</script>
+
+</body>
+</html>
