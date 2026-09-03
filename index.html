@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="sw">
 <head>
@@ -7,6 +8,7 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+
 :root{
 --bg:#090b10;
 --surface:#11141b;
@@ -17,18 +19,35 @@
 --muted:#a8afbd;
 --border:rgba(255,255,255,.09)
 }
-html{scroll-behavior:smooth}
+
+html{
+scroll-behavior:smooth
+}
+
 body{
 font-family:Arial,Helvetica,sans-serif;
 background:var(--bg);
 color:var(--text);
 line-height:1.5
 }
-button,input,select{font:inherit}
-button,a{-webkit-tap-highlight-color:transparent}
-a{text-decoration:none;color:inherit}
 
-/* LANGUAGE */
+button,input,select{
+font:inherit
+}
+
+button,a{
+-webkit-tap-highlight-color:transparent
+}
+
+a{
+text-decoration:none;
+color:inherit
+}
+
+/* =========================
+LANGUAGE
+========================= */
+
 #languageScreen{
 position:fixed;
 inset:0;
@@ -114,7 +133,10 @@ margin-bottom:5px
 color:var(--muted)
 }
 
-/* HEADER */
+/* =========================
+HEADER
+========================= */
+
 header{
 position:sticky;
 top:0;
@@ -248,7 +270,10 @@ font-size:25px;
 cursor:pointer
 }
 
-/* USER PROFILE BUTTON */
+/* =========================
+USER PROFILE
+========================= */
+
 .user-menu{
 display:none;
 position:relative
@@ -356,7 +381,10 @@ color:var(--gold)
 color:#ffb0b0
 }
 
-/* SIDE NAV */
+/* =========================
+SIDE NAV
+========================= */
+
 .side-overlay{
 display:none;
 position:fixed;
@@ -440,7 +468,10 @@ margin-top:10px
 width:100%
 }
 
-/* MOBILE USER */
+/* =========================
+MOBILE USER
+========================= */
+
 .mobile-user{
 display:none
 }
@@ -469,7 +500,10 @@ word-break:break-word;
 margin-top:3px
 }
 
-/* HERO */
+/* =========================
+HERO
+========================= */
+
 .hero{
 min-height:510px;
 display:flex;
@@ -539,7 +573,10 @@ border:1px solid #363b47;
 padding:13px 22px
 }
 
-/* CONTENT */
+/* =========================
+CONTENT
+========================= */
+
 main{
 max-width:1280px;
 margin:auto;
@@ -567,7 +604,10 @@ font-size:14px;
 font-weight:800
 }
 
-/* CATEGORIES */
+/* =========================
+CATEGORIES
+========================= */
+
 .categories{
 display:grid;
 grid-template-columns:repeat(6,1fr);
@@ -601,7 +641,10 @@ font-weight:700;
 color:#dce0e8
 }
 
-/* STORIES */
+/* =========================
+STORIES
+========================= */
+
 .stories{
 display:grid;
 grid-template-columns:repeat(5,1fr);
@@ -681,7 +724,10 @@ border:1px solid var(--border);
 border-radius:12px
 }
 
-/* FOOTER */
+/* =========================
+FOOTER
+========================= */
+
 footer{
 background:#07090d;
 border-top:1px solid var(--border)
@@ -718,7 +764,10 @@ color:#707785;
 font-size:12px
 }
 
-/* MODAL */
+/* =========================
+MODAL
+========================= */
+
 .modal{
 position:fixed;
 inset:0;
@@ -845,7 +894,10 @@ color:#b8f5c8;
 border-color:#28643a
 }
 
-/* RESPONSIVE */
+/* =========================
+RESPONSIVE
+========================= */
+
 @media(max-width:1080px){
 
 .main-nav{
@@ -1003,7 +1055,10 @@ font-size:14px
 
 <body>
 
-<!-- LANGUAGE SCREEN -->
+<!-- =========================
+LANGUAGE SCREEN
+========================= -->
+
 <div id="languageScreen">
 
 <div class="language-container">
@@ -1061,7 +1116,10 @@ Continue in English
 </div>
 
 
-<!-- HEADER -->
+<!-- =========================
+HEADER
+========================= -->
+
 <header>
 
 <div class="header-inner">
@@ -1079,7 +1137,6 @@ NET <span>SIMULIZI</span>
 </div>
 
 </a>
-
 
 <nav class="main-nav">
 
@@ -1101,7 +1158,6 @@ Trending
 
 </nav>
 
-
 <div class="search">
 
 <span class="search-icon">
@@ -1112,10 +1168,10 @@ Trending
 id="searchInput"
 type="search"
 placeholder="Tafuta hadithi..."
+autocomplete="off"
 >
 
 </div>
-
 
 <div class="auth-buttons" id="authButtons">
 
@@ -1132,7 +1188,6 @@ onclick="openAuth('register')"
 >
 Register
 </button>
-
 
 <div class="user-menu" id="userMenu">
 
@@ -1161,7 +1216,6 @@ My Account
 </div>
 
 </button>
-
 
 <div
 class="user-dropdown"
@@ -1212,7 +1266,6 @@ onclick="logoutUser()"
 
 </div>
 
-
 <select
 id="headerLanguage"
 class="language-select"
@@ -1230,7 +1283,6 @@ EN
 
 </div>
 
-
 <button
 class="mobile-menu"
 onclick="toggleMenu()"
@@ -1244,14 +1296,16 @@ aria-label="Open menu"
 </header>
 
 
-<!-- SIDE NAV -->
+<!-- =========================
+SIDE NAV
+========================= -->
+
 <div
 class="side-overlay"
 id="sideOverlay"
 onclick="closeMenu()"
 >
 </div>
-
 
 <aside
 class="side-nav"
@@ -1287,7 +1341,6 @@ onclick="closeMenu()"
 
 </div>
 
-
 <a
 class="side-link"
 href="#home"
@@ -1320,11 +1373,9 @@ onclick="closeMenu()"
 ★ <span>Trending</span>
 </a>
 
-
 <div class="side-title">
 Account
 </div>
-
 
 <div
 class="mobile-user"
@@ -1348,7 +1399,6 @@ email
 </div>
 
 </div>
-
 
 <button
 class="btn login-btn side-link"
@@ -1380,7 +1430,6 @@ Logout
 
 </div>
 
-
 <div
 class="side-auth"
 id="sideAuth"
@@ -1405,7 +1454,10 @@ Register
 </aside>
 
 
-<!-- HERO -->
+<!-- =========================
+HERO
+========================= -->
+
 <section
 class="hero"
 id="home"
@@ -1459,10 +1511,14 @@ Jiunge Bure
 </section>
 
 
-<!-- MAIN -->
+<!-- =========================
+MAIN
+========================= -->
+
 <main>
 
 <!-- DISCOVER -->
+
 <section
 class="section"
 id="discover"
@@ -1483,7 +1539,6 @@ Tazama zote →
 
 </div>
 
-
 <div
 class="stories"
 id="storyGrid"
@@ -1499,6 +1554,7 @@ Inapakia hadithi...
 
 
 <!-- CATEGORIES -->
+
 <section
 class="section"
 id="categories"
@@ -1519,7 +1575,6 @@ View all →
 
 </div>
 
-
 <div
 class="categories"
 id="categoryGrid"
@@ -1535,6 +1590,7 @@ Inapakia categories...
 
 
 <!-- TRENDING -->
+
 <section
 class="section"
 id="trending"
@@ -1555,7 +1611,6 @@ View all →
 
 </div>
 
-
 <div
 class="stories"
 id="trendingGrid"
@@ -1572,7 +1627,10 @@ Inapakia trending stories...
 </main>
 
 
-<!-- FOOTER -->
+<!-- =========================
+FOOTER
+========================= -->
+
 <footer>
 
 <div class="footer-inner">
@@ -1593,14 +1651,12 @@ NET <span>SIMULIZI</span>
 
 </div>
 
-
 <p class="footer-description">
 Jukwaa la hadithi kwa wasomaji na waandishi.
 Soma, gundua na furahia simulizi zako.
 </p>
 
 </div>
-
 
 <div class="footer-links">
 
@@ -1624,7 +1680,6 @@ Contact
 
 </div>
 
-
 <div class="copyright">
 © 2026 Net Simulizi. All rights reserved.
 </div>
@@ -1632,7 +1687,10 @@ Contact
 </footer>
 
 
-<!-- AUTH MODAL -->
+<!-- =========================
+AUTH MODAL
+========================= -->
+
 <div
 class="modal"
 id="authModal"
@@ -1647,8 +1705,8 @@ onclick="closeAuth()"
 ×
 </button>
 
-
 <!-- LOGIN -->
+
 <div id="loginForm">
 
 <h2>
@@ -1659,13 +1717,11 @@ Karibu tena
 Ingia kwenye akaunti yako ya Net Simulizi.
 </p>
 
-
 <div
 id="loginMessage"
 class="auth-message"
 >
 </div>
-
 
 <div class="form-group">
 
@@ -1682,7 +1738,6 @@ autocomplete="username"
 
 </div>
 
-
 <div class="form-group">
 
 <label>
@@ -1698,7 +1753,6 @@ autocomplete="current-password"
 
 </div>
 
-
 <button
 id="homeLoginButton"
 class="btn submit-btn"
@@ -1706,7 +1760,6 @@ onclick="homeLogin()"
 >
 Login
 </button>
-
 
 <div class="switch-form">
 
@@ -1724,6 +1777,7 @@ Register
 
 
 <!-- REGISTER -->
+
 <div
 id="registerForm"
 style="display:none"
@@ -1737,13 +1791,11 @@ Create Account
 Fungua akaunti yako ya Net Simulizi.
 </p>
 
-
 <div
 id="registerMessage"
 class="auth-message"
 >
 </div>
-
 
 <div class="form-group">
 
@@ -1760,7 +1812,6 @@ autocomplete="username"
 
 </div>
 
-
 <div class="form-group">
 
 <label>
@@ -1775,7 +1826,6 @@ autocomplete="email"
 >
 
 </div>
-
 
 <div class="form-group">
 
@@ -1792,7 +1842,6 @@ autocomplete="new-password"
 
 </div>
 
-
 <div class="form-group">
 
 <label>
@@ -1808,7 +1857,6 @@ autocomplete="new-password"
 
 </div>
 
-
 <button
 id="homeRegisterButton"
 class="btn submit-btn"
@@ -1816,7 +1864,6 @@ onclick="homeRegister()"
 >
 Register
 </button>
-
 
 <div class="switch-form">
 
@@ -1913,103 +1960,75 @@ document.getElementById("searchInput");
 if(language === "en"){
 
 if(heroText){
-
 heroText.textContent =
 "Discover stories that entertain, inspire and take you into another world. Read in Swahili or English, anywhere and anytime.";
-
 }
 
 if(startReading){
-
 startReading.textContent =
 "Start Reading";
-
 }
 
 if(joinButton){
-
 joinButton.textContent =
 "Join Free";
-
 }
 
 if(discoverTitle){
-
 discoverTitle.textContent =
 "Discover Stories";
-
 }
 
 if(categoriesTitle){
-
 categoriesTitle.textContent =
 "Categories";
-
 }
 
 if(trendingTitle){
-
 trendingTitle.textContent =
 "Trending Now";
-
 }
 
 if(searchInput){
-
 searchInput.placeholder =
 "Search stories...";
-
 }
 
 }else{
 
 if(heroText){
-
 heroText.textContent =
 "Gundua hadithi zinazokufurahisha, kukusisimua na kukupeleka kwenye ulimwengu mwingine. Soma Kiswahili au English, popote na wakati wowote.";
-
 }
 
 if(startReading){
-
 startReading.textContent =
 "Anza Kusoma";
-
 }
 
 if(joinButton){
-
 joinButton.textContent =
 "Jiunge Bure";
-
 }
 
 if(discoverTitle){
-
 discoverTitle.textContent =
 "Gundua Hadithi";
-
 }
 
 if(categoriesTitle){
-
 categoriesTitle.textContent =
 "Categories";
-
 }
 
 if(trendingTitle){
-
 trendingTitle.textContent =
 "Hadithi Zinazovuma";
-
 }
 
 if(searchInput){
-
 searchInput.placeholder =
 "Tafuta hadithi...";
-
 }
 
 }
@@ -2029,9 +2048,7 @@ document.getElementById(
 );
 
 if(!grid){
-
 return;
-
 }
 
 try{
@@ -2063,7 +2080,6 @@ data.categories
 ? data.categories
 : [];
 
-
 if(!categories.length){
 
 grid.innerHTML = `
@@ -2076,26 +2092,18 @@ return;
 
 }
 
-
 grid.innerHTML = "";
-
 
 const icons = {
 
 romance:"❤️",
-
 horror:"🕯️",
-
 drama:"🔥",
-
 action:"⚔️",
-
 adventure:"🗺️",
-
 fantasy:"✨"
 
 };
-
 
 categories.forEach(
 function(category){
@@ -2107,11 +2115,9 @@ category.name ||
 ""
 ).toLowerCase();
 
-
 const icon =
 icons[slug] ||
 "📚";
-
 
 const card =
 document.createElement("a");
@@ -2119,14 +2125,12 @@ document.createElement("a");
 card.className =
 "category";
 
-
 card.href =
 "categories.html?slug=" +
 encodeURIComponent(
 category.slug ||
 slug
 );
-
 
 card.innerHTML = `
 <div class="category-icon">
@@ -2140,7 +2144,6 @@ category.name ||
 )}
 </div>
 `;
-
 
 grid.appendChild(card);
 
@@ -2165,37 +2168,53 @@ Imeshindikana kupakia categories.
 
 
 /* =========================
-STORIES
+STORIES DATA
 ========================= */
 
 let allStories = [];
 
 
+/* =========================
+LOAD STORIES
+========================= */
+
 async function loadStories(){
 
-const grid =
+const storyGrid =
 document.getElementById(
 "storyGrid"
 );
 
-if(!grid){
+const trendingGrid =
+document.getElementById(
+"trendingGrid"
+);
 
+if(!storyGrid){
 return;
-
 }
-
 
 try{
 
 const response =
 await fetch(
-API_BASE + "/stories"
+API_BASE + "/stories",
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
+}
 );
-
 
 const data =
 await response.json();
 
+console.log(
+"Net Simulizi /api/stories:",
+data
+);
 
 if(
 !response.ok ||
@@ -2210,10 +2229,18 @@ data.message ||
 }
 
 
+/*
+API inatarajiwa kurudisha:
+
+{
+  success:true,
+  stories:[...]
+}
+
+*/
+
 const stories =
-Array.isArray(
-data.stories
-)
+Array.isArray(data.stories)
 ? data.stories
 : [];
 
@@ -2222,18 +2249,17 @@ allStories =
 stories;
 
 
+/*
+KAMA HAKUNA STORIES
+*/
+
 if(!stories.length){
 
-grid.innerHTML = `
+storyGrid.innerHTML = `
 <div class="empty-message">
 Hakuna hadithi zinazopatikana kwa sasa.
 </div>
 `;
-
-const trendingGrid =
-document.getElementById(
-"trendingGrid"
-);
 
 if(trendingGrid){
 
@@ -2250,16 +2276,32 @@ return;
 }
 
 
-renderStories(
-stories,
-grid,
+/*
+IMPORTANT:
+Discover ina-render moja kwa moja hapa.
+*/
+
+storyGrid.innerHTML = "";
+
+stories.forEach(
+function(story){
+
+const card =
+createStoryCard(
+story,
 false
 );
 
+storyGrid.appendChild(card);
 
-renderTrending(
-stories
-);
+});
+
+
+/*
+Trending
+*/
+
+renderTrending(stories);
 
 
 }catch(error){
@@ -2269,19 +2311,11 @@ console.error(
 error
 );
 
-
-grid.innerHTML = `
+storyGrid.innerHTML = `
 <div class="empty-message">
 Imeshindikana kupakia hadithi.
 </div>
 `;
-
-
-const trendingGrid =
-document.getElementById(
-"trendingGrid"
-);
-
 
 if(trendingGrid){
 
@@ -2309,11 +2343,12 @@ trending
 ){
 
 if(!container){
-
 return;
-
 }
 
+if(!Array.isArray(stories)){
+stories = [];
+}
 
 if(!stories.length){
 
@@ -2327,9 +2362,7 @@ return;
 
 }
 
-
 container.innerHTML = "";
-
 
 stories.forEach(
 function(story){
@@ -2396,10 +2429,8 @@ story.coverUrl ||
 const card =
 document.createElement("a");
 
-
 card.className =
 "story-card";
-
 
 card.href =
 "story.html?id=" +
@@ -2407,9 +2438,8 @@ encodeURIComponent(
 storyId
 );
 
-
 card.dataset.title =
-title.toLowerCase();
+String(title).toLowerCase();
 
 
 let coverHTML = "";
@@ -2513,11 +2543,12 @@ document.getElementById(
 );
 
 if(!grid){
-
 return;
-
 }
 
+if(!Array.isArray(stories)){
+stories = [];
+}
 
 if(!stories.length){
 
@@ -2544,14 +2575,12 @@ a.readersCount ??
 0
 );
 
-
 const bReaders =
 Number(
 b.readers_count ??
 b.readersCount ??
 0
 );
-
 
 return bReaders - aReaders;
 
@@ -2580,15 +2609,48 @@ document.getElementById(
 
 if(searchInput){
 
+searchInput.value = "";
+
 searchInput.addEventListener(
 "input",
 function(){
 
 const query =
-this.value
-.toLowerCase()
-.trim();
+String(
+this.value || ""
+).toLowerCase().trim();
 
+const storyGrid =
+document.getElementById(
+"storyGrid"
+);
+
+if(!storyGrid){
+return;
+}
+
+
+/*
+Hakuna search:
+onyesha stories zote.
+*/
+
+if(query === ""){
+
+renderStories(
+allStories,
+storyGrid,
+false
+);
+
+return;
+
+}
+
+
+/*
+Search
+*/
 
 const filtered =
 allStories.filter(
@@ -2599,12 +2661,10 @@ String(
 story.title || ""
 ).toLowerCase();
 
-
 const description =
 String(
 story.description || ""
 ).toLowerCase();
-
 
 const category =
 String(
@@ -2613,21 +2673,49 @@ story.category ||
 ""
 ).toLowerCase();
 
+const author =
+String(
+story.author_name ||
+story.author ||
+""
+).toLowerCase();
 
 return(
 title.includes(query) ||
 description.includes(query) ||
-category.includes(query)
+category.includes(query) ||
+author.includes(query)
 );
 
-});
+}
+);
 
+
+/*
+Hakuna result
+*/
+
+if(!filtered.length){
+
+storyGrid.innerHTML = `
+<div class="empty-message">
+Hakuna hadithi zilizopatikana kwa:
+<strong>${escapeHTML(query)}</strong>
+</div>
+`;
+
+return;
+
+}
+
+
+/*
+Results
+*/
 
 renderStories(
 filtered,
-document.getElementById(
-"storyGrid"
-),
+storyGrid,
 false
 );
 
@@ -2671,14 +2759,12 @@ function switchAuth(type){
 
 clearAuthMessages();
 
-
 document.getElementById(
 "loginForm"
 ).style.display =
 type === "login"
 ? "block"
 : "none";
-
 
 document.getElementById(
 "registerForm"
@@ -2699,10 +2785,12 @@ type
 const element =
 document.getElementById(id);
 
+if(!element){
+return;
+}
 
 element.textContent =
 message;
-
 
 element.className =
 "auth-message show " +
@@ -2723,7 +2811,6 @@ document.getElementById(
 "registerMessage"
 );
 
-
 if(loginMessage){
 
 loginMessage.textContent =
@@ -2733,7 +2820,6 @@ loginMessage.className =
 "auth-message";
 
 }
-
 
 if(registerMessage){
 
@@ -2759,18 +2845,15 @@ document.getElementById(
 "homeLogin"
 ).value.trim();
 
-
 const password =
 document.getElementById(
 "homeLoginPassword"
 ).value;
 
-
 const button =
 document.getElementById(
 "homeLoginButton"
 );
-
 
 if(!login || !password){
 
@@ -2784,20 +2867,17 @@ return;
 
 }
 
-
 button.disabled =
 true;
 
 button.textContent =
 "Inaingia...";
 
-
 showAuthMessage(
 "loginMessage",
 "Inathibitisha taarifa zako...",
 "success"
 );
-
 
 try{
 
@@ -2824,9 +2904,7 @@ password:password
 }
 );
 
-
 let data;
-
 
 try{
 
@@ -2841,7 +2919,6 @@ throw new Error(
 
 }
 
-
 if(
 !response.ok ||
 !data.success
@@ -2854,19 +2931,15 @@ data.message ||
 "error"
 );
 
-
 button.disabled =
 false;
-
 
 button.textContent =
 "Login";
 
-
 return;
 
 }
-
 
 if(!data.user){
 
@@ -2876,7 +2949,6 @@ throw new Error(
 
 }
 
-
 localStorage.setItem(
 "netsimulizi_user",
 JSON.stringify(
@@ -2884,16 +2956,13 @@ data.user
 )
 );
 
-
 showAuthMessage(
 "loginMessage",
 "Login imefanikiwa. Karibu Net Simulizi!",
 "success"
 );
 
-
 updateUserInterface();
-
 
 setTimeout(
 function(){
@@ -2904,7 +2973,6 @@ closeAuth();
 700
 );
 
-
 }catch(error){
 
 showAuthMessage(
@@ -2914,10 +2982,8 @@ error.message,
 "error"
 );
 
-
 button.disabled =
 false;
-
 
 button.textContent =
 "Login";
@@ -2938,30 +3004,25 @@ document.getElementById(
 "homeRegisterUsername"
 ).value.trim();
 
-
 const email =
 document.getElementById(
 "homeRegisterEmail"
 ).value.trim();
-
 
 const password =
 document.getElementById(
 "homeRegisterPassword"
 ).value;
 
-
 const confirmPassword =
 document.getElementById(
 "homeRegisterConfirm"
 ).value;
 
-
 const button =
 document.getElementById(
 "homeRegisterButton"
 );
-
 
 if(
 !username ||
@@ -2980,7 +3041,6 @@ return;
 
 }
 
-
 if(username.length < 3){
 
 showAuthMessage(
@@ -2992,7 +3052,6 @@ showAuthMessage(
 return;
 
 }
-
 
 if(password.length < 8){
 
@@ -3006,7 +3065,6 @@ return;
 
 }
 
-
 if(password !== confirmPassword){
 
 showAuthMessage(
@@ -3019,21 +3077,17 @@ return;
 
 }
 
-
 button.disabled =
 true;
 
-
 button.textContent =
 "Inatengeneza akaunti...";
-
 
 showAuthMessage(
 "registerMessage",
 "Inatengeneza akaunti yako...",
 "success"
 );
-
 
 try{
 
@@ -3062,9 +3116,7 @@ password:password
 }
 );
 
-
 let data;
-
 
 try{
 
@@ -3079,7 +3131,6 @@ throw new Error(
 
 }
 
-
 if(
 !response.ok ||
 !data.success
@@ -3092,26 +3143,21 @@ data.message ||
 "error"
 );
 
-
 button.disabled =
 false;
-
 
 button.textContent =
 "Register";
 
-
 return;
 
 }
-
 
 showAuthMessage(
 "registerMessage",
 "Akaunti imeundwa kikamilifu. Unaelekezwa Login...",
 "success"
 );
-
 
 setTimeout(
 function(){
@@ -3121,27 +3167,22 @@ document.getElementById(
 ).value =
 "";
 
-
 document.getElementById(
 "homeRegisterEmail"
 ).value =
 "";
-
 
 document.getElementById(
 "homeRegisterPassword"
 ).value =
 "";
 
-
 document.getElementById(
 "homeRegisterConfirm"
 ).value =
 "";
 
-
 switchAuth("login");
-
 
 document.getElementById(
 "homeLogin"
@@ -3152,7 +3193,6 @@ email;
 1000
 );
 
-
 }catch(error){
 
 showAuthMessage(
@@ -3162,10 +3202,8 @@ error.message,
 "error"
 );
 
-
 button.disabled =
 false;
-
 
 button.textContent =
 "Register";
@@ -3186,30 +3224,25 @@ localStorage.getItem(
 "netsimulizi_user"
 );
 
-
 const loginButtons =
 document.querySelectorAll(
 ".auth-buttons .login-btn"
 );
-
 
 const registerButtons =
 document.querySelectorAll(
 ".auth-buttons .register-btn"
 );
 
-
 const userMenu =
 document.getElementById(
 "userMenu"
 );
 
-
 const sideAuth =
 document.getElementById(
 "sideAuth"
 );
-
 
 const mobileUser =
 document.getElementById(
@@ -3223,15 +3256,12 @@ userMenu.classList.remove(
 "active"
 );
 
-
 sideAuth.style.display =
 "grid";
-
 
 mobileUser.classList.remove(
 "active"
 );
-
 
 loginButtons.forEach(
 function(button){
@@ -3242,7 +3272,6 @@ button.style.display =
 }
 );
 
-
 registerButtons.forEach(
 function(button){
 
@@ -3251,7 +3280,6 @@ button.style.display =
 
 }
 );
-
 
 return;
 
@@ -3265,53 +3293,44 @@ JSON.parse(
 storedUser
 );
 
-
 const username =
 user.username ||
 user.name ||
 user.email ||
 "User";
 
-
 const email =
 user.email ||
 "";
-
 
 const firstLetter =
 username
 .charAt(0)
 .toUpperCase();
 
-
 document.getElementById(
 "headerUsername"
 ).textContent =
 username;
-
 
 document.getElementById(
 "dropdownUsername"
 ).textContent =
 username;
 
-
 document.getElementById(
 "dropdownEmail"
 ).textContent =
 email;
-
 
 document.getElementById(
 "userAvatar"
 ).textContent =
 firstLetter;
 
-
 userMenu.classList.add(
 "active"
 );
-
 
 loginButtons.forEach(
 function(button){
@@ -3322,7 +3341,6 @@ button.style.display =
 }
 );
 
-
 registerButtons.forEach(
 function(button){
 
@@ -3332,27 +3350,22 @@ button.style.display =
 }
 );
 
-
 sideAuth.style.display =
 "none";
-
 
 mobileUser.classList.add(
 "active"
 );
-
 
 document.getElementById(
 "mobileUsername"
 ).textContent =
 username;
 
-
 document.getElementById(
 "mobileEmail"
 ).textContent =
 email;
-
 
 }catch(error){
 
@@ -3360,7 +3373,6 @@ console.error(
 "User data error:",
 error
 );
-
 
 localStorage.removeItem(
 "netsimulizi_user"
@@ -3382,7 +3394,6 @@ document.getElementById(
 "userDropdown"
 );
 
-
 dropdown.classList.toggle(
 "active"
 );
@@ -3398,7 +3409,6 @@ const userMenu =
 document.getElementById(
 "userMenu"
 );
-
 
 if(
 userMenu &&
@@ -3430,7 +3440,6 @@ localStorage.getItem(
 "netsimulizi_user"
 );
 
-
 if(!storedUser){
 
 openAuth("login");
@@ -3438,7 +3447,6 @@ openAuth("login");
 return;
 
 }
-
 
 window.location.href =
 "profile.html";
@@ -3457,7 +3465,6 @@ localStorage.getItem(
 "netsimulizi_user"
 );
 
-
 if(!storedUser){
 
 openAuth("login");
@@ -3465,7 +3472,6 @@ openAuth("login");
 return;
 
 }
-
 
 window.location.href =
 "library.html";
@@ -3484,7 +3490,6 @@ localStorage.getItem(
 "netsimulizi_user"
 );
 
-
 if(!storedUser){
 
 openAuth("login");
@@ -3492,7 +3497,6 @@ openAuth("login");
 return;
 
 }
-
 
 window.location.href =
 "history.html";
@@ -3510,16 +3514,13 @@ localStorage.removeItem(
 "netsimulizi_user"
 );
 
-
 document.getElementById(
 "userDropdown"
 ).classList.remove(
 "active"
 );
 
-
 updateUserInterface();
-
 
 alert(
 "Umetoka kwenye akaunti yako."
@@ -3540,7 +3541,6 @@ document.getElementById(
 "active"
 );
 
-
 document.getElementById(
 "sideOverlay"
 ).classList.add(
@@ -3557,7 +3557,6 @@ document.getElementById(
 ).classList.remove(
 "active"
 );
-
 
 document.getElementById(
 "sideOverlay"
@@ -3655,7 +3654,6 @@ localStorage.setItem(
 this.value
 );
 
-
 applyLanguage(
 this.value
 );
@@ -3710,7 +3708,6 @@ String(
 text || ""
 );
 
-
 if(
 text.length <= length
 ){
@@ -3718,7 +3715,6 @@ text.length <= length
 return text;
 
 }
-
 
 return text.substring(
 0,
@@ -3735,7 +3731,6 @@ number
 const value =
 Number(number);
 
-
 if(
 !Number.isFinite(value)
 ){
@@ -3743,7 +3738,6 @@ if(
 return "0";
 
 }
-
 
 return value.toLocaleString();
 
@@ -3782,14 +3776,12 @@ localStorage.getItem(
 "netsimulizi_language"
 );
 
-
 if(savedLanguage){
 
 const languageScreen =
 document.getElementById(
 "languageScreen"
 );
-
 
 if(languageScreen){
 
@@ -3798,12 +3790,10 @@ languageScreen.style.display =
 
 }
 
-
 const headerLanguage =
 document.getElementById(
 "headerLanguage"
 );
-
 
 if(headerLanguage){
 
@@ -3812,26 +3802,22 @@ savedLanguage;
 
 }
 
-
 applyLanguage(
 savedLanguage
 );
 
 }
 
-
 updateUserInterface();
-
 
 loadCategories();
 
-
 loadStories();
 
-}
-);
+});
 
 </script>
 
 </body>
 </html>
+```
