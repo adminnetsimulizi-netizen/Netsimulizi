@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Settings - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+      --danger:#e74c3c;
+      --success:#2ecc71;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input,
+    select{
+      font:inherit;
+    }
+
+    /* HEADER */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .login-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .register-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    /* SIDE NAV */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* MAIN */
+
+    main{
+      width:100%;
+      max-width:1000px;
+      margin:0 auto;
+      padding:32px 28px 70px;
+    }
+
+    .page-title{
+      margin-bottom:28px;
+    }
+
+    .page-title h1{
+      font-size:32px;
+      margin-bottom:7px;
+    }
+
+    .page-title p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    /* SETTINGS */
+
+    .settings-section{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      margin-bottom:18px;
+      overflow:hidden;
+    }
+
+    .section-head{
+      padding:20px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .section-head h2{
+      font-size:19px;
+      margin-bottom:5px;
+    }
+
+    .section-head p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .setting-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:19px 20px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .setting-row:last-child{
+      border-bottom:none;
+    }
+
+    .setting-info{
+      min-width:0;
+    }
+
+    .setting-title{
+      font-size:15px;
+      font-weight:700;
+      margin-bottom:5px;
+    }
+
+    .setting-description{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    /* SELECT */
+
+    .setting-select{
+      min-width:170px;
+      padding:10px 12px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--surface-2);
+      color:var(--text);
+      outline:none;
+    }
+
+    .setting-select:focus{
+      border-color:var(--gold);
+    }
+
+    /* TOGGLE */
+
+    .switch{
+      position:relative;
+      width:48px;
+      height:26px;
+      flex-shrink:0;
+    }
+
+    .switch input{
+      opacity:0;
+      width:0;
+      height:0;
+    }
+
+    .slider{
+      position:absolute;
+      inset:0;
+      background:#343945;
+      border-radius:30px;
+      cursor:pointer;
+      transition:.2s;
+    }
+
+    .slider:before{
+      content:"";
+      position:absolute;
+      width:20px;
+      height:20px;
+      left:3px;
+      top:3px;
+      background:#fff;
+      border-radius:50%;
+      transition:.2s;
+    }
+
+    .switch input:checked + .slider{
+      background:var(--gold);
+    }
+
+    .switch input:checked + .slider:before{
+      transform:translateX(22px);
+    }
+
+    /* BUTTONS */
+
+    .setting-button{
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      padding:10px 15px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:700;
+      white-space:nowrap;
+    }
+
+    .setting-button:hover{
+      border-color:var(--gold);
+      color:var(--gold-light);
+    }
+
+    .danger-button{
+      border-color:rgba(231,76,60,.35);
+      color:#ff8f84;
+    }
+
+    .danger-button:hover{
+      background:rgba(231,76,60,.08);
+      border-color:var(--danger);
+      color:#ffaaa2;
+    }
+
+    /* USER STATE */
+
+    .login-notice{
+      display:none;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:40px 25px;
+      text-align:center;
+      margin-bottom:18px;
+    }
+
+    .login-notice-icon{
+      font-size:40px;
+      margin-bottom:12px;
+    }
+
+    .login-notice h2{
+      margin-bottom:8px;
+    }
+
+    .login-notice p{
+      color:var(--muted);
+      margin-bottom:20px;
+    }
+
+    .primary-button{
+      display:inline-block;
+      background:var(--gold);
+      color:#111;
+      border:none;
+      border-radius:8px;
+      padding:11px 20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .primary-button:hover{
+      background:var(--gold-light);
+    }
+
+    /* SAVE */
+
+    .save-area{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:24px;
+    }
+
+    .save-button{
+      background:var(--gold);
+      color:#111;
+      border:none;
+      border-radius:9px;
+      padding:12px 24px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .save-button:hover{
+      background:var(--gold-light);
+    }
+
+    .save-message{
+      display:none;
+      color:var(--success);
+      font-size:13px;
+      margin-right:15px;
+      align-self:center;
+    }
+
+    /* FOOTER */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* MOBILE */
+
+    @media(max-width:700px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      .header-right .login-btn,
+      .header-right .register-btn{
+        padding:8px 10px;
+        font-size:12px;
+      }
+
+      main{
+        padding:24px 14px 55px;
+      }
+
+      .page-title h1{
+        font-size:27px;
+      }
+
+      .setting-row{
+        align-items:flex-start;
+        padding:17px 15px;
+      }
+
+      .setting-info{
+        flex:1;
+      }
+
+      .setting-select{
+        min-width:125px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+    }
+
+    @media(max-width:480px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+      .section-head{
+        padding:17px 15px;
+      }
+
+      .section-head h2{
+        font-size:17px;
+      }
+
+      .setting-row{
+        gap:12px;
+      }
+
+      .setting-title{
+        font-size:14px;
+      }
+
+      .setting-description{
+        font-size:12px;
+      }
+
+      .setting-select{
+        min-width:105px;
+        font-size:12px;
+      }
+
+      .setting-button{
+        padding:9px 10px;
+        font-size:12px;
+      }
+
+      .save-area{
+        flex-direction:column;
+        gap:12px;
+      }
+
+      .save-message{
+        margin-right:0;
+        text-align:right;
+      }
+
+      .save-button{
+        width:100%;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="settings.html" class="active">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <section class="page-title">
+
+      <h1>Settings</h1>
+
+      <p>
+        Dhibiti mipangilio ya akaunti na namna unavyotumia Net Simulizi.
+      </p>
+
+    </section>
+
+    <!-- LOGIN NOTICE -->
+
+    <section
+      class="login-notice"
+      id="loginNotice"
+    >
+
+      <div class="login-notice-icon">
+        ⚙️
+      </div>
+
+      <h2>
+        Ingia kwenye akaunti
+      </h2>
+
+      <p>
+        Ingia ili uweze kuhifadhi na kutumia mipangilio yako.
+      </p>
+
+      <a href="login.html">
+        <button class="primary-button">
+          Ingia
+        </button>
+      </a>
+
+    </section>
+
+    <!-- READING -->
+
+    <section class="settings-section">
+
+      <div class="section-head">
+
+        <h2>
+          📖 Kusoma
+        </h2>
+
+        <p>
+          Badilisha namna hadithi zinavyoonekana wakati wa kusoma.
+        </p>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Ukubwa wa maandishi
+          </div>
+
+          <div class="setting-description">
+            Chagua ukubwa wa maandishi unaokufaa.
+          </div>
+
+        </div>
+
+        <select
+          class="setting-select"
+          id="fontSize"
+        >
+
+          <option value="small">
+            Ndogo
+          </option>
+
+          <option value="medium">
+            Kati
+          </option>
+
+          <option value="large">
+            Kubwa
+          </option>
+
+          <option value="xlarge">
+            Kubwa zaidi
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Dark Mode
+          </div>
+
+          <div class="setting-description">
+            Tumia mwonekano wa giza wakati wa kusoma.
+          </div>
+
+        </div>
+
+        <label class="switch">
+
+          <input
+            type="checkbox"
+            id="darkMode"
+            checked
+          >
+
+          <span class="slider"></span>
+
+        </label>
+
+      </div>
+
+    </section>
+
+    <!-- LANGUAGE -->
+
+    <section class="settings-section">
+
+      <div class="section-head">
+
+        <h2>
+          🌐 Lugha
+        </h2>
+
+        <p>
+          Chagua lugha unayotaka kutumia kwenye Net Simulizi.
+        </p>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Lugha ya programu
+          </div>
+
+          <div class="setting-description">
+            Mpangilio huu utahifadhi lugha uliyochagua.
+          </div>
+
+        </div>
+
+        <select
+          class="setting-select"
+          id="language"
+        >
+
+          <option value="sw">
+            Kiswahili
+          </option>
+
+          <option value="en">
+            English
+          </option>
+
+        </select>
+
+      </div>
+
+    </section>
+
+    <!-- READING EXPERIENCE -->
+
+    <section class="settings-section">
+
+      <div class="section-head">
+
+        <h2>
+          ✨ Uzoefu wa Kusoma
+        </h2>
+
+        <p>
+          Dhibiti baadhi ya vipengele vya ukurasa wa kusomea.
+        </p>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Endelea kutoka ulipoishia
+          </div>
+
+          <div class="setting-description">
+            Fungua hadithi kutoka sehemu uliyofikia mara ya mwisho.
+          </div>
+
+        </div>
+
+        <label class="switch">
+
+          <input
+            type="checkbox"
+            id="continueReading"
+            checked
+          >
+
+          <span class="slider"></span>
+
+        </label>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Thibitisha kabla ya kuondoka
+          </div>
+
+          <div class="setting-description">
+            Onyesha tahadhari unapojaribu kuondoka kwenye ukurasa wa kusoma.
+          </div>
+
+        </div>
+
+        <label class="switch">
+
+          <input
+            type="checkbox"
+            id="readingWarning"
+          >
+
+          <span class="slider"></span>
+
+        </label>
+
+      </div>
+
+    </section>
+
+    <!-- PRIVACY -->
+
+    <section class="settings-section">
+
+      <div class="section-head">
+
+        <h2>
+          🔒 Faragha
+        </h2>
+
+        <p>
+          Dhibiti taarifa zinazohusiana na matumizi yako.
+        </p>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Historia ya kusoma
+          </div>
+
+          <div class="setting-description">
+            Hifadhi hadithi unazosoma kwenye historia yako.
+          </div>
+
+        </div>
+
+        <label class="switch">
+
+          <input
+            type="checkbox"
+            id="saveHistory"
+            checked
+          >
+
+          <span class="slider"></span>
+
+        </label>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Futa mipangilio
+          </div>
+
+          <div class="setting-description">
+            Rudisha mipangilio ya kifaa hiki kwenye hali ya mwanzo.
+          </div>
+
+        </div>
+
+        <button
+          class="setting-button danger-button"
+          id="resetSettings"
+          type="button"
+        >
+          Rudisha
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ACCOUNT -->
+
+    <section class="settings-section">
+
+      <div class="section-head">
+
+        <h2>
+          👤 Akaunti
+        </h2>
+
+        <p>
+          Chaguo zinazohusiana na akaunti yako.
+        </p>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Wasifu
+          </div>
+
+          <div class="setting-description">
+            Angalia au badilisha taarifa za wasifu wako.
+          </div>
+
+        </div>
+
+        <a href="profile.html">
+          <button
+            class="setting-button"
+            type="button"
+          >
+            Fungua
+          </button>
+        </a>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Maktaba yangu
+          </div>
+
+          <div class="setting-description">
+            Angalia hadithi ulizohifadhi.
+          </div>
+
+        </div>
+
+        <a href="library.html">
+          <button
+            class="setting-button"
+            type="button"
+          >
+            Fungua
+          </button>
+        </a>
+
+      </div>
+
+      <div class="setting-row">
+
+        <div class="setting-info">
+
+          <div class="setting-title">
+            Toka kwenye akaunti
+          </div>
+
+          <div class="setting-description">
+            Ondoka kwenye akaunti hii kwenye kifaa hiki.
+          </div>
+
+        </div>
+
+        <button
+          class="setting-button danger-button"
+          id="logoutButton"
+          type="button"
+        >
+          Toka
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- SAVE -->
+
+    <div class="save-area">
+
+      <span
+        class="save-message"
+        id="saveMessage"
+      >
+        ✓ Mipangilio imehifadhiwa
+      </span>
+
+      <button
+        class="save-button"
+        id="saveButton"
+        type="button"
+      >
+        Hifadhi Mipangilio
+      </button>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    /* =========================
+       USER
+    ========================= */
+
+    function loadUser(){
+
+      const guestButtons =
+        document.getElementById("guestButtons");
+
+      const userBox =
+        document.getElementById("userBox");
+
+      const userName =
+        document.getElementById("userName");
+
+      const userAvatar =
+        document.getElementById("userAvatar");
+
+      const loginNotice =
+        document.getElementById("loginNotice");
+
+      let user = null;
+
+      try{
+
+        user = JSON.parse(
+          localStorage.getItem("netsimulizi_user")
+        );
+
+      }catch(error){
+
+        user = null;
+
+      }
+
+      if(user){
+
+        guestButtons.style.display = "none";
+        userBox.style.display = "flex";
+        loginNotice.style.display = "none";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent = name;
+
+        userAvatar.textContent =
+          name.charAt(0).toUpperCase();
+
+      }else{
+
+        guestButtons.style.display = "flex";
+        userBox.style.display = "none";
+        loginNotice.style.display = "block";
+
+      }
+
+    }
+
+    /* =========================
+       SETTINGS
+    ========================= */
+
+    const defaultSettings = {
+
+      fontSize:"medium",
+
+      darkMode:true,
+
+      language:"sw",
+
+      continueReading:true,
+
+      readingWarning:false,
+
+      saveHistory:true
+
+    };
+
+    function loadSettings(){
+
+      let settings = {};
+
+      try{
+
+        settings = JSON.parse(
+          localStorage.getItem(
+            "netsimulizi_settings"
+          )
+        ) || {};
+
+      }catch(error){
+
+        settings = {};
+
+      }
+
+      const finalSettings = {
+        ...defaultSettings,
+        ...settings
+      };
+
+      document.getElementById(
+        "fontSize"
+      ).value =
+        finalSettings.fontSize;
+
+      document.getElementById(
+        "darkMode"
+      ).checked =
+        finalSettings.darkMode;
+
+      document.getElementById(
+        "language"
+      ).value =
+        finalSettings.language;
+
+      document.getElementById(
+        "continueReading"
+      ).checked =
+        finalSettings.continueReading;
+
+      document.getElementById(
+        "readingWarning"
+      ).checked =
+        finalSettings.readingWarning;
+
+      document.getElementById(
+        "saveHistory"
+      ).checked =
+        finalSettings.saveHistory;
+
+    }
+
+    function saveSettings(){
+
+      const settings = {
+
+        fontSize:
+          document.getElementById(
+            "fontSize"
+          ).value,
+
+        darkMode:
+          document.getElementById(
+            "darkMode"
+          ).checked,
+
+        language:
+          document.getElementById(
+            "language"
+          ).value,
+
+        continueReading:
+          document.getElementById(
+            "continueReading"
+          ).checked,
+
+        readingWarning:
+          document.getElementById(
+            "readingWarning"
+          ).checked,
+
+        saveHistory:
+          document.getElementById(
+            "saveHistory"
+          ).checked
+
+      };
+
+      localStorage.setItem(
+        "netsimulizi_settings",
+        JSON.stringify(settings)
+      );
+
+      /*
+        Tunahifadhi pia lugha kwenye
+        key ambayo mfumo wa Net Simulizi
+        tayari unatumia.
+      */
+
+      localStorage.setItem(
+        "netsimulizi_language",
+        settings.language
+      );
+
+      const message =
+        document.getElementById(
+          "saveMessage"
+        );
+
+      message.style.display = "block";
+
+      setTimeout(
+        () => {
+          message.style.display = "none";
+        },
+        2500
+      );
+
+    }
+
+    /* =========================
+       RESET
+    ========================= */
+
+    document
+      .getElementById("resetSettings")
+      .addEventListener(
+        "click",
+        function(){
+
+          const confirmed =
+            confirm(
+              "Unataka kurudisha mipangilio yote kwenye hali ya mwanzo?"
+            );
+
+          if(!confirmed){
+            return;
+          }
+
+          localStorage.removeItem(
+            "netsimulizi_settings"
+          );
+
+          loadSettings();
+
+          localStorage.setItem(
+            "netsimulizi_language",
+            "sw"
+          );
+
+        }
+      );
+
+    /* =========================
+       LOGOUT
+    ========================= */
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        function(){
+
+          const confirmed =
+            confirm(
+              "Unataka kutoka kwenye akaunti?"
+            );
+
+          if(!confirmed){
+            return;
+          }
+
+          localStorage.removeItem(
+            "netsimulizi_user"
+          );
+
+          window.location.href =
+            "index.html";
+
+        }
+      );
+
+    /* =========================
+       SAVE
+    ========================= */
+
+    document
+      .getElementById("saveButton")
+      .addEventListener(
+        "click",
+        saveSettings
+      );
+
+    /* =========================
+       SIDE MENU
+    ========================= */
+
+    const menuBtn =
+      document.getElementById("menuBtn");
+
+    const closeNav =
+      document.getElementById("closeNav");
+
+    const sideNav =
+      document.getElementById("sideNav");
+
+    const overlay =
+      document.getElementById("overlay");
+
+    function openMenu(){
+
+      sideNav.classList.add("open");
+
+      overlay.classList.add("show");
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove("open");
+
+      overlay.classList.remove("show");
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(".nav-list a")
+      .forEach(link => {
+
+        link.addEventListener(
+          "click",
+          closeMenu
+        );
+
+      });
+
+    /* =========================
+       START
+    ========================= */
+
+    loadUser();
+
+    loadSettings();
+
+  </script>
+
+</body>
+</html>
