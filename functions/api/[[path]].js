@@ -67,7 +67,7 @@ async function hashPassword(password) {
         ["deriveBits"]
     );
 
-const iterations = 1000;
+    const iterations = 1000;
 
     const hash = await crypto.subtle.deriveBits(
         {
@@ -482,6 +482,66 @@ export async function onRequest(context) {
             }
         }
 
+        /* =========================
+           PROFILE
+        ========================= */
+
+        if (path.startsWith("/profile/")) {
+
+            const parts = path.split("/").filter(Boolean);
+            const userId = Number(parts[1]);
+
+            if (
+                parts.length !== 2 ||
+                !Number.isInteger(userId) ||
+                userId <= 0
+            ) {
+                return errorResponse(
+                    "Invalid user ID",
+                    400
+                );
+            }
+
+            try {
+
+                const user = await env.D1
+                    .prepare(`
+                        SELECT
+                            id,
+                            username,
+                            email,
+                            role,
+                            status,
+                            created_at,
+                            updated_at
+                        FROM users
+                        WHERE id = ?
+                        LIMIT 1
+                    `)
+                    .bind(userId)
+                    .first();
+
+                if (!user) {
+                    return errorResponse(
+                        "User not found",
+                        404
+                    );
+                }
+
+                return json({
+                    success: true,
+                    user
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to load profile",
+                    500
+                );
+            }
+        }
+
         return errorResponse(
             "Endpoint not found",
             404
@@ -492,144 +552,133 @@ export async function onRequest(context) {
        POST REQUEST
     ========================= */
 
- if (request.method === "POST") {
+    if (request.method === "POST") {
 
-    const url = new URL(request.url);
+        const url = new URL(request.url);
 
-    let path = url.pathname;
+        let path = url.pathname;
 
-    if (path.startsWith("/api")) {
-        path = path.substring(4);
-    }
+        if (path.startsWith("/api")) {
+            path = path.substring(4);
+        }
 
-    if (path === "") {
-        path = "/";
-    }
-
-    // TEMP DEBUG
-    if (path !== "/register" && path !== "/login") {
-        return json({
-            success: false,
-            message: "POST endpoint not found",
-            received_path: path,
-            received_url: url.href
-        }, 404);
-    }
+        if (path === "") {
+            path = "/";
+        }
 
         /* =========================
            REGISTER
         ========================= */
 
-     /* =========================
-   REGISTER
-========================= */
+        if (path === "/register") {
 
-if (path === "/register") {
+            try {
 
-    try {
+                const body = await readJson(request);
 
-        const body = await readJson(request);
+                if (!body) {
+                    return errorResponse(
+                        "Invalid JSON request",
+                        400
+                    );
+                }
 
-        if (!body) {
-            return errorResponse("Invalid JSON request", 400);
-        }
-
-        const {
-            username,
-            email,
-            password
-        } = body;
-
-        if (
-            typeof username !== "string" ||
-            typeof email !== "string" ||
-            typeof password !== "string"
-        ) {
-            return errorResponse(
-                "Username, email and password are required",
-                400
-            );
-        }
-
-        const cleanUsername = username.trim();
-        const cleanEmail = email.trim().toLowerCase();
-
-        if (cleanUsername.length < 3) {
-            return errorResponse(
-                "Username must be at least 3 characters",
-                400
-            );
-        }
-
-        if (password.length < 8) {
-            return errorResponse(
-                "Password must be at least 8 characters",
-                400
-            );
-        }
-
-        const existingUser = await env.D1
-            .prepare(`
-                SELECT id
-                FROM users
-                WHERE username = ? OR email = ?
-                LIMIT 1
-            `)
-            .bind(cleanUsername, cleanEmail)
-            .first();
-
-        if (existingUser) {
-            return errorResponse(
-                "Username or email already exists",
-                409
-            );
-        }
-
-        /*
-         * TEMPORARY INTEGRATION TEST
-         * Hashing imeondolewa kwa muda.
-         */
-
-       const passwordHash = await hashPassword(password);
-
-        const result = await env.D1
-            .prepare(`
-                INSERT INTO users (
+                const {
                     username,
                     email,
-                    password_hash,
-                    role,
-                    status
-                )
-                VALUES (?, ?, ?, 'reader', 'active')
-            `)
-            .bind(
-                cleanUsername,
-                cleanEmail,
-                passwordHash
-            )
-            .run();
+                    password
+                } = body;
 
-        return json({
-            success: true,
-            message: "Account created successfully",
-            user: {
-                id: result.meta.last_row_id,
-                username: cleanUsername,
-                email: cleanEmail,
-                role: "reader",
-                status: "active"
+                if (
+                    typeof username !== "string" ||
+                    typeof email !== "string" ||
+                    typeof password !== "string"
+                ) {
+                    return errorResponse(
+                        "Username, email and password are required",
+                        400
+                    );
+                }
+
+                const cleanUsername = username.trim();
+                const cleanEmail = email.trim().toLowerCase();
+
+                if (cleanUsername.length < 3) {
+                    return errorResponse(
+                        "Username must be at least 3 characters",
+                        400
+                    );
+                }
+
+                if (password.length < 8) {
+                    return errorResponse(
+                        "Password must be at least 8 characters",
+                        400
+                    );
+                }
+
+                const existingUser = await env.D1
+                    .prepare(`
+                        SELECT id
+                        FROM users
+                        WHERE username = ? OR email = ?
+                        LIMIT 1
+                    `)
+                    .bind(
+                        cleanUsername,
+                        cleanEmail
+                    )
+                    .first();
+
+                if (existingUser) {
+                    return errorResponse(
+                        "Username or email already exists",
+                        409
+                    );
+                }
+
+                const passwordHash =
+                    await hashPassword(password);
+
+                const result = await env.D1
+                    .prepare(`
+                        INSERT INTO users (
+                            username,
+                            email,
+                            password_hash,
+                            role,
+                            status
+                        )
+                        VALUES (?, ?, ?, 'reader', 'active')
+                    `)
+                    .bind(
+                        cleanUsername,
+                        cleanEmail,
+                        passwordHash
+                    )
+                    .run();
+
+                return json({
+                    success: true,
+                    message: "Account created successfully",
+                    user: {
+                        id: result.meta.last_row_id,
+                        username: cleanUsername,
+                        email: cleanEmail,
+                        role: "reader",
+                        status: "active"
+                    }
+                }, 201);
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Registration failed: " + error.message,
+                    500
+                );
             }
-        }, 201);
+        }
 
-    } catch (error) {
-
-        return errorResponse(
-            "Registration failed: " + error.message,
-            500
-        );
-    }
-}
         /* =========================
            LOGIN
         ========================= */
@@ -718,8 +767,6 @@ if (path === "/register") {
                     );
                 }
 
-                /* Never send password_hash */
-
                 return json({
                     success: true,
                     message: "Login successful",
@@ -751,44 +798,4 @@ if (path === "/register") {
         "Method not allowed",
         405
     );
-}
-
-// GET /api/profile/:id
-if (path.startsWith("/profile/")) {
-    const userId = path.split("/")[2];
-
-    if (!userId) {
-        return json({
-            success: false,
-            message: "User ID is required"
-        }, 400);
-    }
-
-    const user = await env.D1.prepare(`
-        SELECT
-            id,
-            username,
-            email,
-            role,
-            status,
-            created_at,
-            updated_at
-        FROM users
-        WHERE id = ?
-        LIMIT 1
-    `)
-    .bind(userId)
-    .first();
-
-    if (!user) {
-        return json({
-            success: false,
-            message: "User not found"
-        }, 404);
-    }
-
-    return json({
-        success: true,
-        user
-    });
 }
