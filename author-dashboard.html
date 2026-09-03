@@ -7,12 +7,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Author Dashboard — Net Simulizi</title>
+<title>My Stories — Net Simulizi</title>
 
 <style>
 
 *{
-  box-sizing:border-box
+  box-sizing:border-box;
 }
 
 body{
@@ -20,12 +20,12 @@ body{
   background:#f6f0e5;
   color:#191713;
   font-family:Arial,sans-serif;
-  transition:.2s
+  transition:.2s;
 }
 
 body.dark{
   background:#111;
-  color:#eee
+  color:#eee;
 }
 
 .top{
@@ -37,20 +37,20 @@ body.dark{
   align-items:center;
   position:sticky;
   top:0;
-  z-index:100
+  z-index:100;
 }
 
 .logo{
   color:#d4aa43;
   font-weight:900;
   letter-spacing:2px;
-  text-decoration:none
+  text-decoration:none;
 }
 
 .top-right{
   display:flex;
   gap:8px;
-  align-items:center
+  align-items:center;
 }
 
 .btn{
@@ -59,25 +59,22 @@ body.dark{
   border:1px solid #d4aa43;
   background:transparent;
   color:inherit;
-  cursor:pointer
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-block;
 }
 
 .primary{
   background:#d4aa43;
   color:#171512;
   border:0;
-  font-weight:700
-}
-
-.danger{
-  border-color:#b94a48;
-  color:#b94a48
+  font-weight:700;
 }
 
 .wrap{
   max-width:1100px;
   margin:auto;
-  padding:20px
+  padding:20px;
 }
 
 .hero{
@@ -85,187 +82,134 @@ body.dark{
   border:1px solid #e4dccd;
   border-radius:16px;
   padding:25px;
-  margin-bottom:20px
+  margin-bottom:20px;
 }
 
 .dark .hero{
   background:#1d1b18;
-  border-color:#38342d
+  border-color:#38342d;
 }
 
 .hero h1{
-  margin:0 0 8px
+  margin:0 0 8px;
 }
 
 .muted{
-  color:#777
+  color:#777;
 }
 
 .dark .muted{
-  color:#aaa
+  color:#aaa;
 }
 
-
-/* WELCOME */
-
-.welcome{
+.toolbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:20px;
-  flex-wrap:wrap
+  gap:12px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
 }
 
-.author-name{
-  color:#a17a21;
-  font-weight:800
+.search{
+  flex:1;
+  min-width:220px;
 }
 
-.dark .author-name{
-  color:#d4aa43
+.search input{
+  width:100%;
+  padding:12px 14px;
+  border:1px solid #ddd;
+  border-radius:9px;
+  background:#fffdf8;
+  color:#191713;
+  outline:none;
 }
 
+.dark .search input{
+  background:#1d1b18;
+  color:#eee;
+  border-color:#403b33;
+}
 
-/* STATS */
-
-.stats{
+.story-list{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-  margin-bottom:20px
+  gap:16px;
 }
 
-.stat{
+.story-card{
   background:#fffdf8;
   border:1px solid #e4dccd;
   border-radius:14px;
-  padding:20px
-}
-
-.dark .stat{
-  background:#1d1b18;
-  border-color:#38342d
-}
-
-.stat-title{
-  color:#777;
-  font-size:13px;
-  margin-bottom:8px
-}
-
-.dark .stat-title{
-  color:#aaa
-}
-
-.stat-value{
-  font-size:25px;
-  font-weight:900
-}
-
-.stat-gold{
-  color:#a17a21
-}
-
-.dark .stat-gold{
-  color:#d4aa43
-}
-
-
-/* GRID */
-
-.grid{
+  padding:18px;
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:20px
-}
-
-.card{
-  background:#fffdf8;
-  border:1px solid #e4dccd;
-  border-radius:16px;
-  padding:22px;
-  margin-bottom:20px
-}
-
-.dark .card{
-  background:#1d1b18;
-  border-color:#38342d
-}
-
-.card h2{
-  margin-top:0
-}
-
-
-/* QUICK ACTIONS */
-
-.actions{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px
-}
-
-.action{
-  display:block;
-  padding:17px;
-  border:1px solid #e4dccd;
-  border-radius:10px;
-  text-decoration:none;
-  color:inherit;
-  transition:.2s
-}
-
-.dark .action{
-  border-color:#38342d
-}
-
-.action:hover{
-  border-color:#d4aa43;
-  transform:translateY(-2px)
-}
-
-.action strong{
-  display:block;
-  margin-bottom:5px
-}
-
-.action span{
-  color:#777;
-  font-size:12px
-}
-
-.dark .action span{
-  color:#aaa
-}
-
-
-/* STORIES */
-
-.story-list{
-  display:flex;
-  flex-direction:column;
-  gap:12px
-}
-
-.story-item{
-  padding:15px;
-  border:1px solid #e4dccd;
-  border-radius:10px
-}
-
-.dark .story-item{
-  border-color:#38342d
-}
-
-.story-head{
-  display:flex;
-  justify-content:space-between;
+  grid-template-columns:90px 1fr auto;
+  gap:18px;
   align-items:center;
-  gap:10px
+}
+
+.dark .story-card{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.cover{
+  width:90px;
+  height:125px;
+  border-radius:9px;
+  overflow:hidden;
+  background:linear-gradient(145deg,#211d17,#a47b28);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:#fff;
+  font-weight:900;
+  font-size:13px;
+  padding:8px;
+}
+
+.cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
 .story-title{
-  font-weight:800
+  margin:0 0 7px;
+  font-size:19px;
+}
+
+.description{
+  font-size:13px;
+  color:#777;
+  line-height:1.5;
+  margin:0 0 10px;
+}
+
+.dark .description{
+  color:#aaa;
+}
+
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:20px;
+  background:#eee5d4;
+  color:#665020;
+  font-size:11px;
+  font-weight:700;
+}
+
+.dark .badge{
+  background:#302b22;
+  color:#d8b866;
 }
 
 .status{
@@ -273,206 +217,213 @@ body.dark{
   padding:5px 9px;
   border-radius:20px;
   font-size:11px;
-  font-weight:700
+  font-weight:700;
 }
 
-.status.published{
+.status.approved{
   background:#dff3e4;
-  color:#236b35
+  color:#216b35;
 }
 
 .status.pending{
-  background:#f8edcf;
-  color:#80601b
+  background:#fff0c9;
+  color:#765500;
 }
 
-.status.draft{
-  background:#e9e9e9;
-  color:#555
+.status.rejected{
+  background:#ffe0e0;
+  color:#922c2c;
 }
 
-.dark .status.published{
-  background:#193221;
-  color:#9be0ad
+.status.ongoing{
+  background:#e2edf9;
+  color:#285b89;
+}
+
+.status.completed{
+  background:#e5e5e5;
+  color:#444;
+}
+
+.dark .status.approved{
+  background:#193523;
+  color:#9be0ad;
 }
 
 .dark .status.pending{
-  background:#342b1d;
-  color:#d4aa43
+  background:#3a3018;
+  color:#e5c66d;
 }
 
-.dark .status.draft{
+.dark .status.rejected{
+  background:#3b1d1d;
+  color:#ffaaaa;
+}
+
+.dark .status.ongoing{
+  background:#1c2c3d;
+  color:#9ec9ee;
+}
+
+.dark .status.completed{
   background:#333;
-  color:#bbb
+  color:#ccc;
 }
 
+.actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  min-width:120px;
+}
 
-/* EARNINGS */
+.actions .btn{
+  text-align:center;
+  font-size:13px;
+  padding:9px 10px;
+}
 
-.earning-box{
-  padding:20px;
+.empty{
+  background:#fffdf8;
+  border:1px dashed #d6cbb8;
+  border-radius:14px;
+  padding:50px 20px;
+  text-align:center;
+}
+
+.dark .empty{
+  background:#1d1b18;
+  border-color:#4a4439;
+}
+
+.empty h2{
+  margin:0 0 8px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
   border-radius:12px;
-  background:#f4ecdc;
-  border:1px solid #e4d5b9
+  padding:16px;
 }
 
-.dark .earning-box{
-  background:#25221d;
-  border-color:#484136
+.dark .stat{
+  background:#1d1b18;
+  border-color:#38342d;
 }
 
-.balance{
-  font-size:30px;
+.stat-number{
+  font-size:24px;
   font-weight:900;
   color:#a17a21;
-  margin:8px 0
 }
 
-.dark .balance{
-  color:#d4aa43
+.dark .stat-number{
+  color:#d4aa43;
 }
 
-.withdraw{
-  margin-top:15px
-}
-
-.withdraw:disabled{
-  opacity:.45;
-  cursor:not-allowed
-}
-
-.note{
-  margin-top:10px;
-  color:#777;
+.stat-label{
   font-size:12px;
-  line-height:1.5
+  color:#777;
+  margin-top:4px;
 }
 
-.dark .note{
-  color:#aaa
+.dark .stat-label{
+  color:#aaa;
 }
-
-
-/* EMPTY / LOADING */
-
-.loading,
-.empty{
-  text-align:center;
-  padding:25px;
-  color:#777
-}
-
-.dark .loading,
-.dark .empty{
-  color:#aaa
-}
-
-.spinner{
-  width:30px;
-  height:30px;
-  border:3px solid #ddd;
-  border-top-color:#d4aa43;
-  border-radius:50%;
-  margin:0 auto 10px;
-  animation:spin .8s linear infinite
-}
-
-@keyframes spin{
-  to{
-    transform:rotate(360deg)
-  }
-}
-
-
-/* ERROR */
-
-.error{
-  display:none;
-  padding:14px;
-  margin-bottom:20px;
-  border-radius:9px;
-  background:#ffe7e7;
-  border:1px solid #e2aaaa;
-  color:#9b2222
-}
-
-.dark .error{
-  background:#351b1b;
-  border-color:#653333;
-  color:#ffaaaa
-}
-
-
-/* FOOTER */
 
 .footer{
   background:#171512;
   color:#aaa;
   text-align:center;
   padding:30px;
-  margin-top:30px
+  margin-top:30px;
 }
 
 .footer p{
-  margin:8px 0
+  margin:8px 0;
 }
 
-
-/* MOBILE */
-
-@media(max-width:850px){
-
-  .stats{
-    grid-template-columns:repeat(2,1fr)
-  }
-
+.loading{
+  text-align:center;
+  padding:35px;
+  color:#777;
 }
 
-@media(max-width:700px){
+.error{
+  background:#ffe7e7;
+  border:1px solid #e2aaaa;
+  color:#9b2222;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
 
-  .wrap{
-    padding:15px
+.dark .error{
+  background:#351b1b;
+  border-color:#653333;
+  color:#ffaaaa;
+}
+
+@media(max-width:800px){
+
+  .story-card{
+    grid-template-columns:70px 1fr;
   }
 
-  .grid{
-    grid-template-columns:1fr
+  .cover{
+    width:70px;
+    height:100px;
   }
 
   .actions{
-    grid-template-columns:1fr
+    grid-column:1 / -1;
+    flex-direction:row;
+    flex-wrap:wrap;
   }
 
-  .welcome{
-    align-items:flex-start
+  .actions .btn{
+    flex:1;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
   }
 
 }
 
 @media(max-width:500px){
 
-  .stats{
-    grid-template-columns:1fr 1fr;
-    gap:10px
+  .wrap{
+    padding:15px;
   }
 
-  .stat{
-    padding:15px
-  }
-
-  .stat-value{
-    font-size:20px
+  .hero{
+    padding:18px;
   }
 
   .top{
-    padding:13px
+    padding:13px;
   }
 
   .top-right .btn{
-    padding:8px 10px
+    padding:8px 10px;
   }
 
-  .logo{
-    font-size:14px
+  .story-card{
+    padding:14px;
+    gap:12px;
+  }
+
+  .stats{
+    gap:8px;
   }
 
 }
@@ -485,11 +436,12 @@ body.dark{
 <body>
 
 
-<!-- HEADER -->
-
 <header class="top">
 
-  <a class="logo" href="index.html">
+  <a
+    href="author-dashboard.html"
+    class="logo"
+  >
     NET SIMULIZI
   </a>
 
@@ -503,329 +455,130 @@ body.dark{
       ◐
     </button>
 
-    <button
+    <a
+      href="author-dashboard.html"
       class="btn"
-      type="button"
-      onclick="location.href='index.html'"
     >
-      Home
-    </button>
-
-    <button
-      class="btn danger"
-      id="logoutBtn"
-      type="button"
-    >
-      Logout
-    </button>
+      Dashboard
+    </a>
 
   </div>
 
 </header>
 
 
-<!-- MAIN -->
-
 <main class="wrap">
 
 
-  <!-- ERROR -->
-
-  <div
-    id="errorBox"
-    class="error"
-  ></div>
-
-
-  <!-- WELCOME -->
-
   <section class="hero">
 
-    <div class="welcome">
+    <h1>
+      My Stories
+    </h1>
 
-      <div>
-
-        <h1>Author Dashboard</h1>
-
-        <p class="muted">
-          Karibu,
-          <span
-            class="author-name"
-            id="authorName"
-          >
-            Mwandishi
-          </span>
-        </p>
-
-        <p class="muted">
-          Simamia hadithi zako, episodes,
-          wasomaji na mapato yako.
-        </p>
-
-      </div>
-
-      <a
-        href="submit-story.html"
-        class="btn primary"
-      >
-        + Tuma Hadithi
-      </a>
-
-    </div>
+    <p class="muted">
+      Simamia hadithi zako, angalia status zake
+      na endelea kuongeza episodes.
+    </p>
 
   </section>
 
-
-  <!-- STATS -->
 
   <section class="stats">
 
     <div class="stat">
-
-      <div class="stat-title">
-        Hadithi
-      </div>
-
       <div
-        class="stat-value stat-gold"
-        id="storyCount"
+        class="stat-number"
+        id="totalStories"
       >
         0
       </div>
 
+      <div class="stat-label">
+        Jumla ya Stories
+      </div>
     </div>
 
 
     <div class="stat">
-
-      <div class="stat-title">
-        Episodes
-      </div>
-
       <div
-        class="stat-value"
-        id="episodeCount"
+        class="stat-number"
+        id="approvedStories"
       >
         0
       </div>
 
+      <div class="stat-label">
+        Approved
+      </div>
     </div>
 
 
     <div class="stat">
-
-      <div class="stat-title">
-        Wasomaji
-      </div>
-
       <div
-        class="stat-value"
-        id="readerCount"
+        class="stat-number"
+        id="pendingStories"
       >
         0
       </div>
 
+      <div class="stat-label">
+        Pending
+      </div>
     </div>
 
 
     <div class="stat">
-
-      <div class="stat-title">
-        Mapato
-      </div>
-
       <div
-        class="stat-value stat-gold"
-        id="earnings"
+        class="stat-number"
+        id="completedStories"
       >
-        TSh 0
+        0
       </div>
 
+      <div class="stat-label">
+        Completed
+      </div>
     </div>
 
   </section>
 
 
-  <div class="grid">
+  <div class="toolbar">
 
+    <div class="search">
 
-    <!-- STORIES -->
-
-    <section class="card">
-
-      <h2>
-        Hadithi Zangu
-      </h2>
-
-      <p class="muted">
-        Hadithi ulizowasilisha kwenye Net Simulizi.
-      </p>
-
-
-      <div
-        id="storiesLoading"
-        class="loading"
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="Tafuta story yako..."
       >
 
-        <div class="spinner"></div>
+    </div>
 
-        Inapakia hadithi...
-
-      </div>
-
-
-      <div
-        id="storiesEmpty"
-        class="empty"
-        style="display:none"
-      >
-
-        <p>
-          Bado hujawasilisha hadithi.
-        </p>
-
-        <a
-          href="submit-story.html"
-          class="btn primary"
-        >
-          Tuma Hadithi
-
-        </a>
-
-      </div>
-
-
-      <div
-        id="storyList"
-        class="story-list"
-      ></div>
-
-    </section>
-
-
-    <!-- EARNINGS -->
-
-    <section class="card">
-
-      <h2>
-        Mapato
-      </h2>
-
-      <p class="muted">
-        Muhtasari wa mapato yako kama mwandishi.
-      </p>
-
-
-      <div class="earning-box">
-
-        <div class="stat-title">
-          Salio linaloweza kutolewa
-        </div>
-
-        <div
-          class="balance"
-          id="withdrawable"
-        >
-          TSh 0
-        </div>
-
-        <button
-          class="btn primary withdraw"
-          id="withdrawBtn"
-          disabled
-          type="button"
-        >
-          Withdraw
-        </button>
-
-        <div class="note">
-          Kiwango cha chini cha withdrawal ni
-          <strong>TSh 50,000</strong>.
-          Kitufe kitawezeshwa baada ya kufikisha
-          kiwango hicho.
-        </div>
-
-      </div>
-
-    </section>
-
+    <a
+      href="submit-story.html"
+      class="btn primary"
+    >
+      + Submit Story
+    </a>
 
   </div>
 
 
-  <!-- QUICK ACTIONS -->
-
-  <section class="card">
-
-    <h2>
-      Quick Actions
-    </h2>
-
-    <div class="actions">
-
-      <a
-        class="action"
-        href="submit-story.html"
-      >
-
-        <strong>
-          ✍️ Tuma Hadithi
-        </strong>
-
-        <span>
-          Wasilisha hadithi mpya kwa ajili ya review.
-        </span>
-
-      </a>
+  <div
+    id="errorBox"
+    style="display:none"
+  ></div>
 
 
-      <a
-        class="action"
-        href="my-stories.html"
-      >
+  <section
+    id="storyList"
+    class="story-list"
+  >
 
-        <strong>
-          📚 Hadithi Zangu
-        </strong>
-
-        <span>
-          Simamia hadithi na episodes zako.
-        </span>
-
-      </a>
-
-
-      <a
-        class="action"
-        href="wallet.html"
-      >
-
-        <strong>
-          💰 Wallet
-        </strong>
-
-        <span>
-          Angalia mapato na withdrawals.
-        </span>
-
-      </a>
-
-
-      <a
-        class="action"
-        href="profile.html"
-      >
-
-        <strong>
-          👤 Profile
-        </strong>
-
-        <span>
-          Simamia taarifa za akaunti yako.
-        </span>
-
-      </a>
-
+    <div class="loading">
+      Inapakia stories...
     </div>
 
   </section>
@@ -834,8 +587,6 @@ body.dark{
 </main>
 
 
-<!-- FOOTER -->
-
 <footer class="footer">
 
   <b class="logo">
@@ -843,7 +594,7 @@ body.dark{
   </b>
 
   <p>
-    Digital Storytelling Platform
+    Author Publishing Portal
   </p>
 
   <p>
@@ -873,18 +624,21 @@ if(
 }
 
 
-darkBtn.addEventListener("click",function(){
+darkBtn.addEventListener(
+  "click",
+  function(){
 
-  document.body.classList.toggle("dark");
+    document.body.classList.toggle("dark");
 
-  localStorage.setItem(
-    "netsimulizi_dark",
-    document.body.classList.contains("dark")
-      ? "1"
-      : "0"
-  );
+    localStorage.setItem(
+      "netsimulizi_dark",
+      document.body.classList.contains("dark")
+        ? "1"
+        : "0"
+    );
 
-});
+  }
+);
 
 
 /* =========================
@@ -907,10 +661,6 @@ try{
 
 }
 
-
-/*
- * Dashboard hii ni ya author/admin.
- */
 
 if(!user){
 
@@ -943,67 +693,19 @@ if(
 
 
 /* =========================
-   AUTHOR NAME
-========================= */
-
-const authorName =
-  document.getElementById("authorName");
-
-
-authorName.textContent =
-  user?.name ||
-  user?.username ||
-  "Mwandishi";
-
-
-/* =========================
    ELEMENTS
 ========================= */
-
-const storyCount =
-  document.getElementById("storyCount");
-
-const episodeCount =
-  document.getElementById("episodeCount");
-
-const readerCount =
-  document.getElementById("readerCount");
-
-const earnings =
-  document.getElementById("earnings");
-
-const withdrawable =
-  document.getElementById("withdrawable");
-
-const withdrawBtn =
-  document.getElementById("withdrawBtn");
 
 const storyList =
   document.getElementById("storyList");
 
-const storiesLoading =
-  document.getElementById("storiesLoading");
-
-const storiesEmpty =
-  document.getElementById("storiesEmpty");
+const searchInput =
+  document.getElementById("searchInput");
 
 const errorBox =
   document.getElementById("errorBox");
 
-
-/* =========================
-   MONEY
-========================= */
-
-function money(value){
-
-  const number =
-    Number(value || 0);
-
-  return "TSh " +
-    number.toLocaleString("en-US");
-
-}
+let allStories = [];
 
 
 /* =========================
@@ -1023,39 +725,411 @@ function escapeHTML(value){
 
 
 /* =========================
-   ERROR
+   STATUS
 ========================= */
 
-function showError(text){
+function getStatus(story){
 
-  errorBox.textContent = text;
+  const status =
+    String(
+      story.status ||
+      story.approval_status ||
+      story.publish_status ||
+      ""
+    ).toLowerCase();
 
-  errorBox.style.display = "block";
+  if(
+    status === "approved" ||
+    status === "published"
+  ){
+
+    return {
+      text:"Approved",
+      className:"approved"
+    };
+
+  }
+
+  if(
+    status === "rejected"
+  ){
+
+    return {
+      text:"Rejected",
+      className:"rejected"
+    };
+
+  }
+
+  if(
+    status === "completed"
+  ){
+
+    return {
+      text:"Completed",
+      className:"completed"
+    };
+
+  }
+
+  if(
+    status === "ongoing"
+  ){
+
+    return {
+      text:"Ongoing",
+      className:"ongoing"
+    };
+
+  }
+
+  return {
+    text:"Pending",
+    className:"pending"
+  };
 
 }
 
 
 /* =========================
-   STORIES
+   COVER
+========================= */
+
+function getCover(story){
+
+  const cover =
+    story.cover_url ||
+    story.cover ||
+    story.image ||
+    story.cover_image ||
+    "";
+
+  if(cover){
+
+    return `
+      <img
+        src="${escapeHTML(cover)}"
+        alt="${escapeHTML(story.title || "Story")}"
+        onerror="this.remove()"
+      >
+    `;
+
+  }
+
+  return `
+    <span>
+      ${escapeHTML(story.title || "STORY")}
+    </span>
+  `;
+
+}
+
+
+/* =========================
+   FILTER AUTHOR STORIES
+========================= */
+
+function belongsToAuthor(story){
+
+  if(role === "admin"){
+
+    return true;
+
+  }
+
+
+  const authorId =
+    story.author_id ??
+    story.authorId ??
+    story.user_id ??
+    story.userId;
+
+
+  const currentId =
+    user.id ??
+    user.user_id;
+
+
+  if(
+    authorId !== undefined &&
+    authorId !== null &&
+    currentId !== undefined &&
+    currentId !== null
+  ){
+
+    return String(authorId) ===
+      String(currentId);
+
+  }
+
+
+  const authorName =
+    String(
+      story.author_name ||
+      story.author ||
+      story.author_username ||
+      ""
+    ).trim().toLowerCase();
+
+
+  const currentName =
+    String(
+      user.name ||
+      user.username ||
+      ""
+    ).trim().toLowerCase();
+
+
+  if(
+    authorName &&
+    currentName
+  ){
+
+    return authorName === currentName;
+
+  }
+
+
+  /*
+   * Kwa sasa API ya /api/stories inaweza
+   * kurudisha stories ambazo hazina author_id.
+   *
+   * Kwa admin tunaonyesha zote.
+   * Kwa author tunatumia jina la author ikiwa lipo.
+   */
+
+  return false;
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderStories(list){
+
+  if(!list.length){
+
+    storyList.innerHTML = `
+
+      <div class="empty">
+
+        <h2>
+          Hakuna stories
+        </h2>
+
+        <p class="muted">
+          Bado huna hadithi zilizopatikana
+          kwenye account yako.
+        </p>
+
+        <a
+          href="submit-story.html"
+          class="btn primary"
+        >
+          + Submit Story
+        </a>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  storyList.innerHTML =
+    list.map(function(story){
+
+      const status =
+        getStatus(story);
+
+      const title =
+        story.title ||
+        "Untitled Story";
+
+      const description =
+        story.description ||
+        story.summary ||
+        "Hakuna maelezo ya hadithi.";
+
+      const language =
+        story.language ||
+        "—";
+
+      const category =
+        story.category ||
+        "—";
+
+      const id =
+        story.id ||
+        story.story_id;
+
+
+      return `
+
+        <article class="story-card">
+
+
+          <div class="cover">
+
+            ${getCover(story)}
+
+          </div>
+
+
+          <div>
+
+            <h2 class="story-title">
+              ${escapeHTML(title)}
+            </h2>
+
+
+            <p class="description">
+              ${escapeHTML(description)}
+            </p>
+
+
+            <div class="meta">
+
+              <span class="badge">
+                ${escapeHTML(category)}
+              </span>
+
+              <span class="badge">
+                ${escapeHTML(language)}
+              </span>
+
+              <span class="status ${status.className}">
+                ${status.text}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            ${
+              id
+              ?
+              `
+              <a
+                href="story.html?id=${encodeURIComponent(id)}"
+                class="btn"
+              >
+                View Story
+              </a>
+
+              <a
+                href="chapters.html?id=${encodeURIComponent(id)}"
+                class="btn primary"
+              >
+                Episodes
+              </a>
+              `
+              :
+              `
+              <span class="btn">
+                No ID
+              </span>
+              `
+            }
+
+          </div>
+
+
+        </article>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats(list){
+
+  document.getElementById(
+    "totalStories"
+  ).textContent =
+    list.length;
+
+
+  document.getElementById(
+    "approvedStories"
+  ).textContent =
+    list.filter(function(story){
+
+      const status =
+        String(
+          story.status ||
+          story.approval_status ||
+          story.publish_status ||
+          ""
+        ).toLowerCase();
+
+      return (
+        status === "approved" ||
+        status === "published"
+      );
+
+    }).length;
+
+
+  document.getElementById(
+    "pendingStories"
+  ).textContent =
+    list.filter(function(story){
+
+      const status =
+        String(
+          story.status ||
+          story.approval_status ||
+          story.publish_status ||
+          ""
+        ).toLowerCase();
+
+      return (
+        !status ||
+        status === "pending"
+      );
+
+    }).length;
+
+
+  document.getElementById(
+    "completedStories"
+  ).textContent =
+    list.filter(function(story){
+
+      return String(
+        story.status || ""
+      ).toLowerCase() === "completed";
+
+    }).length;
+
+}
+
+
+/* =========================
+   LOAD STORIES
 ========================= */
 
 async function loadStories(){
 
-  storiesLoading.style.display =
-    "block";
-
-  storiesEmpty.style.display =
-    "none";
-
-  storyList.innerHTML = "";
-
-
   try{
 
-    /*
-     * Kwa sasa API yetu ya stories
-     * ipo tayari.
-     */
+    errorBox.style.display =
+      "none";
+
 
     const response =
       await fetch("/api/stories");
@@ -1064,7 +1138,7 @@ async function loadStories(){
     if(!response.ok){
 
       throw new Error(
-        "Stories API haijapatikana."
+        "Imeshindikana kupata stories."
       );
 
     }
@@ -1074,293 +1148,131 @@ async function loadStories(){
       await response.json();
 
 
-    let stories = [];
-
-
     if(Array.isArray(data)){
 
-      stories = data;
+      allStories = data;
 
-    }else if(Array.isArray(data.stories)){
+    }else if(
+      Array.isArray(data.stories)
+    ){
 
-      stories = data.stories;
+      allStories =
+        data.stories;
 
-    }else if(Array.isArray(data.data)){
+    }else{
 
-      stories = data.data;
+      allStories = [];
 
     }
 
 
     /*
-     * Kwa hatua hii endpoint ya stories
-     * inaweza kuwa bado inarudisha stories
-     * zote, hivyo hatudai kuwa zote ni
-     * za mwandishi mpaka author API
-     * iwepo.
+     * Kwa admin tunaonyesha stories zote.
+     *
+     * Kwa author tunajaribu kuchuja
+     * kwa author_id au author name.
      */
 
-    storiesLoading.style.display =
-      "none";
-
-
-    if(!stories.length){
-
-      storiesEmpty.style.display =
-        "block";
-
-      storyCount.textContent = "0";
-
-      return;
-
-    }
-
-
-    storyCount.textContent =
-      stories.length;
-
-
-    storyList.innerHTML =
-      stories.map(function(story){
-
-        const title =
-          story.title ||
-          story.name ||
-          "Untitled Story";
-
-        const status =
-          String(
-            story.status ||
-            "published"
-          ).toLowerCase();
-
-
-        let statusClass =
-          "published";
-
-        if(status === "pending"){
-          statusClass = "pending";
-        }
-
-        if(status === "draft"){
-          statusClass = "draft";
-        }
-
-
-        return `
-
-          <div class="story-item">
-
-            <div class="story-head">
-
-              <div class="story-title">
-                ${escapeHTML(title)}
-              </div>
-
-              <span class="status ${statusClass}">
-                ${escapeHTML(status)}
-              </span>
-
-            </div>
-
-          </div>
-
-        `;
-
-      }).join("");
-
-
-    /*
-     * Episodes count is calculated only
-     * when the backend provides it.
-     */
-
-    let totalEpisodes = 0;
-
-
-    stories.forEach(function(story){
-
-      totalEpisodes += Number(
-        story.episode_count ||
-        story.episodes_count ||
-        0
+    let authorStories =
+      allStories.filter(
+        belongsToAuthor
       );
 
-    });
+
+    /*
+     * Kama API ya sasa haina author
+     * information kabisa, hakuna story
+     * inayoweza kuthibitishwa kuwa ni ya
+     * author huyu.
+     */
+
+    updateStats(
+      authorStories
+    );
+
+    renderStories(
+      authorStories
+    );
 
 
-    episodeCount.textContent =
-      totalEpisodes;
+    searchInput.addEventListener(
+      "input",
+      function(){
+
+        const term =
+          this.value
+            .trim()
+            .toLowerCase();
+
+
+        const filtered =
+          authorStories.filter(
+            function(story){
+
+              const title =
+                String(
+                  story.title || ""
+                ).toLowerCase();
+
+              const description =
+                String(
+                  story.description ||
+                  story.summary ||
+                  ""
+                ).toLowerCase();
+
+              const category =
+                String(
+                  story.category || ""
+                ).toLowerCase();
+
+
+              return (
+                title.includes(term) ||
+                description.includes(term) ||
+                category.includes(term)
+              );
+
+            }
+          );
+
+
+        renderStories(
+          filtered
+        );
+
+      }
+    );
 
 
   }catch(error){
 
     console.error(
-      "Dashboard stories error:",
+      "My Stories error:",
       error
     );
 
-    storiesLoading.style.display =
-      "none";
 
-    storiesEmpty.style.display =
+    storyList.innerHTML =
+      "";
+
+
+    errorBox.style.display =
       "block";
 
-    storiesEmpty.innerHTML = `
+    errorBox.className =
+      "error";
 
-      <p>
-        Hakuna data ya hadithi
-        inayopatikana kwa sasa.
-      </p>
-
-      <a
-        href="submit-story.html"
-        class="btn primary"
-      >
-        Tuma Hadithi
-      </a>
-
-    `;
+    errorBox.textContent =
+      error.message ||
+      "Imeshindikana kupakia stories.";
 
   }
 
 }
 
 
-/* =========================
-   AUTHOR STATS
-========================= */
-
-function loadLocalStats(){
-
-  /*
-   * Hizi zitachukuliwa kutoka API
-   * ya author statistics itakapounganishwa.
-   */
-
-  const stats =
-    user?.author_stats ||
-    user?.stats ||
-    {};
-
-
-  readerCount.textContent =
-    Number(
-      stats.readers ||
-      stats.readers_count ||
-      user?.reader_count ||
-      0
-    ).toLocaleString("en-US");
-
-
-  const total =
-    Number(
-      stats.earnings ||
-      stats.total_earnings ||
-      user?.earnings ||
-      0
-    );
-
-
-  const available =
-    Number(
-      stats.withdrawable ||
-      stats.available_balance ||
-      user?.withdrawable ||
-      total
-    );
-
-
-  earnings.textContent =
-    money(total);
-
-
-  withdrawable.textContent =
-    money(available);
-
-
-  /*
-   * Minimum withdrawal:
-   * TSh 50,000
-   */
-
-  withdrawBtn.disabled =
-    available < 50000;
-
-}
-
-
-/* =========================
-   WITHDRAW
-========================= */
-
-withdrawBtn.addEventListener(
-  "click",
-  function(){
-
-    const available =
-      Number(
-        String(
-          withdrawable.textContent
-        ).replace(/[^\d]/g,"")
-      );
-
-
-    if(available < 50000){
-
-      alert(
-        "Withdrawal inahitaji kiwango cha chini cha TSh 50,000."
-      );
-
-      return;
-
-    }
-
-
-    /*
-     * Backend withdrawal system itaunganishwa
-     * kwenye wallet API.
-     */
-
-    window.location.href =
-      "wallet.html";
-
-  }
-);
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-document
-  .getElementById("logoutBtn")
-  .addEventListener(
-    "click",
-    function(){
-
-      localStorage.removeItem(
-        "netsimulizi_user"
-      );
-
-      window.location.href =
-        "author-login.html";
-
-    }
-  );
-
-
-/* =========================
-   START
-========================= */
-
-if(user){
-
-  loadLocalStats();
-
-  loadStories();
-
-}
+loadStories();
 
 
 </script>
