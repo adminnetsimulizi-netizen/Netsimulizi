@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Msaada - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09)
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input,
+    textarea{
+      font-family:inherit;
+    }
+
+    .topbar{
+      height:70px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .brand img{
+      width:42px;
+      height:42px;
+      object-fit:contain;
+      border-radius:8px;
+    }
+
+    .brand span{
+      color:var(--gold);
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .top-btn{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .top-btn:hover{
+      border-color:var(--gold);
+      color:var(--gold);
+    }
+
+    .layout{
+      display:flex;
+      min-height:calc(100vh - 70px);
+    }
+
+    .sidebar{
+      width:240px;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      padding:24px 14px;
+      flex-shrink:0;
+    }
+
+    .nav-title{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:10px 12px;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      margin-bottom:4px;
+      font-size:14px;
+      transition:.2s;
+    }
+
+    .nav-item:hover{
+      background:var(--surface-2);
+      color:var(--text);
+    }
+
+    .nav-item.active{
+      background:rgba(229,165,28,.12);
+      color:var(--gold);
+    }
+
+    .nav-icon{
+      width:20px;
+      text-align:center;
+    }
+
+    .main{
+      flex:1;
+      padding:35px;
+      min-width:0;
+    }
+
+    .page-header{
+      margin-bottom:28px;
+    }
+
+    .page-header h1{
+      font-size:32px;
+      margin-bottom:8px;
+    }
+
+    .page-header p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .content{
+      max-width:1000px;
+    }
+
+    .help-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:18px;
+      margin-bottom:25px;
+    }
+
+    .help-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:23px;
+      transition:.2s;
+    }
+
+    .help-card:hover{
+      border-color:rgba(229,165,28,.45);
+      transform:translateY(-2px);
+    }
+
+    .help-icon{
+      width:45px;
+      height:45px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:11px;
+      background:rgba(229,165,28,.12);
+      color:var(--gold-light);
+      font-size:22px;
+      margin-bottom:15px;
+    }
+
+    .help-card h3{
+      font-size:16px;
+      margin-bottom:8px;
+    }
+
+    .help-card p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      margin-bottom:15px;
+    }
+
+    .help-link{
+      color:var(--gold-light);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .section-card{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:26px;
+      margin-bottom:22px;
+    }
+
+    .section-title{
+      font-size:20px;
+      margin-bottom:18px;
+    }
+
+    .faq-item{
+      border-bottom:1px solid var(--border);
+    }
+
+    .faq-item:last-child{
+      border-bottom:0;
+    }
+
+    .faq-question{
+      width:100%;
+      background:none;
+      border:0;
+      color:var(--text);
+      text-align:left;
+      padding:17px 5px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .faq-question:hover{
+      color:var(--gold-light);
+    }
+
+    .faq-answer{
+      display:none;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+      padding:0 5px 17px;
+    }
+
+    .faq-item.open .faq-answer{
+      display:block;
+    }
+
+    .faq-item.open .arrow{
+      transform:rotate(180deg);
+      color:var(--gold);
+    }
+
+    .arrow{
+      transition:.2s;
+      font-size:13px;
+    }
+
+    .steps{
+      display:grid;
+      gap:14px;
+    }
+
+    .step{
+      display:flex;
+      gap:15px;
+      align-items:flex-start;
+      padding:15px;
+      background:var(--surface-2);
+      border-radius:10px;
+    }
+
+    .step-number{
+      min-width:32px;
+      height:32px;
+      border-radius:50%;
+      background:rgba(229,165,28,.15);
+      color:var(--gold-light);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .step h4{
+      font-size:14px;
+      margin-bottom:5px;
+    }
+
+    .step p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .contact-box{
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:11px;
+      padding:20px;
+      text-align:center;
+    }
+
+    .contact-box h3{
+      color:var(--gold-light);
+      margin-bottom:8px;
+    }
+
+    .contact-box p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.7;
+      margin-bottom:15px;
+    }
+
+    .contact-btn{
+      display:inline-block;
+      background:var(--gold);
+      color:#090b10;
+      padding:11px 18px;
+      border-radius:8px;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .contact-btn:hover{
+      background:var(--gold-light);
+    }
+
+    footer{
+      margin-top:35px;
+      border-top:1px solid var(--border);
+      padding:25px 0;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    footer a{
+      color:var(--muted);
+      margin:0 8px;
+    }
+
+    footer a:hover{
+      color:var(--gold);
+    }
+
+    .mobile-nav{
+      display:none;
+    }
+
+    @media(max-width:900px){
+
+      .help-grid{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+    }
+
+    @media(max-width:800px){
+
+      .topbar{
+        height:62px;
+        padding:0 15px;
+      }
+
+      .brand{
+        font-size:17px;
+      }
+
+      .brand img{
+        width:36px;
+        height:36px;
+      }
+
+      .layout{
+        display:block;
+      }
+
+      .sidebar{
+        display:none;
+      }
+
+      .main{
+        padding:22px 15px 85px;
+      }
+
+      .page-header h1{
+        font-size:26px;
+      }
+
+      .help-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+
+      .section-card{
+        padding:20px 17px;
+      }
+
+      .section-title{
+        font-size:18px;
+      }
+
+      .mobile-nav{
+        position:fixed;
+        display:flex;
+        left:0;
+        right:0;
+        bottom:0;
+        height:62px;
+        background:var(--surface);
+        border-top:1px solid var(--border);
+        z-index:200;
+        justify-content:space-around;
+        align-items:center;
+      }
+
+      .mobile-nav a{
+        color:var(--muted);
+        font-size:10px;
+        text-align:center;
+      }
+
+      .mobile-nav .m-icon{
+        display:block;
+        font-size:19px;
+        margin-bottom:3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="Net Simulizi">
+      <div>Net <span>Simulizi</span></div>
+    </a>
+
+    <div class="top-actions">
+      <button class="top-btn" onclick="toggleDark()" title="Muonekano">☾</button>
+      <button class="top-btn" onclick="goProfile()" title="Akaunti">👤</button>
+    </div>
+
+  </header>
+
+
+  <div class="layout">
+
+    <aside class="sidebar">
+
+      <div class="nav-title">Menyu</div>
+
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">⌂</span>
+        <span>Nyumbani</span>
+      </a>
+
+      <a href="discover.html" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span>Gundua</span>
+      </a>
+
+      <a href="search.html" class="nav-item">
+        <span class="nav-icon">⌕</span>
+        <span>Tafuta</span>
+      </a>
+
+      <a href="categories.html" class="nav-item">
+        <span class="nav-icon">☷</span>
+        <span>Makundi</span>
+      </a>
+
+      <a href="trending.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>Trending</span>
+      </a>
+
+      <div class="nav-title">Maktaba</div>
+
+      <a href="library.html" class="nav-item">
+        <span class="nav-icon">▣</span>
+        <span>Maktaba Yangu</span>
+      </a>
+
+      <a href="history.html" class="nav-item">
+        <span class="nav-icon">◷</span>
+        <span>Historia</span>
+      </a>
+
+      <div class="nav-title">Akaunti</div>
+
+      <a href="profile.html" class="nav-item">
+        <span class="nav-icon">♙</span>
+        <span>Wasifu</span>
+      </a>
+
+      <a href="notifications.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Taarifa</span>
+      </a>
+
+      <a href="settings.html" class="nav-item">
+        <span class="nav-icon">⚙</span>
+        <span>Mipangilio</span>
+      </a>
+
+      <div class="nav-title">Msaada</div>
+
+      <a href="about.html" class="nav-item">
+        <span class="nav-icon">ⓘ</span>
+        <span>Kuhusu Sisi</span>
+      </a>
+
+      <a href="contact.html" class="nav-item">
+        <span class="nav-icon">✉</span>
+        <span>Wasiliana Nasi</span>
+      </a>
+
+      <a href="help.html" class="nav-item active">
+        <span class="nav-icon">?</span>
+        <span>Msaada</span>
+      </a>
+
+      <a href="privacy.html" class="nav-item">
+        <span class="nav-icon">🔒</span>
+        <span>Faragha</span>
+      </a>
+
+      <a href="terms.html" class="nav-item">
+        <span class="nav-icon">📄</span>
+        <span>Masharti</span>
+      </a>
+
+      <a href="copyright.html" class="nav-item">
+        <span class="nav-icon">©</span>
+        <span>Hakimiliki</span>
+      </a>
+
+    </aside>
+
+
+    <main class="main">
+
+      <div class="page-header">
+        <h1>Kituo cha Msaada</h1>
+        <p>Pata majibu na maelekezo kuhusu matumizi ya Net Simulizi.</p>
+      </div>
+
+
+      <div class="content">
+
+        <div class="help-grid">
+
+          <div class="help-card">
+
+            <div class="help-icon">📖</div>
+
+            <h3>Kusoma Hadithi</h3>
+
+            <p>
+              Jifunze jinsi ya kutafuta hadithi, kufungua sura na kuendelea
+              kusoma ulipoishia.
+            </p>
+
+            <a href="discover.html" class="help-link">
+              Gundua Hadithi →
+            </a>
+
+          </div>
+
+
+          <div class="help-card">
+
+            <div class="help-icon">👤</div>
+
+            <h3>Akaunti Yako</h3>
+
+            <p>
+              Simamia wasifu wako, historia ya usomaji, maktaba na
+              mipangilio ya akaunti.
+            </p>
+
+            <a href="profile.html" class="help-link">
+              Fungua Wasifu →
+            </a>
+
+          </div>
+
+
+          <div class="help-card">
+
+            <div class="help-icon">🔎</div>
+
+            <h3>Kutafuta Hadithi</h3>
+
+            <p>
+              Tumia sehemu ya utafutaji kupata hadithi kulingana na jina,
+              mwandishi au maudhui.
+            </p>
+
+            <a href="search.html" class="help-link">
+              Tafuta Sasa →
+            </a>
+
+          </div>
+
+
+          <div class="help-card">
+
+            <div class="help-icon">▣</div>
+
+            <h3>Maktaba</h3>
+
+            <p>
+              Hifadhi hadithi unazopenda ili uweze kuzipata kwa urahisi
+              baadaye.
+            </p>
+
+            <a href="library.html" class="help-link">
+              Fungua Maktaba →
+            </a>
+
+          </div>
+
+
+          <div class="help-card">
+
+            <div class="help-icon">◷</div>
+
+            <h3>Historia ya Kusoma</h3>
+
+            <p>
+              Angalia hadithi ulizosoma na endelea kutoka sehemu
+              uliyokuwa umefikia.
+            </p>
+
+            <a href="history.html" class="help-link">
+              Angalia Historia →
+            </a>
+
+          </div>
+
+
+          <div class="help-card">
+
+            <div class="help-icon">✉</div>
+
+            <h3>Msaada wa Moja kwa Moja</h3>
+
+            <p>
+              Ikiwa hujapata jibu, unaweza kuwasiliana nasi moja kwa moja
+              kupitia ukurasa wa mawasiliano.
+            </p>
+
+            <a href="contact.html" class="help-link">
+              Wasiliana Nasi →
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <section class="section-card">
+
+          <h2 class="section-title">Maswali Yanayoulizwa Mara kwa Mara</h2>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Ninawezaje kuanza kusoma hadithi?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Fungua sehemu ya Gundua au Tafuta, chagua hadithi unayotaka,
+              kisha fungua sura inayopatikana kwa ajili ya kusoma.
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Ninawezaje kuhifadhi hadithi?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Ukiwa umeingia kwenye akaunti yako, unaweza kutumia chaguo
+              la kuongeza hadithi kwenye Maktaba yako.
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Nimesahau nilipofikia kwenye hadithi. Nifanye nini?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Fungua sehemu ya Historia ili kuona hadithi ulizosoma na
+              kuendelea kusoma kutoka ulipoishia pale taarifa ya maendeleo
+              ya usomaji inapopatikana.
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Je hadithi zote ni bure?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Si lazima. Baadhi ya hadithi au sura zinaweza kuwa bure,
+              wakati nyingine zinaweza kuwa maudhui ya kulipia.
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Ninawezaje kuwasiliana na Net Simulizi?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Tembelea ukurasa wa Wasiliana Nasi na ututumie ujumbe wako.
+              Tutatumia njia ya mawasiliano itakayowekwa kwenye mfumo
+              kwa ajili ya msaada.
+            </div>
+
+          </div>
+
+
+          <div class="faq-item">
+
+            <button class="faq-question" onclick="toggleFaq(this)">
+              <span>Ninawezaje kuwa mwandishi wa Net Simulizi?</span>
+              <span class="arrow">▼</span>
+            </button>
+
+            <div class="faq-answer">
+              Mfumo wa waandishi unasimamiwa na Net Simulizi. Waandishi
+              wanaweza kupewa akaunti na ruhusa kulingana na taratibu
+              za jukwaa.
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="section-card">
+
+          <h2 class="section-title">Jinsi ya Kutumia Net Simulizi</h2>
+
+
+          <div class="steps">
+
+            <div class="step">
+
+              <div class="step-number">1</div>
+
+              <div>
+                <h4>Chagua lugha</h4>
+                <p>
+                  Chagua Kiswahili au English kulingana na lugha
+                  unayotaka kutumia.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="step">
+
+              <div class="step-number">2</div>
+
+              <div>
+                <h4>Gundua hadithi</h4>
+                <p>
+                  Tumia Gundua, Makundi, Trending au Tafuta kupata
+                  hadithi unazozipenda.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="step">
+
+              <div class="step-number">3</div>
+
+              <div>
+                <h4>Fungua hadithi</h4>
+                <p>
+                  Chagua hadithi ili kuona maelezo yake na orodha ya sura.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="step">
+
+              <div class="step-number">4</div>
+
+              <div>
+                <h4>Anza kusoma</h4>
+                <p>
+                  Fungua sura inayopatikana na endelea kusoma.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="step">
+
+              <div class="step-number">5</div>
+
+              <div>
+                <h4>Hifadhi kwenye Maktaba</h4>
+                <p>
+                  Hifadhi hadithi unazopenda ili uzipate kwa urahisi
+                  wakati mwingine.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="section-card">
+
+          <div class="contact-box">
+
+            <h3>Hujapata jibu?</h3>
+
+            <p>
+              Ikiwa swali lako halijajibiwa hapa, wasiliana nasi
+              kupitia ukurasa wa mawasiliano.
+            </p>
+
+            <a href="contact.html" class="contact-btn">
+              Wasiliana Nasi
+            </a>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <footer>
+
+        <div>
+          © 2026 Net Simulizi. Haki zote zimehifadhiwa.
+        </div>
+
+        <div style="margin-top:10px;">
+          <a href="about.html">Kuhusu Sisi</a>
+          <a href="contact.html">Mawasiliano</a>
+          <a href="privacy.html">Faragha</a>
+          <a href="terms.html">Masharti</a>
+          <a href="copyright.html">Hakimiliki</a>
+        </div>
+
+      </footer>
+
+    </main>
+
+  </div>
+
+
+  <nav class="mobile-nav">
+
+    <a href="index.html">
+      <span class="m-icon">⌂</span>
+      Nyumbani
+    </a>
+
+    <a href="discover.html">
+      <span class="m-icon">✦</span>
+      Gundua
+    </a>
+
+    <a href="library.html">
+      <span class="m-icon">▣</span>
+      Maktaba
+    </a>
+
+    <a href="notifications.html">
+      <span class="m-icon">🔔</span>
+      Taarifa
+    </a>
+
+    <a href="profile.html">
+      <span class="m-icon">♙</span>
+      Wasifu
+    </a>
+
+  </nav>
+
+
+  <script>
+
+    function goProfile(){
+      window.location.href = "profile.html";
+    }
+
+
+    function toggleFaq(button){
+
+      const item = button.parentElement;
+
+      document.querySelectorAll(".faq-item").forEach(function(faq){
+
+        if(faq !== item){
+          faq.classList.remove("open");
+        }
+
+      });
+
+      item.classList.toggle("open");
+    }
+
+
+    function toggleDark(){
+
+      const current = localStorage.getItem("netsimulizi_theme");
+
+      if(current === "light"){
+        localStorage.setItem("netsimulizi_theme","dark");
+        document.body.style.background = "#090b10";
+        document.body.style.color = "#fff";
+      }else{
+        localStorage.setItem("netsimulizi_theme","light");
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+      }
+
+    }
+
+
+    function loadTheme(){
+
+      const theme = localStorage.getItem("netsimulizi_theme");
+
+      if(theme === "light"){
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+      }
+
+    }
+
+    loadTheme();
+
+  </script>
+
+</body>
+</html>
