@@ -711,6 +711,203 @@ function renderReader(
             "readerContainer"
         );
 
+    const rawContent =
+        episode.content ??
+        episode.text ??
+        episode.body ??
+        "";
+
+    const cleanContent =
+        String(rawContent).trim();
+
+    if(!cleanContent){
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                <h2>
+                    Content haijapatikana
+                </h2>
+
+                <p>
+                    Episode imepatikana lakini content yake iko tupu.
+                </p>
+
+                <button
+                    class="btn"
+                    onclick="goToChapters()"
+                >
+                    ← Chapters
+                </button>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    const paragraphs =
+        cleanContent
+            .split(/\r?\n+/)
+            .map(
+                paragraph =>
+                    paragraph.trim()
+            )
+            .filter(
+                paragraph =>
+                    paragraph.length > 0
+            );
+
+
+    const contentHtml =
+        paragraphs
+            .map(
+                paragraph =>
+                    `<p>${escapeHtml(paragraph)}</p>`
+            )
+            .join("");
+
+
+    const currentIndex =
+        episodes.findIndex(
+            item =>
+                Number(item.id) ===
+                Number(episode.id)
+        );
+
+
+    const previous =
+        currentIndex > 0
+            ? episodes[currentIndex - 1]
+            : null;
+
+
+    const next =
+        currentIndex <
+        episodes.length - 1
+            ? episodes[currentIndex + 1]
+            : null;
+
+
+    container.innerHTML = `
+
+        <div class="meta">
+
+            ${escapeHtml(story.title)}
+
+            · CHAPTER
+            ${Number(episode.episode_number)}
+
+        </div>
+
+
+        <h1>
+            ${escapeHtml(episode.title)}
+        </h1>
+
+
+        <div
+            id="readingContent"
+            class="content"
+        >
+            ${contentHtml}
+        </div>
+
+
+        <div class="progress-area">
+
+            <div class="progress-label">
+
+                <span>
+                    Reading progress
+                </span>
+
+                <span id="progressText">
+                    0%
+                </span>
+
+            </div>
+
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="controls">
+
+            ${
+                previous
+                ?
+                `<button
+                    class="btn"
+                    onclick="goToEpisode(${previous.id})"
+                >
+                    ← Previous
+                </button>`
+                :
+                `<button
+                    class="btn"
+                    onclick="goToChapters()"
+                >
+                    ← Chapters
+                </button>`
+            }
+
+
+            ${
+                next
+                ?
+                `<button
+                    class="btn primary"
+                    onclick="goToEpisode(${next.id})"
+                >
+                    Next →
+                </button>`
+                :
+                `<button
+                    class="btn primary"
+                    onclick="goToChapters()"
+                >
+                    Chapters →
+                </button>`
+            }
+
+        </div>
+
+    `;
+
+
+    applyFontSize();
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+
+    restoreProgress(
+        story.id,
+        episode.id
+    );
+
+}
+    const container =
+        document.getElementById(
+            "readerContainer"
+        );
+
 
     const paragraphs =
         String(
