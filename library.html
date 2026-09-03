@@ -1,1 +1,825 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Library — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="hero"><h1>Maktaba Yangu</h1><p class="muted">Hadithi ulizohifadhi.</p></section><section class="grid"><a href="story.html?id=1"><div class="cover">FADHAA</div><b>FADHAA</b></a></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script></script></body></html>
+```html
+<!doctype html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maktaba — Net Simulizi</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:#f6f0e5;
+  color:#191713;
+  font-family:Arial,sans-serif;
+  transition:.2s;
+}
+
+body.dark{
+  background:#111;
+  color:#eee;
+}
+
+.top{
+  background:#171512;
+  color:#fff;
+  padding:16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+}
+
+.logo{
+  color:#d4aa43;
+  font-weight:900;
+  letter-spacing:2px;
+  text-decoration:none;
+}
+
+.logo-image{
+  height:42px;
+  width:auto;
+  display:block;
+}
+
+.top-actions{
+  display:flex;
+  gap:8px;
+}
+
+.btn{
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #d4aa43;
+  background:transparent;
+  color:inherit;
+  cursor:pointer;
+}
+
+.primary{
+  background:#d4aa43;
+  color:#171512;
+  border:0;
+}
+
+.wrap{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.hero{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:20px;
+}
+
+.dark .hero{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.muted{
+  color:#777;
+}
+
+.dark .muted{
+  color:#aaa;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+}
+
+.story-card{
+  position:relative;
+  text-decoration:none;
+  color:inherit;
+  display:block;
+}
+
+.cover{
+  aspect-ratio:2/3;
+  border-radius:12px;
+  background:linear-gradient(145deg,#211d17,#a47b28);
+  color:#fff;
+  padding:14px;
+  display:flex;
+  align-items:end;
+  font-weight:900;
+  font-size:18px;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+}
+
+.cover-image{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:12px;
+}
+
+.story-title{
+  display:block;
+  margin-top:9px;
+  font-size:16px;
+  font-weight:800;
+}
+
+.story-author{
+  display:block;
+  margin-top:5px;
+  font-size:13px;
+  color:#777;
+}
+
+.dark .story-author{
+  color:#aaa;
+}
+
+.remove-btn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.7);
+  color:#fff;
+  cursor:pointer;
+  font-size:16px;
+  z-index:5;
+}
+
+.remove-btn:hover{
+  background:#a22;
+}
+
+.empty{
+  background:#fffdf8;
+  border:1px solid #e4dccd;
+  border-radius:16px;
+  padding:45px 20px;
+  text-align:center;
+}
+
+.dark .empty{
+  background:#1d1b18;
+  border-color:#38342d;
+}
+
+.empty-icon{
+  font-size:45px;
+  margin-bottom:10px;
+}
+
+.empty h2{
+  margin:10px 0;
+}
+
+.empty p{
+  color:#777;
+}
+
+.dark .empty p{
+  color:#aaa;
+}
+
+.loading{
+  text-align:center;
+  padding:50px 20px;
+  color:#777;
+}
+
+.error{
+  background:#3a1717;
+  color:#fff;
+  border:1px solid #6d2929;
+  padding:16px;
+  border-radius:10px;
+  margin-bottom:20px;
+  display:none;
+}
+
+.footer{
+  background:#171512;
+  color:#aaa;
+  text-align:center;
+  padding:30px;
+  margin-top:40px;
+}
+
+.footer-logo{
+  height:40px;
+  width:auto;
+  margin:auto;
+}
+
+.login-box{
+  text-align:center;
+  padding:30px 10px;
+}
+
+@media(max-width:900px){
+  .grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:700px){
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+  }
+
+  .wrap{
+    padding:15px;
+  }
+
+  .hero{
+    padding:18px;
+  }
+
+  .top{
+    padding:12px;
+  }
+
+  .logo-image{
+    height:36px;
+  }
+
+  .btn{
+    padding:8px 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+
+  <a class="logo" href="index.html">
+    <img src="Logo.png" alt="Net Simulizi" class="logo-image">
+  </a>
+
+  <div class="top-actions">
+    <button class="btn" onclick="toggleDarkMode()">◐</button>
+    <button class="btn" onclick="location.href='land.html'">EN/SW</button>
+  </div>
+
+</header>
+
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Maktaba Yangu</h1>
+    <p class="muted">
+      Hadithi ulizohifadhi kwenye Maktaba yako.
+    </p>
+  </section>
+
+  <div id="errorBox" class="error"></div>
+
+  <div id="loading" class="loading">
+    Inapakia Maktaba...
+  </div>
+
+  <section id="libraryGrid" class="grid" style="display:none;"></section>
+
+  <section id="emptyBox" class="empty" style="display:none;">
+
+    <div class="empty-icon">📚</div>
+
+    <h2>Maktaba yako iko tupu</h2>
+
+    <p>
+      Bado hujahifadhi hadithi yoyote.
+      Tafuta hadithi unayoipenda kisha bonyeza
+      <b>+ Maktaba</b>.
+    </p>
+
+    <button class="btn primary" onclick="location.href='index.html'">
+      Tafuta Hadithi
+    </button>
+
+  </section>
+
+</main>
+
+
+<footer class="footer">
+
+  <img src="Logo.png" alt="Net Simulizi" class="footer-logo">
+
+  <p>Digital Storytelling Platform</p>
+
+  <p>© 2026 Net Simulizi</p>
+
+</footer>
+
+
+<script>
+
+const API = "/api";
+
+
+/* =========================
+   DARK MODE
+========================= */
+
+function loadDarkMode(){
+
+  const dark =
+    localStorage.getItem("netsimulizi_dark") === "true";
+
+  if(dark){
+    document.body.classList.add("dark");
+  }
+}
+
+
+function toggleDarkMode(){
+
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem(
+    "netsimulizi_dark",
+    document.body.classList.contains("dark")
+  );
+}
+
+
+/* =========================
+   GET CURRENT USER
+========================= */
+
+function getCurrentUser(){
+
+  try{
+
+    const saved =
+      localStorage.getItem("netsimulizi_user");
+
+    if(!saved){
+      return null;
+    }
+
+    return JSON.parse(saved);
+
+  }catch(error){
+
+    console.error("User data error:",error);
+
+    return null;
+  }
+}
+
+
+/* =========================
+   ERROR
+========================= */
+
+function showError(message){
+
+  const box =
+    document.getElementById("errorBox");
+
+  box.textContent = message;
+  box.style.display = "block";
+}
+
+
+/* =========================
+   LOAD LIBRARY
+========================= */
+
+async function loadLibrary(){
+
+  const user = getCurrentUser();
+
+  const loading =
+    document.getElementById("loading");
+
+  const grid =
+    document.getElementById("libraryGrid");
+
+  const empty =
+    document.getElementById("emptyBox");
+
+
+  if(!user){
+
+    loading.style.display = "none";
+
+    empty.innerHTML = `
+      <div class="login-box">
+
+        <div class="empty-icon">🔐</div>
+
+        <h2>Ingia kwanza</h2>
+
+        <p>
+          Ili kuona hadithi ulizohifadhi,
+          tafadhali ingia kwenye akaunti yako.
+        </p>
+
+        <button
+          class="btn primary"
+          onclick="location.href='land.html'">
+          Ingia
+        </button>
+
+      </div>
+    `;
+
+    empty.style.display = "block";
+
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(`${API}/bookmarks/${user.id}`);
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Imeshindikana kupata Maktaba."
+      );
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if(!data.success){
+
+      throw new Error(
+        data.message || "Imeshindikana kupata Maktaba."
+      );
+    }
+
+
+    const bookmarks =
+      data.bookmarks || [];
+
+
+    loading.style.display = "none";
+
+
+    if(bookmarks.length === 0){
+
+      empty.style.display = "block";
+
+      return;
+    }
+
+
+    grid.innerHTML = "";
+
+
+    /*
+      API inaweza kurudisha story details
+      ndani ya bookmark, au story_id pekee.
+      Kwa hiyo tunapata story kwa ID pale
+      ambapo details hazipo.
+    */
+
+    const stories = await Promise.all(
+
+      bookmarks.map(async bookmark => {
+
+        if(bookmark.title){
+
+          return {
+            bookmark,
+            story: bookmark
+          };
+
+        }
+
+
+        try{
+
+          const storyResponse =
+            await fetch(
+              `${API}/stories/${bookmark.story_id}`
+            );
+
+
+          const storyData =
+            await storyResponse.json();
+
+
+          if(storyData.success){
+
+            return {
+              bookmark,
+              story: storyData.story
+            };
+
+          }
+
+        }catch(error){
+
+          console.error(
+            "Story loading error:",
+            error
+          );
+
+        }
+
+
+        return {
+          bookmark,
+          story: null
+        };
+
+      })
+
+    );
+
+
+    stories.forEach(item => {
+
+      if(item.story){
+
+        renderStory(
+          item.bookmark,
+          item.story
+        );
+
+      }
+
+    });
+
+
+    if(grid.children.length === 0){
+
+      empty.style.display = "block";
+
+    }else{
+
+      grid.style.display = "grid";
+
+    }
+
+
+  }catch(error){
+
+    console.error(error);
+
+    loading.style.display = "none";
+
+    showError(
+      error.message ||
+      "Kuna tatizo la kupakia Maktaba."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   RENDER STORY
+========================= */
+
+function renderStory(bookmark, story){
+
+  const grid =
+    document.getElementById("libraryGrid");
+
+
+  const storyId =
+    story.id || bookmark.story_id;
+
+
+  const title =
+    story.title || "Hadithi";
+
+
+  const author =
+    story.author_name ||
+    story.author ||
+    "Net Simulizi";
+
+
+  const cover =
+    story.cover_url ||
+    story.cover ||
+    "";
+
+
+  const card =
+    document.createElement("div");
+
+  card.className = "story-card";
+
+
+  let coverHTML = "";
+
+
+  if(cover){
+
+    coverHTML = `
+      <img
+        src="${escapeHTML(cover)}"
+        alt="${escapeHTML(title)}"
+        class="cover-image"
+        onerror="this.style.display='none';this.parentElement.querySelector('.fallback-cover').style.display='flex';"
+      >
+    `;
+
+  }
+
+
+  card.innerHTML = `
+
+    <a
+      href="story.html?id=${encodeURIComponent(storyId)}"
+      style="text-decoration:none;color:inherit;display:block;"
+    >
+
+      <div class="cover">
+
+        ${coverHTML}
+
+        <div
+          class="fallback-cover"
+          style="
+            ${cover ? "display:none;" : "display:flex;"}
+            width:100%;
+            height:100%;
+            align-items:flex-end;
+          "
+        >
+          ${escapeHTML(title)}
+        </div>
+
+      </div>
+
+      <span class="story-title">
+        ${escapeHTML(title)}
+      </span>
+
+      <span class="story-author">
+        ${escapeHTML(author)}
+      </span>
+
+    </a>
+
+    <button
+      class="remove-btn"
+      title="Ondoa kwenye Maktaba"
+      onclick="removeBookmark(event, ${storyId})"
+    >
+      ✕
+    </button>
+
+  `;
+
+
+  grid.appendChild(card);
+}
+
+
+/* =========================
+   REMOVE BOOKMARK
+========================= */
+
+async function removeBookmark(event, storyId){
+
+  event.preventDefault();
+  event.stopPropagation();
+
+
+  const user =
+    getCurrentUser();
+
+
+  if(!user){
+
+    alert("Tafadhali ingia kwanza.");
+
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      "Unataka kuondoa hadithi hii kwenye Maktaba?"
+    );
+
+
+  if(!confirmed){
+
+    return;
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/bookmarks/${user.id}/${storyId}`,
+        {
+          method:"DELETE"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if(!response.ok || !data.success){
+
+      throw new Error(
+        data.message ||
+        "Imeshindikana kuondoa hadithi."
+      );
+
+    }
+
+
+    /*
+      Pakia Maktaba tena baada ya kuondoa.
+    */
+
+    document.getElementById(
+      "libraryGrid"
+    ).style.display = "none";
+
+
+    document.getElementById(
+      "loading"
+    ).style.display = "block";
+
+
+    document.getElementById(
+      "emptyBox"
+    ).style.display = "none";
+
+
+    await loadLibrary();
+
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Imeshindikana kuondoa hadithi."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadDarkMode();
+
+loadLibrary();
+
+</script>
+
+</body>
+</html>
+```
