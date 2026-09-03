@@ -1,1 +1,697 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Story Details — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="hero"><div class="grid" style="grid-template-columns:180px 1fr"><div class="cover">FADHAA</div><div><span class="tag">HORROR</span><h1>FADHAA</h1><p class="muted">HASSAN MAMBOSASA</p><p><b>24.8K</b> readers · <b>4.8</b> rating · <b>45</b> chapters · Ongoing</p><button class="btn primary" onclick="location.href='chapters.html?id=1'">Soma Sasa</button> <button class="btn" onclick="save()">+ Maktaba</button></div></div></section><section class="card"><h2>Kuhusu Hadithi</h2><p class="muted">FADHAA ni simulizi ya kutisha inayomfuata mhusika mkuu katika safari iliyojaa siri, hofu na matukio yasiyoelezeka.</p></section><section class="card"><h2>Rating</h2><p style="color:#d4aa43;font-size:24px">★★★★★ <b style="color:inherit">4.8</b></p><p class="muted">1,284 ratings</p></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script>function save(){try{localStorage.setItem('ns_library_fadhaa','1')}catch(e){}alert('Imeongezwa kwenye Maktaba.')}</script></body></html>
+<!doctype html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Story Details — Net Simulizi</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:#f6f0e5;
+    color:#191713;
+    font-family:Arial,sans-serif
+}
+
+body.dark{
+    background:#111;
+    color:#eee
+}
+
+.top{
+    background:#171512;
+    color:#fff;
+    padding:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center
+}
+
+.logo{
+    color:#d4aa43;
+    font-weight:900;
+    letter-spacing:2px;
+    text-decoration:none
+}
+
+.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #d4aa43;
+    background:transparent;
+    color:inherit;
+    cursor:pointer
+}
+
+.primary{
+    background:#d4aa43;
+    color:#171512;
+    border:0
+}
+
+.wrap{
+    max-width:1100px;
+    margin:auto;
+    padding:20px
+}
+
+.card,.hero{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:20px
+}
+
+.dark .card,
+.dark .hero{
+    background:#1d1b18;
+    border-color:#38342d
+}
+
+.story-grid{
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:25px
+}
+
+.cover{
+    aspect-ratio:2/3;
+    border-radius:10px;
+    background:linear-gradient(145deg,#211d17,#a47b28);
+    color:#fff;
+    padding:12px;
+    display:flex;
+    align-items:end;
+    font-weight:900;
+    font-size:20px;
+    overflow:hidden
+}
+
+.cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:8px
+}
+
+.muted{
+    color:#777
+}
+
+.dark .muted{
+    color:#aaa
+}
+
+.tag{
+    display:inline-block;
+    padding:8px 12px;
+    border:1px solid #ddd;
+    border-radius:20px;
+    margin:4px;
+    font-size:13px
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px
+}
+
+.rating{
+    color:#d4aa43;
+    font-size:24px
+}
+
+.loading{
+    text-align:center;
+    padding:40px;
+    font-size:18px
+}
+
+.error{
+    text-align:center;
+    padding:40px;
+    color:#b00020
+}
+
+.footer{
+    background:#171512;
+    color:#aaa;
+    text-align:center;
+    padding:30px
+}
+
+@media(max-width:700px){
+
+    .story-grid{
+        grid-template-columns:1fr;
+    }
+
+    .cover{
+        max-width:220px;
+        margin:auto;
+        width:100%
+    }
+
+    .top{
+        padding:12px
+    }
+
+    .wrap{
+        padding:12px
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+
+    <a class="logo" href="../public/index.html">
+        NET SIMULIZI
+    </a>
+
+    <div>
+        <button class="btn" onclick="toggleDark()">
+            ◐
+        </button>
+
+        <button class="btn" onclick="location.href='../public/land.html'">
+            EN/SW
+        </button>
+    </div>
+
+</header>
+
+
+<main class="wrap">
+
+    <section id="storyContainer" class="hero">
+
+        <div class="loading">
+            Inapakia hadithi...
+        </div>
+
+    </section>
+
+
+    <section id="aboutContainer" class="card">
+
+        <h2>Kuhusu Hadithi</h2>
+
+        <p class="muted">
+            Inapakia...
+        </p>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Rating</h2>
+
+        <p class="rating">
+            ★★★★★
+            <b style="color:inherit">4.8</b>
+        </p>
+
+        <p class="muted">
+            Rating itaunganishwa na mfumo wa ratings.
+        </p>
+
+    </section>
+
+</main>
+
+
+<footer class="footer">
+
+    <b class="logo">
+        NET SIMULIZI
+    </b>
+
+    <p>
+        Digital Storytelling Platform
+    </p>
+
+    <p>
+        © 2026 Net Simulizi
+    </p>
+
+</footer>
+
+
+<script>
+
+const API = "/api";
+
+
+function toggleDark(){
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "netsimulizi_dark",
+        document.body.classList.contains("dark")
+    );
+}
+
+
+function loadDarkMode(){
+
+    const dark =
+        localStorage.getItem("netsimulizi_dark");
+
+    if(dark === "true"){
+
+        document.body.classList.add("dark");
+
+    }
+}
+
+
+function getStoryId(){
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const id =
+        Number(params.get("id"));
+
+    if(
+        !Number.isInteger(id) ||
+        id <= 0
+    ){
+
+        return 1;
+
+    }
+
+    return id;
+}
+
+
+async function loadStory(){
+
+    const storyId =
+        getStoryId();
+
+    const storyContainer =
+        document.getElementById("storyContainer");
+
+    const aboutContainer =
+        document.getElementById("aboutContainer");
+
+
+    try{
+
+        const response =
+            await fetch(
+                `${API}/stories/${storyId}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            !response.ok ||
+            !data.success ||
+            !data.story
+        ){
+
+            throw new Error(
+                data.message ||
+                "Story haijapatikana."
+            );
+
+        }
+
+
+        const story =
+            data.story;
+
+
+        const cover =
+            story.cover_url
+            ? `<img src="${escapeHtml(story.cover_url)}" alt="${escapeHtml(story.title)}">`
+            : `<span>${escapeHtml(story.title)}</span>`;
+
+
+        storyContainer.innerHTML = `
+
+            <div class="story-grid">
+
+                <div class="cover">
+
+                    ${cover}
+
+                </div>
+
+
+                <div>
+
+                    <span class="tag">
+                        ${escapeHtml(
+                            story.category_name || "Story"
+                        )}
+                    </span>
+
+
+                    <h1>
+                        ${escapeHtml(story.title)}
+                    </h1>
+
+
+                    <p class="muted">
+                        ${escapeHtml(
+                            story.author_name || "Unknown Author"
+                        )}
+                    </p>
+
+
+                    <p>
+
+                        <b>
+                            ${Number(
+                                story.readers_count || 0
+                            ).toLocaleString()}
+                        </b>
+
+                        readers
+
+                        ·
+
+                        <b>
+                            ${escapeHtml(
+                                story.language || "sw"
+                            )}
+                        </b>
+
+                        ·
+
+                        <b>
+                            ${escapeHtml(
+                                story.status || "published"
+                            )}
+                        </b>
+
+                    </p>
+
+
+                    <div class="actions">
+
+                        <button
+                            class="btn primary"
+                            onclick="startReading(${story.id})"
+                        >
+                            Soma Sasa
+                        </button>
+
+
+                        <button
+                            id="bookmarkButton"
+                            class="btn"
+                            onclick="saveBookmark(${story.id})"
+                        >
+                            + Maktaba
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        aboutContainer.innerHTML = `
+
+            <h2>Kuhusu Hadithi</h2>
+
+            <p class="muted">
+
+                ${escapeHtml(
+                    story.description ||
+                    "Hakuna maelezo ya hadithi kwa sasa."
+                )}
+
+            </p>
+
+        `;
+
+
+        checkBookmark(story.id);
+
+
+    }catch(error){
+
+        console.error(error);
+
+        storyContainer.innerHTML = `
+
+            <div class="error">
+
+                Imeshindikana kupakia hadithi.
+
+                <br><br>
+
+                <button
+                    class="btn"
+                    onclick="loadStory()"
+                >
+                    Jaribu Tena
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+function startReading(storyId){
+
+    location.href =
+        `chapters.html?id=${storyId}`;
+
+}
+
+
+async function saveBookmark(storyId){
+
+    const storedUser =
+        localStorage.getItem(
+            "netsimulizi_user"
+        );
+
+
+    if(!storedUser){
+
+        alert(
+            "Tafadhali ingia kwenye akaunti yako kwanza."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        const user =
+            JSON.parse(storedUser);
+
+
+        if(!user.id){
+
+            alert(
+                "Akaunti haijatambuliwa."
+            );
+
+            return;
+
+        }
+
+
+        const response =
+            await fetch(
+                `${API}/bookmarks`,
+                {
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        user_id:user.id,
+
+                        story_id:storyId
+
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            response.ok &&
+            data.success
+        ){
+
+            const button =
+                document.getElementById(
+                    "bookmarkButton"
+                );
+
+            if(button){
+
+                button.textContent =
+                    "✓ Ipo Maktabani";
+
+            }
+
+            alert(
+                "Imeongezwa kwenye Maktaba."
+            );
+
+        }else{
+
+            alert(
+                data.message ||
+                "Imeshindikana kuongeza kwenye Maktaba."
+            );
+
+        }
+
+
+    }catch(error){
+
+        console.error(error);
+
+        alert(
+            "Kuna tatizo la kuunganisha na server."
+        );
+
+    }
+
+}
+
+
+async function checkBookmark(storyId){
+
+    const storedUser =
+        localStorage.getItem(
+            "netsimulizi_user"
+        );
+
+
+    if(!storedUser){
+
+        return;
+
+    }
+
+
+    try{
+
+        const user =
+            JSON.parse(storedUser);
+
+
+        if(!user.id){
+
+            return;
+
+        }
+
+
+        const response =
+            await fetch(
+                `${API}/bookmarks/${user.id}`
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            !response.ok ||
+            !data.success
+        ){
+
+            return;
+
+        }
+
+
+        const exists =
+            data.bookmarks.some(
+                bookmark =>
+                    Number(bookmark.story_id) ===
+                    Number(storyId)
+            );
+
+
+        if(exists){
+
+            const button =
+                document.getElementById(
+                    "bookmarkButton"
+                );
+
+            if(button){
+
+                button.textContent =
+                    "✓ Ipo Maktabani";
+
+            }
+
+        }
+
+
+    }catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+loadDarkMode();
+
+loadStory();
+
+</script>
+
+</body>
+</html>
