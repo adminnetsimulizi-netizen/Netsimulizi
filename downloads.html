@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Vipakuliwa - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+      --danger:#e05252;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:1000;
+      background:rgba(9,11,16,.96);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+
+    .header-inner{
+      max-width:1200px;
+      margin:auto;
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:21px;
+      font-weight:800;
+    }
+
+    .brand img{
+      width:42px;
+      height:42px;
+      object-fit:contain;
+      border-radius:10px;
+    }
+
+    .brand span{
+      color:var(--gold-light);
+    }
+
+    nav{
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+
+    nav a{
+      color:var(--muted);
+      font-size:14px;
+      transition:.2s;
+    }
+
+    nav a:hover,
+    nav a.active{
+      color:var(--gold-light);
+    }
+
+    .menu-btn{
+      display:none;
+      border:0;
+      background:var(--surface-2);
+      color:#fff;
+      font-size:23px;
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+
+    main{
+      max-width:1200px;
+      margin:auto;
+      padding:35px 20px 70px;
+    }
+
+    .page-head{
+      margin-bottom:28px;
+    }
+
+    .page-head h1{
+      font-size:30px;
+      margin-bottom:8px;
+    }
+
+    .page-head p{
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
+
+    .info-box{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:25px;
+    }
+
+    .info-box h3{
+      color:var(--gold-light);
+      margin-bottom:8px;
+      font-size:17px;
+    }
+
+    .info-box p{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .downloads{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .download-card{
+      overflow:hidden;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      transition:.2s;
+      min-width:0;
+    }
+
+    .download-card:hover{
+      transform:translateY(-3px);
+      border-color:rgba(229,165,28,.35);
+    }
+
+    .cover{
+      position:relative;
+      width:100%;
+      aspect-ratio:2/3;
+      background:var(--surface-2);
+      overflow:hidden;
+    }
+
+    .cover img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .offline-badge{
+      position:absolute;
+      top:9px;
+      left:9px;
+      background:rgba(0,0,0,.78);
+      border:1px solid rgba(255,255,255,.12);
+      color:#fff;
+      border-radius:7px;
+      padding:6px 8px;
+      font-size:10px;
+      font-weight:700;
+    }
+
+    .card-body{
+      padding:13px;
+    }
+
+    .title{
+      display:block;
+      font-size:16px;
+      font-weight:700;
+      line-height:1.3;
+      margin-bottom:7px;
+
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .author{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:12px;
+    }
+
+    .actions{
+      display:flex;
+      gap:7px;
+    }
+
+    .read-btn{
+      flex:1;
+      text-align:center;
+      padding:9px 6px;
+      border-radius:7px;
+      background:var(--gold);
+      color:#111;
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .remove-btn{
+      width:38px;
+      border:1px solid rgba(224,82,82,.3);
+      background:rgba(224,82,82,.08);
+      color:var(--danger);
+      border-radius:7px;
+      cursor:pointer;
+      font-size:16px;
+    }
+
+    .empty-box,
+    .login-box{
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:45px 25px;
+      text-align:center;
+    }
+
+    .empty-icon{
+      font-size:45px;
+      margin-bottom:12px;
+    }
+
+    .empty-box h2,
+    .login-box h2{
+      font-size:22px;
+      margin-bottom:10px;
+    }
+
+    .empty-box p,
+    .login-box p{
+      color:var(--muted);
+      line-height:1.6;
+      margin-bottom:22px;
+      font-size:14px;
+    }
+
+    .btn{
+      display:inline-block;
+      background:var(--gold);
+      color:#111;
+      padding:11px 18px;
+      border-radius:9px;
+      font-size:13px;
+      font-weight:700;
+    }
+
+    .status{
+      color:var(--muted);
+      text-align:center;
+      padding:35px 10px;
+    }
+
+    footer{
+      border-top:1px solid var(--border);
+      padding:25px 20px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    @media(max-width:1050px){
+      .downloads{
+        grid-template-columns:repeat(4,1fr);
+      }
+    }
+
+    @media(max-width:800px){
+      nav{
+        display:none;
+        position:absolute;
+        top:70px;
+        left:0;
+        right:0;
+        padding:15px 20px 20px;
+        background:var(--surface);
+        border-bottom:1px solid var(--border);
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      nav.open{
+        display:flex;
+      }
+
+      .menu-btn{
+        display:block;
+      }
+
+      .downloads{
+        grid-template-columns:repeat(3,1fr);
+      }
+    }
+
+    @media(max-width:560px){
+      .header-inner{
+        padding:11px 14px;
+      }
+
+      .brand{
+        font-size:18px;
+      }
+
+      .brand img{
+        width:37px;
+        height:37px;
+      }
+
+      main{
+        padding:28px 14px 55px;
+      }
+
+      .page-head h1{
+        font-size:25px;
+      }
+
+      .downloads{
+        grid-template-columns:repeat(2,1fr);
+        gap:13px;
+      }
+
+      .card-body{
+        padding:10px;
+      }
+
+      .title{
+        font-size:14px;
+      }
+
+      .author{
+        font-size:11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="Net Simulizi">
+      <span>Net Simulizi</span>
+    </a>
+
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <nav id="nav">
+      <a href="index.html">Nyumbani</a>
+      <a href="discover.html">Gundua</a>
+      <a href="categories.html">Categories</a>
+      <a href="library.html">Maktaba</a>
+      <a href="history.html">Historia</a>
+      <a href="bookmarks.html">Bookmarks</a>
+      <a href="downloads.html" class="active">Vipakuliwa</a>
+      <a href="profile.html">Wasifu</a>
+    </nav>
+
+  </div>
+</header>
+
+<main>
+
+  <div class="page-head">
+    <h1>📥 Vipakuliwa</h1>
+    <p>
+      Hadithi ulizohifadhi kwenye kifaa kwa ajili ya kusoma bila internet.
+    </p>
+  </div>
+
+  <div class="info-box">
+    <h3>📱 Kusoma bila Internet</h3>
+    <p>
+      Hadithi zitakazopakuliwa zitaonekana hapa na zinaweza kusomwa
+      bila kuwa na internet. Mfumo kamili wa offline reading utaunganishwa
+      na storage halisi wakati wa kuweka data za production.
+    </p>
+  </div>
+
+  <div id="content">
+    <div class="status">Inapakia...</div>
+  </div>
+
+</main>
+
+<footer>
+  © 2026 Net Simulizi — Hadithi bora, sehemu moja.
+</footer>
+
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const nav = document.getElementById("nav");
+  const content = document.getElementById("content");
+
+  menuBtn.addEventListener("click", () => {
+    nav.classList.toggle("open");
+  });
+
+  function getUser(){
+    try{
+      return JSON.parse(
+        localStorage.getItem("netsimulizi_user")
+      );
+    }catch(e){
+      return null;
+    }
+  }
+
+  function escapeHtml(value){
+    return String(value ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+  }
+
+  function getDownloads(){
+    try{
+      const data = JSON.parse(
+        localStorage.getItem("netsimulizi_downloads") || "[]"
+      );
+
+      return Array.isArray(data) ? data : [];
+    }catch(e){
+      return [];
+    }
+  }
+
+  function saveDownloads(items){
+    localStorage.setItem(
+      "netsimulizi_downloads",
+      JSON.stringify(items)
+    );
+  }
+
+  function coverUrl(cover){
+    if(!cover){
+      return "Logo.png";
+    }
+
+    if(
+      cover.startsWith("http://") ||
+      cover.startsWith("https://") ||
+      cover.startsWith("/")
+    ){
+      return cover;
+    }
+
+    return cover;
+  }
+
+  function removeDownload(storyId){
+
+    const downloads = getDownloads();
+
+    const confirmed = confirm(
+      "Una uhakika unataka kuondoa hadithi hii kwenye vipakuliwa?"
+    );
+
+    if(!confirmed){
+      return;
+    }
+
+    const remaining = downloads.filter(
+      item => String(item.story_id || item.id) !== String(storyId)
+    );
+
+    saveDownloads(remaining);
+
+    renderDownloads();
+  }
+
+  function renderDownloads(){
+
+    const user = getUser();
+
+    if(!user || !user.id){
+
+      content.innerHTML = `
+        <div class="login-box">
+
+          <div class="empty-icon">🔐</div>
+
+          <h2>Ingia kwanza</h2>
+
+          <p>
+            Ingia kwenye akaunti yako ili kutumia mfumo wa
+            vipakuliwa na kusoma hadithi bila internet.
+          </p>
+
+          <a href="login.html" class="btn">
+            Ingia
+          </a>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    const downloads = getDownloads();
+
+    const userDownloads = downloads.filter(item => {
+
+      if(!item.user_id){
+        return true;
+      }
+
+      return String(item.user_id) === String(user.id);
+
+    });
+
+    if(!userDownloads.length){
+
+      content.innerHTML = `
+        <div class="empty-box">
+
+          <div class="empty-icon">📥</div>
+
+          <h2>Bado hakuna vipakuliwa</h2>
+
+          <p>
+            Hadithi utakazopakua kwa ajili ya kusoma bila
+            internet zitaonekana hapa.
+          </p>
+
+          <a href="discover.html" class="btn">
+            Gundua Hadithi
+          </a>
+
+        </div>
+      `;
+
+      return;
+    }
+
+    content.innerHTML = `
+      <div class="downloads">
+
+        ${userDownloads.map(item => {
+
+          const storyId =
+            item.story_id ||
+            item.id;
+
+          const title =
+            item.title ||
+            item.story_title ||
+            "Hadithi";
+
+          const author =
+            item.author ||
+            item.author_name ||
+            "Net Simulizi";
+
+          const cover =
+            item.cover ||
+            item.cover_image ||
+            "Logo.png";
+
+          return `
+
+            <article class="download-card">
+
+              <a href="story.html?id=${encodeURIComponent(storyId)}">
+
+                <div class="cover">
+
+                  <img
+                    src="${escapeHtml(coverUrl(cover))}"
+                    alt="${escapeHtml(title)}"
+                    onerror="this.src='Logo.png'"
+                  >
+
+                  <div class="offline-badge">
+                    ✓ OFFLINE
+                  </div>
+
+                </div>
+
+              </a>
+
+              <div class="card-body">
+
+                <a
+                  href="story.html?id=${encodeURIComponent(storyId)}"
+                  class="title"
+                >
+                  ${escapeHtml(title)}
+                </a>
+
+                <div class="author">
+                  ${escapeHtml(author)}
+                </div>
+
+                <div class="actions">
+
+                  <a
+                    href="story.html?id=${encodeURIComponent(storyId)}"
+                    class="read-btn"
+                  >
+                    Soma
+                  </a>
+
+                  <button
+                    class="remove-btn"
+                    onclick="removeDownload(${Number(storyId)})"
+                    title="Ondoa"
+                  >
+                    ×
+                  </button>
+
+                </div>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }).join("")}
+
+      </div>
+    `;
+  }
+
+  renderDownloads();
+</script>
+
+</body>
+</html>
