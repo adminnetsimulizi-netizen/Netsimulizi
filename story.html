@@ -1,695 +1,3526 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="sw">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Story Details — Net Simulizi</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Story — Net Simulizi</title>
 
 <style>
-*{box-sizing:border-box}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+:root{
+--bg:#090b10;
+--surface:#11141b;
+--surface2:#171b24;
+--gold:#e5a51c;
+--gold2:#f2bd3d;
+--text:#ffffff;
+--muted:#a8afbd;
+--border:rgba(255,255,255,.09);
+--danger:#ff7777;
+}
+
+html{
+scroll-behavior:smooth;
+}
 
 body{
-    margin:0;
-    background:#f6f0e5;
-    color:#191713;
-    font-family:Arial,sans-serif
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text);
+line-height:1.6;
+min-height:100vh;
 }
 
-body.dark{
-    background:#111;
-    color:#eee
+a{
+text-decoration:none;
+color:inherit;
 }
 
-.top{
-    background:#171512;
-    color:#fff;
-    padding:16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center
+button,
+input,
+select{
+font:inherit;
 }
 
-.logo{
-    color:#d4aa43;
-    font-weight:900;
-    letter-spacing:2px;
-    text-decoration:none
+button{
+cursor:pointer;
+}
+
+img{
+max-width:100%;
+display:block;
+}
+
+
+/* =========================
+HEADER
+========================= */
+
+header{
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(9,11,16,.97);
+backdrop-filter:blur(12px);
+border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+max-width:1280px;
+margin:auto;
+min-height:72px;
+padding:10px 20px;
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:10px;
+min-width:220px;
+}
+
+.brand-logo{
+width:44px;
+height:44px;
+object-fit:contain;
+border-radius:9px;
+}
+
+.brand-name{
+font-size:20px;
+font-weight:900;
+letter-spacing:.5px;
+}
+
+.brand-name span{
+color:var(--gold);
+}
+
+.main-nav{
+display:flex;
+align-items:center;
+gap:20px;
+flex:1;
+}
+
+.main-nav a{
+font-size:14px;
+font-weight:700;
+color:#d9dde6;
+}
+
+.main-nav a:hover{
+color:var(--gold);
+}
+
+.search{
+position:relative;
+width:210px;
+}
+
+.search input{
+width:100%;
+height:40px;
+padding:0 14px 0 38px;
+border:1px solid var(--border);
+border-radius:22px;
+outline:none;
+background:var(--surface);
+color:#fff;
+}
+
+.search-icon{
+position:absolute;
+left:14px;
+top:8px;
+color:#8f96a5;
+font-size:19px;
+}
+
+.auth-buttons{
+display:flex;
+gap:8px;
+align-items:center;
 }
 
 .btn{
-    padding:10px 14px;
-    border-radius:8px;
-    border:1px solid #d4aa43;
-    background:transparent;
-    color:inherit;
-    cursor:pointer
+border:1px solid var(--border);
+border-radius:8px;
+padding:10px 15px;
+font-weight:800;
+background:transparent;
+color:#fff;
+transition:.2s;
+}
+
+.btn:hover{
+border-color:var(--gold);
+color:var(--gold);
 }
 
 .primary{
-    background:#d4aa43;
-    color:#171512;
-    border:0
+background:var(--gold);
+color:#111;
+border-color:var(--gold);
 }
 
-.wrap{
-    max-width:1100px;
-    margin:auto;
-    padding:20px
+.primary:hover{
+background:var(--gold2);
+color:#111;
 }
 
-.card,.hero{
-    background:#fffdf8;
-    border:1px solid #e4dccd;
-    border-radius:16px;
-    padding:22px;
-    margin-bottom:20px
+.language-select{
+height:40px;
+padding:0 8px;
+border-radius:8px;
+border:1px solid var(--border);
+background:var(--surface);
+color:#fff;
 }
 
-.dark .card,
-.dark .hero{
-    background:#1d1b18;
-    border-color:#38342d
+.mobile-menu{
+display:none;
+border:0;
+background:transparent;
+color:#fff;
+font-size:26px;
 }
 
-.story-grid{
-    display:grid;
-    grid-template-columns:180px 1fr;
-    gap:25px
+
+/* =========================
+USER MENU
+========================= */
+
+.user-menu{
+display:none;
+position:relative;
+}
+
+.user-menu.active{
+display:block;
+}
+
+.user-button{
+display:flex;
+align-items:center;
+gap:8px;
+padding:6px 9px;
+border:1px solid var(--border);
+border-radius:10px;
+background:var(--surface);
+color:#fff;
+}
+
+.user-avatar{
+width:32px;
+height:32px;
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+background:var(--gold);
+color:#111;
+font-weight:900;
+}
+
+.user-info{
+display:flex;
+flex-direction:column;
+align-items:flex-start;
+line-height:1.2;
+}
+
+.user-info strong{
+font-size:13px;
+}
+
+.user-info small{
+font-size:10px;
+color:var(--muted);
+}
+
+.user-dropdown{
+display:none;
+position:absolute;
+right:0;
+top:50px;
+width:230px;
+padding:10px;
+border:1px solid var(--border);
+border-radius:12px;
+background:var(--surface);
+box-shadow:0 15px 40px rgba(0,0,0,.5);
+}
+
+.user-dropdown.active{
+display:block;
+}
+
+.dropdown-user{
+padding:12px;
+border-bottom:1px solid var(--border);
+margin-bottom:6px;
+}
+
+.dropdown-user strong{
+display:block;
+}
+
+.dropdown-user span{
+font-size:12px;
+color:var(--muted);
+word-break:break-word;
+}
+
+.dropdown-link{
+width:100%;
+border:0;
+background:transparent;
+color:#ddd;
+padding:10px;
+text-align:left;
+border-radius:7px;
+}
+
+.dropdown-link:hover{
+background:var(--surface2);
+color:var(--gold);
+}
+
+.logout-link{
+color:#ffaaaa;
+}
+
+
+/* =========================
+MOBILE SIDE MENU
+========================= */
+
+.side-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.7);
+z-index:1998;
+}
+
+.side-overlay.active{
+display:block;
+}
+
+.side-nav{
+position:fixed;
+top:0;
+left:-310px;
+width:290px;
+height:100vh;
+background:#0d1016;
+border-right:1px solid var(--border);
+z-index:1999;
+padding:20px;
+transition:.25s;
+overflow-y:auto;
+}
+
+.side-nav.active{
+left:0;
+}
+
+.side-head{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-bottom:25px;
+}
+
+.side-head .brand{
+min-width:0;
+}
+
+.side-close{
+background:none;
+border:0;
+color:#fff;
+font-size:28px;
+}
+
+.side-link{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px 10px;
+border-radius:8px;
+color:#ddd;
+font-weight:700;
+}
+
+.side-link:hover{
+background:var(--surface2);
+color:var(--gold);
+}
+
+.side-title{
+margin:22px 0 10px;
+font-size:12px;
+font-weight:900;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:1px;
+}
+
+.side-auth{
+display:grid;
+gap:9px;
+}
+
+.mobile-user{
+display:none;
+}
+
+.mobile-user.active{
+display:block;
+}
+
+.mobile-user-card{
+padding:13px;
+border:1px solid var(--border);
+border-radius:10px;
+background:var(--surface);
+margin-bottom:10px;
+}
+
+.mobile-user-name{
+font-weight:900;
+}
+
+.mobile-user-email{
+font-size:12px;
+color:var(--muted);
+word-break:break-word;
+}
+
+
+/* =========================
+MAIN
+========================= */
+
+main{
+max-width:1180px;
+margin:auto;
+padding:35px 20px 80px;
+}
+
+.breadcrumb{
+margin-bottom:22px;
+font-size:13px;
+color:var(--muted);
+}
+
+.breadcrumb a:hover{
+color:var(--gold);
+}
+
+
+/* =========================
+STORY HERO
+========================= */
+
+.story-hero{
+display:grid;
+grid-template-columns:280px 1fr;
+gap:35px;
+padding:28px;
+border:1px solid var(--border);
+border-radius:18px;
+background:
+radial-gradient(
+circle at 90% 10%,
+rgba(229,165,28,.12),
+transparent 35%
+),
+var(--surface);
 }
 
 .cover{
-    aspect-ratio:2/3;
-    border-radius:10px;
-    background:linear-gradient(145deg,#211d17,#a47b28);
-    color:#fff;
-    padding:12px;
-    display:flex;
-    align-items:end;
-    font-weight:900;
-    font-size:20px;
-    overflow:hidden
+width:100%;
+aspect-ratio:2/3;
+border-radius:13px;
+overflow:hidden;
+background:
+linear-gradient(
+145deg,
+#303542,
+#11131a
+);
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:20px;
 }
 
 .cover img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    border-radius:8px
+width:100%;
+height:100%;
+object-fit:cover;
 }
 
-.muted{
-    color:#777
+.cover-placeholder{
+font-size:24px;
+font-weight:900;
+color:#fff;
 }
 
-.dark .muted{
-    color:#aaa
+.story-info{
+display:flex;
+flex-direction:column;
+justify-content:center;
 }
 
-.tag{
-    display:inline-block;
-    padding:8px 12px;
-    border:1px solid #ddd;
-    border-radius:20px;
-    margin:4px;
-    font-size:13px
+.category{
+display:inline-block;
+width:max-content;
+padding:7px 12px;
+border:1px solid rgba(229,165,28,.45);
+border-radius:20px;
+color:var(--gold);
+font-size:12px;
+font-weight:900;
+margin-bottom:15px;
+}
+
+.story-title{
+font-size:clamp(32px,5vw,52px);
+line-height:1.1;
+margin-bottom:12px;
+}
+
+.author{
+font-size:15px;
+color:var(--muted);
+margin-bottom:20px;
+}
+
+.author strong{
+color:#fff;
+}
+
+.story-description{
+color:#c4c9d3;
+max-width:750px;
+margin-bottom:22px;
+}
+
+.story-meta{
+display:flex;
+flex-wrap:wrap;
+gap:10px 22px;
+color:var(--muted);
+font-size:13px;
+margin-bottom:22px;
+}
+
+.story-meta strong{
+color:#fff;
+}
+
+.status{
+display:inline-block;
+padding:5px 9px;
+border-radius:6px;
+font-size:11px;
+font-weight:900;
+background:#26301f;
+color:#aee17f;
+}
+
+.status.paid{
+background:#382c13;
+color:var(--gold2);
 }
 
 .actions{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-top:20px
+display:flex;
+gap:10px;
+flex-wrap:wrap;
 }
 
-.rating{
-    color:#d4aa43;
-    font-size:24px
+
+/* =========================
+RATING
+========================= */
+
+.rating-box{
+margin-top:25px;
+padding-top:20px;
+border-top:1px solid var(--border);
+display:flex;
+align-items:center;
+gap:14px;
+flex-wrap:wrap;
 }
 
-.loading{
-    text-align:center;
-    padding:40px;
-    font-size:18px
+.stars{
+color:var(--gold);
+font-size:23px;
+letter-spacing:2px;
+}
+
+.rating-number{
+font-size:20px;
+font-weight:900;
+}
+
+.rating-count{
+color:var(--muted);
+font-size:13px;
+}
+
+
+/* =========================
+SECTIONS
+========================= */
+
+.section{
+margin-top:28px;
+padding:26px;
+border:1px solid var(--border);
+border-radius:16px;
+background:var(--surface);
+}
+
+.section-heading{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+margin-bottom:20px;
+}
+
+.section-heading h2{
+font-size:24px;
+}
+
+.section-heading span{
+font-size:13px;
+color:var(--muted);
+}
+
+
+/* =========================
+CHAPTERS
+========================= */
+
+.chapter-list{
+display:grid;
+gap:10px;
+}
+
+.chapter{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+padding:15px;
+border:1px solid var(--border);
+border-radius:10px;
+background:var(--surface2);
+transition:.2s;
+}
+
+.chapter:hover{
+border-color:rgba(229,165,28,.5);
+transform:translateX(3px);
+}
+
+.chapter-left{
+display:flex;
+align-items:center;
+gap:13px;
+min-width:0;
+}
+
+.chapter-number{
+width:38px;
+height:38px;
+border-radius:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#242832;
+color:var(--gold);
+font-weight:900;
+flex-shrink:0;
+}
+
+.chapter-title{
+font-weight:800;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.chapter-date{
+font-size:11px;
+color:var(--muted);
+}
+
+.chapter-button{
+padding:8px 12px;
+border-radius:7px;
+border:1px solid var(--border);
+background:transparent;
+color:#fff;
+font-weight:700;
+}
+
+.chapter-button:hover{
+border-color:var(--gold);
+color:var(--gold);
+}
+
+.locked{
+color:#ffcc66;
+font-size:13px;
+}
+
+
+/* =========================
+ABOUT
+========================= */
+
+.about-text{
+color:#c3c8d2;
+white-space:pre-line;
+}
+
+.info-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+margin-top:22px;
+}
+
+.info-box{
+padding:16px;
+border:1px solid var(--border);
+border-radius:10px;
+background:var(--surface2);
+}
+
+.info-box small{
+display:block;
+color:var(--muted);
+font-size:11px;
+margin-bottom:5px;
+}
+
+.info-box strong{
+font-size:15px;
+}
+
+
+/* =========================
+RECOMMENDED
+========================= */
+
+.story-grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+}
+
+.recommended-card{
+overflow:hidden;
+border:1px solid var(--border);
+border-radius:12px;
+background:var(--surface2);
+transition:.2s;
+}
+
+.recommended-card:hover{
+transform:translateY(-4px);
+border-color:rgba(229,165,28,.5);
+}
+
+.recommended-cover{
+height:190px;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:15px;
+text-align:center;
+background:linear-gradient(145deg,#303542,#11131a);
+font-weight:900;
+}
+
+.recommended-cover img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+.recommended-content{
+padding:12px;
+}
+
+.recommended-content h3{
+font-size:15px;
+margin-bottom:4px;
+}
+
+.recommended-content p{
+font-size:12px;
+color:var(--muted);
+}
+
+
+/* =========================
+LOADING / ERROR
+========================= */
+
+.loading,
+.error,
+.empty{
+padding:50px 20px;
+text-align:center;
+color:var(--muted);
+}
+
+.spinner{
+width:35px;
+height:35px;
+border:3px solid #333;
+border-top-color:var(--gold);
+border-radius:50%;
+animation:spin .8s linear infinite;
+margin:0 auto 15px;
+}
+
+@keyframes spin{
+to{
+transform:rotate(360deg);
+}
 }
 
 .error{
-    text-align:center;
-    padding:40px;
-    color:#b00020
+color:#ff9999;
 }
 
-.footer{
-    background:#171512;
-    color:#aaa;
-    text-align:center;
-    padding:30px
+.hidden{
+display:none!important;
 }
 
-@media(max-width:700px){
 
-    .story-grid{
-        grid-template-columns:1fr;
-    }
+/* =========================
+FOOTER
+========================= */
 
-    .cover{
-        max-width:220px;
-        margin:auto;
-        width:100%
-    }
-
-    .top{
-        padding:12px
-    }
-
-    .wrap{
-        padding:12px
-    }
+footer{
+background:#07090d;
+border-top:1px solid var(--border);
 }
+
+.footer-inner{
+max-width:1180px;
+margin:auto;
+padding:38px 20px;
+display:flex;
+justify-content:space-between;
+gap:30px;
+}
+
+.footer-description{
+max-width:450px;
+color:var(--muted);
+font-size:13px;
+margin-top:10px;
+}
+
+.footer-links{
+display:flex;
+gap:20px;
+color:#aeb4c1;
+font-size:13px;
+}
+
+.footer-links a:hover{
+color:var(--gold);
+}
+
+.copyright{
+border-top:1px solid var(--border);
+padding:18px;
+text-align:center;
+color:#707785;
+font-size:12px;
+}
+
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:1080px){
+
+.main-nav{
+display:none;
+}
+
+.search{
+margin-left:auto;
+}
+
+.mobile-menu{
+display:block;
+}
+
+.story-grid{
+grid-template-columns:repeat(3,1fr);
+}
+
+}
+
+@media(max-width:760px){
+
+.header-inner{
+padding:10px 14px;
+gap:8px;
+}
+
+.brand{
+min-width:auto;
+}
+
+.brand-logo{
+width:39px;
+height:39px;
+}
+
+.brand-name{
+font-size:17px;
+}
+
+.search{
+display:none;
+}
+
+.auth-buttons{
+margin-left:auto;
+}
+
+.auth-buttons .login-btn,
+.auth-buttons .register-btn{
+display:block;
+}
+
+.auth-buttons .btn{
+padding:8px 9px;
+font-size:12px;
+}
+
+.language-select{
+height:36px;
+width:50px;
+}
+
+main{
+padding:22px 14px 60px;
+}
+
+.story-hero{
+grid-template-columns:1fr;
+padding:20px;
+gap:25px;
+}
+
+.cover{
+max-width:230px;
+margin:auto;
+}
+
+.story-title{
+font-size:36px;
+}
+
+.story-info{
+text-align:left;
+}
+
+.info-grid{
+grid-template-columns:1fr 1fr;
+}
+
+.story-grid{
+grid-template-columns:repeat(2,1fr);
+}
+
+.footer-inner{
+flex-direction:column;
+}
+
+}
+
+@media(max-width:430px){
+
+.brand-name{
+font-size:14px;
+}
+
+.brand-logo{
+width:35px;
+height:35px;
+}
+
+.auth-buttons .btn{
+padding:7px;
+font-size:11px;
+}
+
+.language-select{
+width:44px;
+padding:0 3px;
+}
+
+.story-hero{
+padding:15px;
+}
+
+.story-title{
+font-size:30px;
+}
+
+.story-description{
+font-size:14px;
+}
+
+.section{
+padding:18px;
+}
+
+.info-grid{
+grid-template-columns:1fr;
+}
+
+.chapter{
+padding:11px;
+}
+
+.chapter-date{
+display:none;
+}
+
+.chapter-button{
+padding:7px 9px;
+font-size:12px;
+}
+
+.story-grid{
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.recommended-cover{
+height:160px;
+}
+
+.recommended-content{
+padding:9px;
+}
+
+.recommended-content h3{
+font-size:13px;
+}
+
+.footer-links{
+flex-wrap:wrap;
+}
+
+}
+
 </style>
+
 </head>
 
 <body>
 
-<header class="top">
+<!-- =========================
+HEADER
+========================= -->
 
-    <a class="logo" href="../public/index.html">
-        NET SIMULIZI
-    </a>
+<header>
 
-    <div>
-        <button class="btn" onclick="toggleDark()">
-            ◐
-        </button>
+<div class="header-inner">
 
-        <button class="btn" onclick="location.href='../public/land.html'">
-            EN/SW
-        </button>
-    </div>
+<a href="index.html" class="brand">
+
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
+
+>
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</a>
+
+<nav class="main-nav">
+
+<a href="index.html">
+Home
+</a>
+
+<a href="discover.html">
+Discover
+</a>
+
+<a href="categories.html">
+Categories
+</a>
+
+<a href="trending.html">
+Trending
+</a>
+
+</nav>
+
+<div class="search">
+
+<span class="search-icon">
+⌕
+</span>
+
+<input
+id="headerSearch"
+type="search"
+placeholder="Tafuta hadithi..."
+autocomplete="off"
+
+>
+
+</div>
+
+<div
+class="auth-buttons"
+id="authButtons"
+>
+
+<button
+class="btn login-btn"
+onclick="goLogin()"
+
+>
+
+Login </button>
+
+<button
+class="btn primary register-btn"
+onclick="goRegister()"
+
+>
+
+Register </button>
+
+<div
+class="user-menu"
+id="userMenu"
+>
+
+<button
+class="user-button"
+onclick="toggleUserDropdown()"
+
+>
+
+<div
+class="user-avatar"
+id="userAvatar"
+>
+U
+</div>
+
+<div class="user-info">
+
+<strong id="headerUsername">
+User
+</strong>
+
+<small>
+My Account
+</small>
+
+</div>
+
+</button>
+
+<div
+class="user-dropdown"
+id="userDropdown"
+>
+
+<div class="dropdown-user">
+
+<strong id="dropdownUsername">
+User
+</strong>
+
+<span id="dropdownEmail">
+email
+</span>
+
+</div>
+
+<button
+class="dropdown-link"
+onclick="openProfile()"
+
+>
+
+👤 My Profile </button>
+
+<button
+class="dropdown-link"
+onclick="openLibrary()"
+
+>
+
+📚 My Library </button>
+
+<button
+class="dropdown-link"
+onclick="openHistory()"
+
+>
+
+📖 Reading History </button>
+
+<button
+class="dropdown-link logout-link"
+onclick="logoutUser()"
+
+>
+
+↪ Logout </button>
+
+</div>
+
+</div>
+
+<select
+id="headerLanguage"
+class="language-select"
+
+>
+
+<option value="sw">
+SW
+</option>
+
+<option value="en">
+EN
+</option>
+
+</select>
+
+</div>
+
+<button
+class="mobile-menu"
+onclick="toggleMenu()"
+aria-label="Open menu"
+
+>
+
+☰ </button>
+
+</div>
 
 </header>
 
+<!-- =========================
+SIDE MENU
+========================= -->
 
-<main class="wrap">
+<div
+class="side-overlay"
+id="sideOverlay"
+onclick="closeMenu()"
+></div>
 
-    <section id="storyContainer" class="hero">
+<aside
+class="side-nav"
+id="sideNav"
+>
 
-        <div class="loading">
-            Inapakia hadithi...
-        </div>
+<div class="side-head">
 
-    </section>
+<a
+href="index.html"
+class="brand"
+onclick="closeMenu()"
 
+>
 
-    <section id="aboutContainer" class="card">
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
 
-        <h2>Kuhusu Hadithi</h2>
+>
 
-        <p class="muted">
-            Inapakia...
-        </p>
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
 
-    </section>
+</a>
 
+<button
+class="side-close"
+onclick="closeMenu()"
 
-    <section class="card">
+>
 
-        <h2>Rating</h2>
+× </button>
 
-        <p class="rating">
-            ★★★★★
-            <b style="color:inherit">4.8</b>
-        </p>
+</div>
 
-        <p class="muted">
-            Rating itaunganishwa na mfumo wa ratings.
-        </p>
+<a
+class="side-link"
+href="index.html"
+onclick="closeMenu()"
 
-    </section>
+>
+
+⌂ <span>Home</span> </a>
+
+<a
+class="side-link"
+href="discover.html"
+onclick="closeMenu()"
+
+>
+
+▣ <span>Discover</span> </a>
+
+<a
+class="side-link"
+href="categories.html"
+onclick="closeMenu()"
+
+>
+
+▦ <span>Categories</span> </a>
+
+<a
+class="side-link"
+href="trending.html"
+onclick="closeMenu()"
+
+>
+
+★ <span>Trending</span> </a>
+
+<div class="side-title">
+Account
+</div>
+
+<div
+class="mobile-user"
+id="mobileUser"
+>
+
+<div class="mobile-user-card">
+
+<div
+class="mobile-user-name"
+id="mobileUsername"
+>
+User
+</div>
+
+<div
+class="mobile-user-email"
+id="mobileEmail"
+>
+email
+</div>
+
+</div>
+
+<button
+class="btn side-link"
+onclick="openProfile();closeMenu()"
+
+>
+
+👤 My Profile </button>
+
+<button
+class="btn side-link"
+onclick="openLibrary();closeMenu()"
+
+>
+
+📚 My Library </button>
+
+<button
+class="btn side-link"
+onclick="openHistory();closeMenu()"
+
+>
+
+📖 Reading History </button>
+
+<button
+class="btn primary"
+onclick="logoutUser()"
+
+>
+
+Logout </button>
+
+</div>
+
+<div
+class="side-auth"
+id="sideAuth"
+>
+
+<button
+class="btn"
+onclick="goLogin();closeMenu()"
+
+>
+
+Login </button>
+
+<button
+class="btn primary"
+onclick="goRegister();closeMenu()"
+
+>
+
+Register </button>
+
+</div>
+
+</aside>
+
+<!-- =========================
+MAIN
+========================= -->
+
+<main>
+
+<div class="breadcrumb">
+
+<a href="index.html">
+Home
+</a>
+
+  /  
+
+<a href="discover.html">
+Discover
+</a>
+
+  /  
+
+<span id="breadcrumbTitle">
+Story
+</span>
+
+</div>
+
+<!-- STORY -->
+
+<section
+id="storyHero"
+class="story-hero"
+>
+
+<div class="loading">
+
+<div class="spinner"></div>
+
+Inapakia hadithi...
+
+</div>
+
+</section>
+
+<!-- ABOUT -->
+
+<section
+id="aboutSection"
+class="section hidden"
+>
+
+<div class="section-heading">
+
+<h2>
+Kuhusu Hadithi
+</h2>
+
+</div>
+
+<p
+id="storyDescription"
+class="about-text"
+>
+</p>
+
+<div class="info-grid">
+
+<div class="info-box">
+
+<small>
+Category
+</small>
+
+<strong id="infoCategory">
+-
+</strong>
+
+</div>
+
+<div class="info-box">
+
+<small>
+Language
+</small>
+
+<strong id="infoLanguage">
+-
+</strong>
+
+</div>
+
+<div class="info-box">
+
+<small>
+Readers
+</small>
+
+<strong id="infoReaders">
+-
+</strong>
+
+</div>
+
+<div class="info-box">
+
+<small>
+Status
+</small>
+
+<strong id="infoStatus">
+-
+</strong>
+
+</div>
+
+<div class="info-box">
+
+<small>
+Chapters
+</small>
+
+<strong id="infoChapters">
+-
+</strong>
+
+</div>
+
+<div class="info-box">
+
+<small>
+Published
+</small>
+
+<strong id="infoPublished">
+-
+</strong>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- CHAPTERS -->
+
+<section
+id="chaptersSection"
+class="section hidden"
+>
+
+<div class="section-heading">
+
+<h2>
+Chapters
+</h2>
+
+<span id="chapterCount">
+0 chapters
+</span>
+
+</div>
+
+<div
+id="chapterList"
+class="chapter-list"
+>
+
+<div class="loading">
+Inapakia chapters...
+</div>
+
+</div>
+
+</section>
+
+<!-- RECOMMENDED -->
+
+<section
+id="recommendedSection"
+class="section hidden"
+>
+
+<div class="section-heading">
+
+<h2>
+Hadithi Zinazofanana
+</h2>
+
+<span>
+Discover more
+</span>
+
+</div>
+
+<div
+id="recommendedGrid"
+class="story-grid"
+>
+
+</div>
+
+</section>
 
 </main>
 
+<!-- =========================
+FOOTER
+========================= -->
 
-<footer class="footer">
+<footer>
 
-    <b class="logo">
-        NET SIMULIZI
-    </b>
+<div class="footer-inner">
 
-    <p>
-        Digital Storytelling Platform
-    </p>
+<div>
 
-    <p>
-        © 2026 Net Simulizi
-    </p>
+<div class="brand">
+
+<img
+src="Logo.png"
+alt="Net Simulizi Logo"
+class="brand-logo"
+
+>
+
+<div class="brand-name">
+NET <span>SIMULIZI</span>
+</div>
+
+</div>
+
+<p class="footer-description">
+
+Jukwaa la hadithi kwa wasomaji na waandishi.
+Soma, gundua na furahia simulizi zako.
+
+</p>
+
+</div>
+
+<div class="footer-links">
+
+<a href="about.html">
+About
+</a>
+
+<a href="terms.html">
+Terms
+</a>
+
+<a href="privacy.html">
+Privacy
+</a>
+
+<a href="contact.html">
+Contact
+</a>
+
+</div>
+
+</div>
+
+<div class="copyright">
+
+© 2026 Net Simulizi. All rights reserved.
+
+</div>
 
 </footer>
 
-
 <script>
 
-const API = "/api";
+
+/* =========================
+API
+========================= */
+
+const API_BASE = "/api";
+
+let currentStory = null;
 
 
-function toggleDark(){
+/* =========================
+ESCAPE HTML
+========================= */
 
-    document.body.classList.toggle("dark");
+function escapeHTML(value){
 
-    localStorage.setItem(
-        "netsimulizi_dark",
-        document.body.classList.contains("dark")
-    );
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
 }
 
 
-function loadDarkMode(){
+/* =========================
+SAFE URL
+========================= */
 
-    const dark =
-        localStorage.getItem("netsimulizi_dark");
+function safeURL(value){
 
-    if(dark === "true"){
+const url =
+String(value || "").trim();
 
-        document.body.classList.add("dark");
+if(
+url.startsWith("https://") ||
+url.startsWith("http://") ||
+url.startsWith("/")
+){
 
-    }
+return url;
+
 }
 
+return "";
+
+}
+
+
+/* =========================
+NUMBER
+========================= */
+
+function formatNumber(value){
+
+return Number(
+value || 0
+).toLocaleString();
+
+}
+
+
+/* =========================
+STORY ID
+========================= */
 
 function getStoryId(){
 
-    const params =
-        new URLSearchParams(window.location.search);
-
-    const id =
-        Number(params.get("id"));
-
-    if(
-        !Number.isInteger(id) ||
-        id <= 0
-    ){
-
-        return 1;
-
-    }
-
-    return id;
-}
-
-
-async function loadStory(){
-
-    const storyId =
-        getStoryId();
-
-    const storyContainer =
-        document.getElementById("storyContainer");
-
-    const aboutContainer =
-        document.getElementById("aboutContainer");
-
-
-    try{
-
-        const response =
-            await fetch(
-                `${API}/stories/${storyId}`
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if(
-            !response.ok ||
-            !data.success ||
-            !data.story
-        ){
-
-            throw new Error(
-                data.message ||
-                "Story haijapatikana."
-            );
-
-        }
-
-
-        const story =
-            data.story;
-
-
-        const cover =
-            story.cover_url
-            ? `<img src="${escapeHtml(story.cover_url)}" alt="${escapeHtml(story.title)}">`
-            : `<span>${escapeHtml(story.title)}</span>`;
-
-
-        storyContainer.innerHTML = `
-
-            <div class="story-grid">
-
-                <div class="cover">
-
-                    ${cover}
-
-                </div>
-
-
-                <div>
-
-                    <span class="tag">
-                        ${escapeHtml(
-                            story.category_name || "Story"
-                        )}
-                    </span>
-
-
-                    <h1>
-                        ${escapeHtml(story.title)}
-                    </h1>
-
-
-                    <p class="muted">
-                        ${escapeHtml(
-                            story.author_name || "Unknown Author"
-                        )}
-                    </p>
-
-
-                    <p>
-
-                        <b>
-                            ${Number(
-                                story.readers_count || 0
-                            ).toLocaleString()}
-                        </b>
-
-                        readers
-
-                        ·
-
-                        <b>
-                            ${escapeHtml(
-                                story.language || "sw"
-                            )}
-                        </b>
-
-                        ·
-
-                        <b>
-                            ${escapeHtml(
-                                story.status || "published"
-                            )}
-                        </b>
-
-                    </p>
-
-
-                    <div class="actions">
-
-                        <button
-                            class="btn primary"
-                            onclick="startReading(${story.id})"
-                        >
-                            Soma Sasa
-                        </button>
-
-
-                        <button
-                            id="bookmarkButton"
-                            class="btn"
-                            onclick="saveBookmark(${story.id})"
-                        >
-                            + Maktaba
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        `;
-
-
-        aboutContainer.innerHTML = `
-
-            <h2>Kuhusu Hadithi</h2>
-
-            <p class="muted">
-
-                ${escapeHtml(
-                    story.description ||
-                    "Hakuna maelezo ya hadithi kwa sasa."
-                )}
-
-            </p>
-
-        `;
-
-
-        checkBookmark(story.id);
-
-
-    }catch(error){
-
-        console.error(error);
-
-        storyContainer.innerHTML = `
-
-            <div class="error">
-
-                Imeshindikana kupakia hadithi.
-
-                <br><br>
-
-                <button
-                    class="btn"
-                    onclick="loadStory()"
-                >
-                    Jaribu Tena
-                </button>
-
-            </div>
-
-        `;
-
-    }
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const id =
+Number(params.get("id"));
+
+if(
+!Number.isInteger(id) ||
+id <= 0
+){
+
+return null;
 
 }
 
+return id;
+
+}
+
+
+/* =========================
+DARK MODE
+========================= */
+
+function loadDarkMode(){
+
+const saved =
+localStorage.getItem(
+"netsimulizi_dark"
+);
+
+if(saved === "true"){
+
+document.body.classList.add("dark");
+
+}
+
+}
+
+
+/* =========================
+USER UI
+========================= */
+
+function updateUserInterface(){
+
+const rawUser =
+localStorage.getItem(
+"netsimulizi_user"
+);
+
+const userMenu =
+document.getElementById(
+"userMenu"
+);
+
+const sideAuth =
+document.getElementById(
+"sideAuth"
+);
+
+const mobileUser =
+document.getElementById(
+"mobileUser"
+);
+
+
+if(!rawUser){
+
+if(userMenu){
+
+userMenu.classList.remove(
+"active"
+);
+
+}
+
+if(sideAuth){
+
+sideAuth.style.display =
+"grid";
+
+}
+
+if(mobileUser){
+
+mobileUser.classList.remove(
+"active"
+);
+
+}
+
+return;
+
+}
+
+
+let user;
+
+try{
+
+user =
+JSON.parse(rawUser);
+
+}catch(error){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+return;
+
+}
+
+
+if(!user){
+
+return;
+
+}
+
+
+const username =
+user.username ||
+user.name ||
+"User";
+
+const email =
+user.email ||
+"";
+
+
+const avatar =
+username
+.charAt(0)
+.toUpperCase();
+
+
+document.getElementById(
+"userAvatar"
+).textContent =
+avatar;
+
+document.getElementById(
+"headerUsername"
+).textContent =
+username;
+
+document.getElementById(
+"dropdownUsername"
+).textContent =
+username;
+
+document.getElementById(
+"dropdownEmail"
+).textContent =
+email;
+
+document.getElementById(
+"mobileUsername"
+).textContent =
+username;
+
+document.getElementById(
+"mobileEmail"
+).textContent =
+email;
+
+
+if(userMenu){
+
+userMenu.classList.add(
+"active"
+);
+
+}
+
+if(sideAuth){
+
+sideAuth.style.display =
+"none";
+
+}
+
+if(mobileUser){
+
+mobileUser.classList.add(
+"active"
+);
+
+}
+
+}
+
+
+/* =========================
+NAVIGATION
+========================= */
+
+function goLogin(){
+
+location.href =
+"login.html";
+
+}
+
+
+function goRegister(){
+
+location.href =
+"register.html";
+
+}
+
+
+function openProfile(){
+
+location.href =
+"profile.html";
+
+}
+
+
+function openLibrary(){
+
+location.href =
+"library.html";
+
+}
+
+
+function openHistory(){
+
+location.href =
+"history.html";
+
+}
+
+
+/* =========================
+USER DROPDOWN
+========================= */
+
+function toggleUserDropdown(){
+
+const dropdown =
+document.getElementById(
+"userDropdown"
+);
+
+if(dropdown){
+
+dropdown.classList.toggle(
+"active"
+);
+
+}
+
+}
+
+
+function logoutUser(){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+updateUserInterface();
+
+alert(
+"Umetoka kwenye akaunti."
+);
+
+}
+
+
+/* =========================
+MOBILE MENU
+========================= */
+
+function toggleMenu(){
+
+document
+.getElementById("sideNav")
+.classList.toggle("active");
+
+document
+.getElementById("sideOverlay")
+.classList.toggle("active");
+
+}
+
+
+function closeMenu(){
+
+document
+.getElementById("sideNav")
+.classList.remove("active");
+
+document
+.getElementById("sideOverlay")
+.classList.remove("active");
+
+}
+
+
+/* =========================
+HEADER SEARCH
+========================= */
+
+const headerSearch =
+document.getElementById(
+"headerSearch"
+);
+
+if(headerSearch){
+
+headerSearch.addEventListener(
+"keydown",
+function(event){
+
+if(event.key !== "Enter"){
+
+return;
+
+}
+
+const value =
+String(this.value || "")
+.trim();
+
+if(!value){
+
+return;
+
+}
+
+location.href =
+"discover.html?search=" +
+encodeURIComponent(value);
+
+});
+
+}
+
+
+/* =========================
+LANGUAGE
+========================= */
+
+const headerLanguage =
+document.getElementById(
+"headerLanguage"
+);
+
+if(headerLanguage){
+
+const saved =
+localStorage.getItem(
+"netsimulizi_language"
+);
+
+if(saved){
+
+headerLanguage.value =
+saved;
+
+}
+
+headerLanguage.addEventListener(
+"change",
+function(){
+
+localStorage.setItem(
+"netsimulizi_language",
+this.value
+);
+
+});
+
+}
+
+
+/* =========================
+START READING
+========================= */
 
 function startReading(storyId){
 
-    location.href =
-        `chapters.html?id=${storyId}`;
+if(!storyId){
+
+return;
 
 }
 
+location.href =
+"chapters.html?id=" +
+encodeURIComponent(storyId);
+
+}
+
+
+/* =========================
+BOOKMARK
+========================= */
 
 async function saveBookmark(storyId){
 
-    const storedUser =
-        localStorage.getItem(
-            "netsimulizi_user"
-        );
+const rawUser =
+localStorage.getItem(
+"netsimulizi_user"
+);
 
+if(!rawUser){
 
-    if(!storedUser){
+alert(
+"Tafadhali ingia kwenye akaunti yako kwanza."
+);
 
-        alert(
-            "Tafadhali ingia kwenye akaunti yako kwanza."
-        );
+goLogin();
 
-        return;
-
-    }
-
-
-    try{
-
-        const user =
-            JSON.parse(storedUser);
-
-
-        if(!user.id){
-
-            alert(
-                "Akaunti haijatambuliwa."
-            );
-
-            return;
-
-        }
-
-
-        const response =
-            await fetch(
-                `${API}/bookmarks`,
-                {
-                    method:"POST",
-
-                    headers:{
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:JSON.stringify({
-
-                        user_id:user.id,
-
-                        story_id:storyId
-
-                    })
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if(
-            response.ok &&
-            data.success
-        ){
-
-            const button =
-                document.getElementById(
-                    "bookmarkButton"
-                );
-
-            if(button){
-
-                button.textContent =
-                    "✓ Ipo Maktabani";
-
-            }
-
-            alert(
-                "Imeongezwa kwenye Maktaba."
-            );
-
-        }else{
-
-            alert(
-                data.message ||
-                "Imeshindikana kuongeza kwenye Maktaba."
-            );
-
-        }
-
-
-    }catch(error){
-
-        console.error(error);
-
-        alert(
-            "Kuna tatizo la kuunganisha na server."
-        );
-
-    }
+return;
 
 }
 
+
+let user;
+
+try{
+
+user =
+JSON.parse(rawUser);
+
+}catch(error){
+
+alert(
+"Akaunti haijatambuliwa."
+);
+
+return;
+
+}
+
+
+if(!user.id){
+
+alert(
+"Akaunti haijatambuliwa."
+);
+
+return;
+
+}
+
+
+const button =
+document.getElementById(
+"bookmarkButton"
+);
+
+
+if(button){
+
+button.disabled = true;
+
+}
+
+
+try{
+
+const response =
+await fetch(
+API_BASE + "/bookmarks",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/json",
+
+"Accept":
+"application/json"
+},
+
+body:JSON.stringify({
+
+user_id:user.id,
+
+story_id:storyId
+
+})
+
+});
+
+
+const data =
+await response.json();
+
+
+if(
+response.ok &&
+data.success
+){
+
+if(button){
+
+button.textContent =
+"✓ Ipo Maktabani";
+
+}
+
+alert(
+"Imeongezwa kwenye Maktaba."
+);
+
+}else{
+
+alert(
+data.message ||
+"Imeshindikana kuongeza kwenye Maktaba."
+);
+
+}
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Kuna tatizo la kuunganisha na server."
+);
+
+}finally{
+
+if(button){
+
+button.disabled = false;
+
+}
+
+}
+
+}
+
+
+/* =========================
+BOOKMARK CHECK
+========================= */
 
 async function checkBookmark(storyId){
 
-    const storedUser =
-        localStorage.getItem(
-            "netsimulizi_user"
-        );
+const rawUser =
+localStorage.getItem(
+"netsimulizi_user"
+);
 
+if(!rawUser){
 
-    if(!storedUser){
-
-        return;
-
-    }
-
-
-    try{
-
-        const user =
-            JSON.parse(storedUser);
-
-
-        if(!user.id){
-
-            return;
-
-        }
-
-
-        const response =
-            await fetch(
-                `${API}/bookmarks/${user.id}`
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if(
-            !response.ok ||
-            !data.success
-        ){
-
-            return;
-
-        }
-
-
-        const exists =
-            data.bookmarks.some(
-                bookmark =>
-                    Number(bookmark.story_id) ===
-                    Number(storyId)
-            );
-
-
-        if(exists){
-
-            const button =
-                document.getElementById(
-                    "bookmarkButton"
-                );
-
-            if(button){
-
-                button.textContent =
-                    "✓ Ipo Maktabani";
-
-            }
-
-        }
-
-
-    }catch(error){
-
-        console.error(error);
-
-    }
+return;
 
 }
 
 
-function escapeHtml(value){
+let user;
 
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+try{
+
+user =
+JSON.parse(rawUser);
+
+}catch(error){
+
+return;
 
 }
 
+
+if(!user.id){
+
+return;
+
+}
+
+
+try{
+
+const response =
+await fetch(
+API_BASE +
+"/bookmarks/" +
+encodeURIComponent(user.id)
+);
+
+const data =
+await response.json();
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+return;
+
+}
+
+
+const bookmarks =
+Array.isArray(data.bookmarks)
+? data.bookmarks
+: [];
+
+
+const exists =
+bookmarks.some(
+item =>
+Number(item.story_id) ===
+Number(storyId)
+);
+
+
+if(exists){
+
+const button =
+document.getElementById(
+"bookmarkButton"
+);
+
+if(button){
+
+button.textContent =
+"✓ Ipo Maktabani";
+
+}
+
+}
+
+}catch(error){
+
+console.error(
+"Bookmark check:",
+error
+);
+
+}
+
+}
+
+
+/* =========================
+RATING
+========================= */
+
+function renderRating(story){
+
+const rating =
+Number(
+story.rating ??
+story.average_rating ??
+story.rating_average ??
+0
+);
+
+const count =
+Number(
+story.rating_count ??
+story.ratings_count ??
+0
+);
+
+
+let stars = "";
+
+const rounded =
+Math.round(rating);
+
+
+for(let i=1;i<=5;i++){
+
+stars +=
+i <= rounded
+? "★"
+: "☆";
+
+}
+
+
+return `
+
+<div class="rating-box">
+
+<div class="stars">
+${stars}
+</div>
+
+<div class="rating-number">
+${rating > 0 ? rating.toFixed(1) : "—"}
+</div>
+
+<div class="rating-count">
+${formatNumber(count)} ratings
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =========================
+STORY HERO
+========================= */
+
+function renderStory(story){
+
+const container =
+document.getElementById(
+"storyHero"
+);
+
+
+const title =
+story.title ||
+"Untitled Story";
+
+
+const author =
+story.author_name ||
+story.author ||
+"Net Simulizi";
+
+
+const category =
+story.category_name ||
+story.category ||
+"Story";
+
+
+const language =
+story.language ||
+"sw";
+
+
+const readers =
+story.readers_count ??
+story.readersCount ??
+0;
+
+
+const chapters =
+story.chapters_count ??
+story.chapter_count ??
+story.chaptersCount ??
+0;
+
+
+const status =
+story.status ||
+"published";
+
+
+const description =
+story.description ||
+"Hakuna maelezo ya hadithi kwa sasa.";
+
+
+const cover =
+safeURL(
+story.cover_url ||
+story.coverUrl ||
+""
+);
+
+
+const price =
+Number(
+story.price ||
+story.story_price ||
+0
+);
+
+
+const isPaid =
+story.is_paid === true ||
+story.is_paid === 1 ||
+story.paid === true ||
+price > 0;
+
+
+let coverHTML;
+
+
+if(cover){
+
+coverHTML = `
+
+<img
+src="${escapeHTML(cover)}"
+alt="${escapeHTML(title)}"
+onerror="this.style.display='none'"
+>
+
+`;
+
+}else{
+
+coverHTML = `
+
+<div class="cover-placeholder">
+
+${escapeHTML(title)}
+
+</div>
+
+`;
+
+}
+
+
+container.innerHTML = `
+
+<div class="cover">
+
+${coverHTML}
+
+</div>
+
+
+<div class="story-info">
+
+
+<div class="category">
+
+${escapeHTML(category)}
+
+</div>
+
+
+<h1 class="story-title">
+
+${escapeHTML(title)}
+
+</h1>
+
+
+<p class="author">
+
+Written by
+
+<strong>
+
+${escapeHTML(author)}
+
+</strong>
+
+</p>
+
+
+<p class="story-description">
+
+${escapeHTML(description)}
+
+</p>
+
+
+<div class="story-meta">
+
+<span>
+
+👁
+
+<strong>
+${formatNumber(readers)}
+</strong>
+
+readers
+
+</span>
+
+
+<span>
+
+📚
+
+<strong>
+${formatNumber(chapters)}
+</strong>
+
+chapters
+
+</span>
+
+
+<span>
+
+🌐
+
+<strong>
+${escapeHTML(language.toUpperCase())}
+</strong>
+
+</span>
+
+
+<span>
+
+<span class="status ${isPaid ? "paid" : ""}">
+
+${isPaid ? "PAID" : "FREE"}
+
+</span>
+
+</span>
+
+</div>
+
+
+<div class="actions">
+
+
+<button
+class="btn primary"
+onclick="startReading(${Number(story.id)})"
+>
+
+📖 Soma Sasa
+
+</button>
+
+
+<button
+id="bookmarkButton"
+class="btn"
+onclick="saveBookmark(${Number(story.id)})"
+>
+
++ Maktaba
+
+</button>
+
+
+<button
+class="btn"
+onclick="shareStory()"
+>
+
+↗ Share
+
+</button>
+
+
+</div>
+
+
+${renderRating(story)}
+
+
+</div>
+
+`;
+
+
+document.getElementById(
+"breadcrumbTitle"
+).textContent =
+title;
+
+
+document.getElementById(
+"aboutSection"
+).classList.remove(
+"hidden"
+);
+
+
+document.getElementById(
+"storyDescription"
+).textContent =
+description;
+
+
+document.getElementById(
+"infoCategory"
+).textContent =
+category;
+
+
+document.getElementById(
+"infoLanguage"
+).textContent =
+language.toUpperCase();
+
+
+document.getElementById(
+"infoReaders"
+).textContent =
+formatNumber(readers);
+
+
+document.getElementById(
+"infoStatus"
+).textContent =
+isPaid
+? "Paid"
+: "Free";
+
+
+document.getElementById(
+"infoChapters"
+).textContent =
+formatNumber(chapters);
+
+
+document.getElementById(
+"infoPublished"
+).textContent =
+formatDate(
+story.created_at ||
+story.published_at
+);
+
+
+checkBookmark(
+story.id
+);
+
+}
+
+
+/* =========================
+DATE
+========================= */
+
+function formatDate(value){
+
+if(!value){
+
+return "—";
+
+}
+
+const date =
+new Date(value);
+
+if(
+Number.isNaN(
+date.getTime()
+)
+){
+
+return "—";
+
+}
+
+return date.toLocaleDateString(
+"sw-TZ",
+{
+day:"numeric",
+month:"short",
+year:"numeric"
+}
+);
+
+}
+
+
+/* =========================
+LOAD CHAPTERS
+========================= */
+
+async function loadChapters(storyId){
+
+const section =
+document.getElementById(
+"chaptersSection"
+);
+
+const list =
+document.getElementById(
+"chapterList"
+);
+
+try{
+
+const response =
+await fetch(
+API_BASE +
+"/stories/" +
+encodeURIComponent(storyId) +
+"/chapters",
+{
+headers:{
+"Accept":
+"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+if(!response.ok){
+
+throw new Error(
+"Chapters API error"
+);
+
+}
+
+
+const data =
+await response.json();
+
+
+const chapters =
+Array.isArray(data.chapters)
+? data.chapters
+: [];
+
+
+section.classList.remove(
+"hidden"
+);
+
+
+document.getElementById(
+"chapterCount"
+).textContent =
+chapters.length +
+" chapters";
+
+
+if(!chapters.length){
+
+list.innerHTML = `
+
+<div class="empty">
+
+Hakuna chapters zilizowekwa bado.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+list.innerHTML = "";
+
+
+chapters.forEach(
+function(chapter,index){
+
+const chapterId =
+chapter.id;
+
+
+const number =
+chapter.chapter_number ||
+chapter.number ||
+index + 1;
+
+
+const title =
+chapter.title ||
+"Chapter " +
+number;
+
+
+const locked =
+chapter.is_locked === true ||
+chapter.is_locked === 1 ||
+chapter.locked === true;
+
+
+const item =
+document.createElement("div");
+
+item.className =
+"chapter";
+
+
+item.innerHTML = `
+
+<div class="chapter-left">
+
+<div class="chapter-number">
+
+${escapeHTML(number)}
+
+</div>
+
+
+<div>
+
+<div class="chapter-title">
+
+${escapeHTML(title)}
+
+</div>
+
+
+<div class="chapter-date">
+
+${formatDate(
+chapter.created_at ||
+chapter.published_at
+)}
+
+</div>
+
+</div>
+
+</div>
+
+
+${
+locked
+
+?
+
+`<span class="locked">
+🔒 Locked
+</span>`
+
+:
+
+`<button
+class="chapter-button"
+onclick="openChapter(${Number(chapterId)},${Number(storyId)})"
+>
+Read
+</button>`
+
+}
+
+`;
+
+
+list.appendChild(
+item
+);
+
+});
+
+}catch(error){
+
+console.warn(
+"Chapters API not available yet:",
+error
+);
+
+
+section.classList.remove(
+"hidden"
+);
+
+
+list.innerHTML = `
+
+<div class="empty">
+
+Chapters zitaonekana baada ya kuunganishwa na API.
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* =========================
+OPEN CHAPTER
+========================= */
+
+function openChapter(chapterId,storyId){
+
+if(!chapterId){
+
+return;
+
+}
+
+location.href =
+"reader.html?chapter_id=" +
+encodeURIComponent(chapterId) +
+"&story_id=" +
+encodeURIComponent(storyId);
+
+}
+
+
+/* =========================
+RECOMMENDED STORIES
+========================= */
+
+async function loadRecommended(story){
+
+const section =
+document.getElementById(
+"recommendedSection"
+);
+
+const grid =
+document.getElementById(
+"recommendedGrid"
+);
+
+try{
+
+const response =
+await fetch(
+API_BASE + "/stories",
+{
+headers:{
+"Accept":
+"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+const data =
+await response.json();
+
+
+if(
+!response.ok ||
+!data.success
+){
+
+return;
+
+}
+
+
+let stories =
+Array.isArray(data.stories)
+? data.stories
+: [];
+
+
+stories =
+stories.filter(
+item =>
+Number(item.id) !==
+Number(story.id)
+);
+
+
+const category =
+String(
+story.category_name ||
+story.category ||
+""
+).toLowerCase();
+
+
+const sameCategory =
+stories.filter(
+item =>
+String(
+item.category_name ||
+item.category ||
+""
+).toLowerCase() ===
+category
+);
+
+
+if(sameCategory.length){
+
+stories =
+sameCategory.concat(
+stories.filter(
+item =>
+!sameCategory.includes(item)
+)
+);
+
+}
+
+
+stories =
+stories.slice(0,4);
+
+
+if(!stories.length){
+
+return;
+
+}
+
+
+section.classList.remove(
+"hidden"
+);
+
+
+grid.innerHTML = "";
+
+
+stories.forEach(
+function(item){
+
+const card =
+document.createElement("a");
+
+card.className =
+"recommended-card";
+
+card.href =
+"story.html?id=" +
+encodeURIComponent(item.id);
+
+
+const title =
+item.title ||
+"Untitled Story";
+
+
+const cover =
+safeURL(
+item.cover_url ||
+item.coverUrl ||
+""
+);
+
+
+let coverHTML;
+
+if(cover){
+
+coverHTML = `
+
+<img
+src="${escapeHTML(cover)}"
+alt="${escapeHTML(title)}"
+>
+
+`;
+
+}else{
+
+coverHTML = `
+
+${escapeHTML(title)}
+
+`;
+
+}
+
+
+card.innerHTML = `
+
+<div class="recommended-cover">
+
+${coverHTML}
+
+</div>
+
+
+<div class="recommended-content">
+
+<h3>
+
+${escapeHTML(title)}
+
+</h3>
+
+<p>
+
+${escapeHTML(
+item.author_name ||
+item.author ||
+"Net Simulizi"
+)}
+
+</p>
+
+</div>
+
+`;
+
+
+grid.appendChild(card);
+
+});
+
+}catch(error){
+
+console.warn(
+"Recommended stories unavailable:",
+error
+);
+
+}
+
+}
+
+
+/* =========================
+SHARE
+========================= */
+
+async function shareStory(){
+
+const title =
+currentStory?.title ||
+"Net Simulizi";
+
+
+const url =
+window.location.href;
+
+
+if(
+navigator.share
+){
+
+try{
+
+await navigator.share({
+
+title:title,
+
+text:
+"Soma hadithi hii kwenye Net Simulizi.",
+
+url:url
+
+});
+
+}catch(error){
+
+console.log(
+"Share cancelled."
+);
+
+}
+
+return;
+
+}
+
+
+try{
+
+await navigator.clipboard.writeText(
+url
+);
+
+alert(
+"Link ya hadithi imenakiliwa."
+);
+
+}catch(error){
+
+alert(
+"Link: " +
+url
+);
+
+}
+
+}
+
+
+/* =========================
+LOAD STORY
+========================= */
+
+async function loadStory(){
+
+const storyId =
+getStoryId();
+
+
+const container =
+document.getElementById(
+"storyHero"
+);
+
+
+if(!storyId){
+
+container.innerHTML = `
+
+<div class="error">
+
+Hadithi haijatambuliwa.
+
+<br><br>
+
+<a
+href="discover.html"
+class="btn primary"
+>
+Rudi Discover
+</a>
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+try{
+
+const response =
+await fetch(
+API_BASE +
+"/stories/" +
+encodeURIComponent(storyId),
+{
+method:"GET",
+headers:{
+"Accept":
+"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+const data =
+await response.json();
+
+
+if(
+!response.ok ||
+!data.success ||
+!data.story
+){
+
+throw new Error(
+data.message ||
+"Story haijapatikana."
+);
+
+}
+
+
+currentStory =
+data.story;
+
+
+renderStory(
+currentStory
+);
+
+
+loadChapters(
+storyId
+);
+
+
+loadRecommended(
+currentStory
+);
+
+
+}catch(error){
+
+console.error(
+"Story error:",
+error
+);
+
+
+container.innerHTML = `
+
+<div class="error">
+
+Imeshindikana kupakia hadithi.
+
+<br><br>
+
+${escapeHTML(
+error.message ||
+"Jaribu tena baadaye."
+)}
+
+<br><br>
+
+<button
+class="btn primary"
+onclick="loadStory()"
+>
+Jaribu Tena
+</button>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* =========================
+CLOSE DROPDOWN
+========================= */
+
+document.addEventListener(
+"click",
+function(event){
+
+const userMenu =
+document.getElementById(
+"userMenu"
+);
+
+const dropdown =
+document.getElementById(
+"userDropdown"
+);
+
+
+if(
+userMenu &&
+dropdown &&
+!userMenu.contains(
+event.target
+)
+){
+
+dropdown.classList.remove(
+"active"
+);
+
+}
+
+});
+
+
+/* =========================
+START
+========================= */
+
+window.addEventListener(
+"DOMContentLoaded",
+function(){
 
 loadDarkMode();
 
+updateUserInterface();
+
 loadStory();
+
+});
 
 </script>
 
