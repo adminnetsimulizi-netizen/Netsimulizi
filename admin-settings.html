@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Settings - Net Simulizi</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+--bg:#090b10;
+--surface:#11141b;
+--surface-2:#171b24;
+--gold:#e5a51c;
+--gold-light:#f2bd3d;
+--text:#fff;
+--muted:#a8afbd;
+--border:rgba(255,255,255,.09);
+--green:#22c55e;
+--red:#ef4444;
+}
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text);
+min-height:100vh;
+}
+
+a{
+color:inherit;
+text-decoration:none;
+}
+
+button,input,select{
+font:inherit;
+}
+
+button{
+cursor:pointer;
+}
+
+.layout{
+display:flex;
+min-height:100vh;
+}
+
+.sidebar{
+width:250px;
+background:var(--surface);
+border-right:1px solid var(--border);
+position:fixed;
+left:0;
+top:0;
+bottom:0;
+overflow-y:auto;
+z-index:100;
+}
+
+.logo-area{
+height:80px;
+display:flex;
+align-items:center;
+padding:15px 20px;
+border-bottom:1px solid var(--border);
+}
+
+.logo-area img{
+width:48px;
+height:48px;
+object-fit:contain;
+margin-right:10px;
+}
+
+.logo-text{
+font-size:20px;
+font-weight:bold;
+color:var(--gold-light);
+}
+
+.admin-label{
+font-size:11px;
+color:var(--muted);
+margin-top:3px;
+}
+
+.menu{
+padding:18px 12px;
+}
+
+.menu-title{
+font-size:11px;
+color:#697180;
+text-transform:uppercase;
+padding:10px 12px;
+font-weight:bold;
+}
+
+.menu a{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px;
+border-radius:9px;
+color:#c5cad3;
+font-size:14px;
+margin-bottom:4px;
+transition:.2s;
+}
+
+.menu a:hover{
+background:var(--surface-2);
+color:#fff;
+}
+
+.menu a.active{
+background:rgba(229,165,28,.13);
+color:var(--gold-light);
+}
+
+.menu-icon{
+width:22px;
+text-align:center;
+font-size:17px;
+}
+
+.main{
+margin-left:250px;
+width:calc(100% - 250px);
+}
+
+.topbar{
+height:80px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 28px;
+border-bottom:1px solid var(--border);
+background:rgba(9,11,16,.96);
+position:sticky;
+top:0;
+z-index:50;
+}
+
+.page-title h1{
+font-size:22px;
+margin-bottom:4px;
+}
+
+.page-title p{
+font-size:12px;
+color:var(--muted);
+}
+
+.top-actions{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.admin-user{
+padding:9px 13px;
+border:1px solid var(--border);
+border-radius:8px;
+font-size:13px;
+color:#ddd;
+}
+
+.logout-btn{
+border:1px solid rgba(239,68,68,.35);
+background:rgba(239,68,68,.08);
+color:#ff7d7d;
+padding:9px 13px;
+border-radius:8px;
+}
+
+.content{
+padding:28px;
+max-width:1100px;
+}
+
+.settings-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+.card{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:12px;
+padding:22px;
+}
+
+.card.full{
+grid-column:1/-1;
+}
+
+.card-header{
+padding-bottom:15px;
+margin-bottom:18px;
+border-bottom:1px solid var(--border);
+}
+
+.card-header h2{
+font-size:16px;
+margin-bottom:5px;
+}
+
+.card-header p{
+font-size:12px;
+color:var(--muted);
+line-height:1.5;
+}
+
+.form-group{
+margin-bottom:16px;
+}
+
+.form-group:last-child{
+margin-bottom:0;
+}
+
+label{
+display:block;
+font-size:12px;
+color:#cfd3db;
+margin-bottom:7px;
+}
+
+input,select{
+width:100%;
+padding:11px 12px;
+background:var(--surface-2);
+border:1px solid var(--border);
+border-radius:8px;
+color:#fff;
+outline:none;
+}
+
+input:focus,select:focus{
+border-color:rgba(229,165,28,.55);
+}
+
+select option{
+background:#171b24;
+}
+
+.save-btn{
+margin-top:18px;
+background:var(--gold);
+color:#111;
+border:0;
+padding:11px 18px;
+border-radius:8px;
+font-weight:bold;
+}
+
+.save-btn:hover{
+background:var(--gold-light);
+}
+
+.toggle-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:20px;
+padding:14px 0;
+border-bottom:1px solid var(--border);
+}
+
+.toggle-row:last-child{
+border-bottom:0;
+}
+
+.toggle-info strong{
+display:block;
+font-size:13px;
+margin-bottom:4px;
+}
+
+.toggle-info span{
+font-size:11px;
+color:var(--muted);
+line-height:1.4;
+}
+
+.switch{
+position:relative;
+width:48px;
+height:26px;
+flex-shrink:0;
+}
+
+.switch input{
+display:none;
+}
+
+.slider{
+position:absolute;
+inset:0;
+background:#303641;
+border-radius:30px;
+transition:.2s;
+}
+
+.slider:before{
+content:"";
+position:absolute;
+width:20px;
+height:20px;
+left:3px;
+top:3px;
+background:#fff;
+border-radius:50%;
+transition:.2s;
+}
+
+.switch input:checked + .slider{
+background:var(--gold);
+}
+
+.switch input:checked + .slider:before{
+transform:translateX(22px);
+}
+
+.revenue-box{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+.revenue-item{
+background:var(--surface-2);
+border:1px solid var(--border);
+border-radius:9px;
+padding:16px;
+text-align:center;
+}
+
+.revenue-number{
+font-size:24px;
+font-weight:bold;
+color:var(--gold-light);
+margin-bottom:5px;
+}
+
+.revenue-label{
+font-size:11px;
+color:var(--muted);
+}
+
+.danger{
+border-color:rgba(239,68,68,.2);
+}
+
+.danger .card-header h2{
+color:#f87171;
+}
+
+.danger-btn{
+background:rgba(239,68,68,.1);
+border:1px solid rgba(239,68,68,.3);
+color:#f87171;
+padding:10px 15px;
+border-radius:8px;
+margin-top:15px;
+}
+
+.notice{
+background:rgba(229,165,28,.07);
+border:1px solid rgba(229,165,28,.18);
+border-radius:9px;
+padding:13px;
+font-size:11px;
+line-height:1.6;
+color:#c9c0a8;
+margin-top:14px;
+}
+
+.success{
+display:none;
+background:rgba(34,197,94,.1);
+border:1px solid rgba(34,197,94,.2);
+color:#4ade80;
+padding:11px 13px;
+border-radius:8px;
+font-size:12px;
+margin-top:14px;
+}
+
+.mobile-menu{
+display:none;
+background:none;
+border:0;
+color:#fff;
+font-size:25px;
+}
+
+.overlay{
+display:none;
+}
+
+@media(max-width:900px){
+
+.sidebar{
+transform:translateX(-100%);
+transition:.25s;
+}
+
+.sidebar.open{
+transform:translateX(0);
+}
+
+.main{
+margin-left:0;
+width:100%;
+}
+
+.mobile-menu{
+display:block;
+}
+
+.overlay.show{
+display:block;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.65);
+z-index:90;
+}
+
+.topbar{
+padding:0 16px;
+}
+
+.admin-user{
+display:none;
+}
+
+.content{
+padding:18px 14px;
+}
+
+.settings-grid{
+grid-template-columns:1fr;
+}
+
+.card.full{
+grid-column:auto;
+}
+
+}
+
+@media(max-width:520px){
+
+.page-title h1{
+font-size:18px;
+}
+
+.page-title p{
+display:none;
+}
+
+.content{
+padding:14px;
+}
+
+.card{
+padding:17px;
+}
+
+.revenue-box{
+grid-template-columns:1fr 1fr;
+}
+
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="layout">
+
+<aside class="sidebar" id="sidebar">
+
+<div class="logo-area">
+
+<img src="Logo.png" alt="Net Simulizi">
+
+<div>
+<div class="logo-text">Net Simulizi</div>
+<div class="admin-label">ADMIN PANEL</div>
+</div>
+
+</div>
+
+<nav class="menu">
+
+<div class="menu-title">Dashboard</div>
+
+<a href="admin-dashboard.html">
+<span class="menu-icon">📊</span>
+<span>Dashboard</span>
+</a>
+
+<div class="menu-title">Usimamizi</div>
+
+<a href="admin-users.html">
+<span class="menu-icon">👥</span>
+<span>Users</span>
+</a>
+
+<a href="admin-authors.html">
+<span class="menu-icon">✍️</span>
+<span>Authors</span>
+</a>
+
+<a href="admin-stories.html">
+<span class="menu-icon">📚</span>
+<span>Stories</span>
+</a>
+
+<a href="admin-submissions.html">
+<span class="menu-icon">📥</span>
+<span>Submissions</span>
+</a>
+
+<div class="menu-title">Fedha</div>
+
+<a href="admin-withdrawals.html">
+<span class="menu-icon">💰</span>
+<span>Withdrawals</span>
+</a>
+
+<div class="menu-title">Mfumo</div>
+
+<a href="admin-settings.html" class="active">
+<span class="menu-icon">⚙️</span>
+<span>Settings</span>
+</a>
+
+<a href="index.html">
+<span class="menu-icon">🌐</span>
+<span>View Website</span>
+</a>
+
+</nav>
+
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+
+<div style="display:flex;align-items:center;gap:14px">
+
+<button class="mobile-menu" onclick="openMenu()">☰</button>
+
+<div class="page-title">
+<h1>Settings</h1>
+<p>Simamia mipangilio ya Net Simulizi</p>
+</div>
+
+</div>
+
+<div class="top-actions">
+
+<div class="admin-user" id="adminName">
+Administrator
+</div>
+
+<button class="logout-btn" onclick="logout()">
+Toka
+</button>
+
+</div>
+
+</header>
+
+<section class="content">
+
+<div class="settings-grid">
+
+<!-- PLATFORM -->
+
+<div class="card">
+
+<div class="card-header">
+
+<h2>Platform Settings</h2>
+
+<p>
+Mipangilio ya msingi ya Net Simulizi.
+</p>
+
+</div>
+
+<div class="form-group">
+
+<label>Jina la Platform</label>
+
+<input
+type="text"
+id="platformName"
+value="Net Simulizi"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label>Author Name</label>
+
+<input
+type="text"
+id="ownerName"
+value="HASSAN MAMBOSASA"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label>Default Language</label>
+
+<select id="defaultLanguage">
+
+<option value="sw">Kiswahili</option>
+<option value="en">English</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>Currency</label>
+
+<select id="currency">
+
+<option value="TZS">TSh - Tanzania Shilling</option>
+
+</select>
+
+</div>
+
+<button
+class="save-btn"
+onclick="savePlatformSettings()"
+
+>
+
+Hifadhi Mipangilio </button>
+
+<div class="success" id="platformSuccess">
+Mabadiliko yamehifadhiwa.
+</div>
+
+</div>
+
+<!-- REVENUE -->
+
+<div class="card">
+
+<div class="card-header">
+
+<h2>Revenue Settings</h2>
+
+<p>
+Mgawanyo wa mapato kati ya mwandishi na Net Simulizi.
+</p>
+
+</div>
+
+<div class="revenue-box">
+
+<div class="revenue-item">
+
+<div class="revenue-number">
+70%
+</div>
+
+<div class="revenue-label">
+Mwandishi
+</div>
+
+</div>
+
+<div class="revenue-item">
+
+<div class="revenue-number">
+30%
+</div>
+
+<div class="revenue-label">
+Net Simulizi
+</div>
+
+</div>
+
+</div>
+
+<div style="margin-top:18px">
+
+<div class="form-group">
+
+<label>
+Minimum Withdrawal (TSh)
+</label>
+
+<input
+type="number"
+id="minimumWithdrawal"
+value="50000"
+min="0"
+
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Paid Story Recommendation - Author Share
+</label>
+
+<input
+type="number"
+id="recommendationAuthor"
+value="50"
+min="0"
+max="100"
+
+>
+
+</div>
+
+</div>
+
+<button
+class="save-btn"
+onclick="saveRevenueSettings()"
+
+>
+
+Hifadhi Revenue Settings </button>
+
+<div class="success" id="revenueSuccess">
+Revenue settings zimehifadhiwa.
+</div>
+
+</div>
+
+<!-- FEATURES -->
+
+<div class="card full">
+
+<div class="card-header">
+
+<h2>Platform Features</h2>
+
+<p>
+Washa au zima vipengele vya Net Simulizi.
+</p>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>User Registration</strong>
+
+<span>
+Ruhusu wasomaji kujisajili kwenye platform.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="userRegistration"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Author Submissions</strong>
+
+<span>
+Ruhusu waandishi kutuma hadithi kwa ajili ya approval.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="authorSubmissions"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Paid Stories</strong>
+
+<span>
+Ruhusu hadithi zenye chapters zinazolipiwa.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="paidStories"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Author Withdrawals</strong>
+
+<span>
+Ruhusu waandishi kuomba withdrawal.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="authorWithdrawals"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Maintenance Mode</strong>
+
+<span>
+Washa hii wakati platform iko kwenye matengenezo.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="maintenanceMode"
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<button
+class="save-btn"
+onclick="saveFeatureSettings()"
+
+>
+
+Hifadhi Features </button>
+
+<div class="success" id="featureSuccess">
+Feature settings zimehifadhiwa.
+</div>
+
+</div>
+
+<!-- READING -->
+
+<div class="card">
+
+<div class="card-header">
+
+<h2>Reading Settings</h2>
+
+<p>
+Mipangilio ya reading experience.
+</p>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Anti Copy</strong>
+
+<span>
+Zuia copy, paste na selection wakati wa kusoma.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="antiCopy"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Reader Dark Mode</strong>
+
+<span>
+Reader atumie dark reading interface.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="readerDark"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<div class="toggle-row">
+
+<div class="toggle-info">
+
+<strong>Reading Progress</strong>
+
+<span>
+Hifadhi progress ya msomaji.
+</span>
+
+</div>
+
+<label class="switch">
+
+<input
+type="checkbox"
+id="readingProgress"
+checked
+
+>
+
+<span class="slider"></span>
+
+</label>
+
+</div>
+
+<button
+class="save-btn"
+onclick="saveReadingSettings()"
+
+>
+
+Hifadhi Reading Settings </button>
+
+<div class="success" id="readingSuccess">
+Reading settings zimehifadhiwa.
+</div>
+
+</div>
+
+<!-- SECURITY -->
+
+<div class="card">
+
+<div class="card-header">
+
+<h2>Security</h2>
+
+<p>
+Mipangilio ya usalama ya Admin Panel.
+</p>
+
+</div>
+
+<div class="form-group">
+
+<label>Admin Session Duration</label>
+
+<select id="sessionDuration">
+
+<option value="1">Siku 1</option>
+<option value="7" selected>Siku 7</option>
+<option value="30">Siku 30</option>
+
+</select>
+
+</div>
+
+<div class="notice">
+Admin password na credentials halisi havibadilishwi
+kwenye ukurasa huu kwa sasa. Mfumo wa authentication
+wa backend utaunganishwa kwenye hatua ya mwisho.
+</div>
+
+<button
+class="save-btn"
+onclick="saveSecuritySettings()"
+
+>
+
+Hifadhi Security </button>
+
+<div class="success" id="securitySuccess">
+Security settings zimehifadhiwa.
+</div>
+
+</div>
+
+<!-- DANGER -->
+
+<div class="card full danger">
+
+<div class="card-header">
+
+<h2>Danger Zone</h2>
+
+<p>
+Sehemu hii ina vitendo vinavyoweza kuathiri data ya browser.
+Tumia kwa tahadhari.
+</p>
+
+</div>
+
+<button
+class="danger-btn"
+onclick="clearLocalData()"
+
+>
+
+Futa Local Testing Data </button>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<script>
+
+/* ADMIN CHECK */
+
+function checkAdmin(){
+
+const user =
+JSON.parse(
+localStorage.getItem("netsimulizi_user") || "null"
+);
+
+if(!user){
+
+window.location.href =
+"admin-login.html";
+
+return null;
+
+}
+
+if(user.role !== "admin"){
+
+alert(
+"Huna ruhusa ya kufungua Admin Panel."
+);
+
+window.location.href =
+"index.html";
+
+return null;
+
+}
+
+document.getElementById("adminName").textContent =
+user.username ||
+user.email ||
+"Administrator";
+
+return user;
+
+}
+
+/* LOAD SETTINGS */
+
+function loadSettings(){
+
+const settings =
+JSON.parse(
+localStorage.getItem(
+"netsimulizi_admin_settings"
+) || "{}"
+);
+
+if(settings.platformName)
+document.getElementById("platformName").value =
+settings.platformName;
+
+if(settings.ownerName)
+document.getElementById("ownerName").value =
+settings.ownerName;
+
+if(settings.defaultLanguage)
+document.getElementById("defaultLanguage").value =
+settings.defaultLanguage;
+
+if(settings.currency)
+document.getElementById("currency").value =
+settings.currency;
+
+if(settings.minimumWithdrawal !== undefined)
+document.getElementById("minimumWithdrawal").value =
+settings.minimumWithdrawal;
+
+if(settings.recommendationAuthor !== undefined)
+document.getElementById("recommendationAuthor").value =
+settings.recommendationAuthor;
+
+const features =
+settings.features || {};
+
+if(features.userRegistration !== undefined)
+document.getElementById("userRegistration").checked =
+features.userRegistration;
+
+if(features.authorSubmissions !== undefined)
+document.getElementById("authorSubmissions").checked =
+features.authorSubmissions;
+
+if(features.paidStories !== undefined)
+document.getElementById("paidStories").checked =
+features.paidStories;
+
+if(features.authorWithdrawals !== undefined)
+document.getElementById("authorWithdrawals").checked =
+features.authorWithdrawals;
+
+if(features.maintenanceMode !== undefined)
+document.getElementById("maintenanceMode").checked =
+features.maintenanceMode;
+
+const reading =
+settings.reading || {};
+
+if(reading.antiCopy !== undefined)
+document.getElementById("antiCopy").checked =
+reading.antiCopy;
+
+if(reading.readerDark !== undefined)
+document.getElementById("readerDark").checked =
+reading.readerDark;
+
+if(reading.readingProgress !== undefined)
+document.getElementById("readingProgress").checked =
+reading.readingProgress;
+
+if(settings.sessionDuration)
+document.getElementById("sessionDuration").value =
+settings.sessionDuration;
+
+}
+
+/* SAVE PLATFORM */
+
+function savePlatformSettings(){
+
+const settings =
+getSettings();
+
+settings.platformName =
+document.getElementById("platformName").value.trim();
+
+settings.ownerName =
+document.getElementById("ownerName").value.trim();
+
+settings.defaultLanguage =
+document.getElementById("defaultLanguage").value;
+
+settings.currency =
+document.getElementById("currency").value;
+
+saveSettings(settings);
+
+showSuccess("platformSuccess");
+
+}
+
+/* SAVE REVENUE */
+
+function saveRevenueSettings(){
+
+const settings =
+getSettings();
+
+settings.minimumWithdrawal =
+Number(
+document.getElementById(
+"minimumWithdrawal"
+).value || 50000
+);
+
+settings.recommendationAuthor =
+Number(
+document.getElementById(
+"recommendationAuthor"
+).value || 50
+);
+
+saveSettings(settings);
+
+showSuccess("revenueSuccess");
+
+}
+
+/* SAVE FEATURES */
+
+function saveFeatureSettings(){
+
+const settings =
+getSettings();
+
+settings.features = {
+
+userRegistration:
+document.getElementById(
+"userRegistration"
+).checked,
+
+authorSubmissions:
+document.getElementById(
+"authorSubmissions"
+).checked,
+
+paidStories:
+document.getElementById(
+"paidStories"
+).checked,
+
+authorWithdrawals:
+document.getElementById(
+"authorWithdrawals"
+).checked,
+
+maintenanceMode:
+document.getElementById(
+"maintenanceMode"
+).checked
+
+};
+
+saveSettings(settings);
+
+showSuccess("featureSuccess");
+
+}
+
+/* SAVE READING */
+
+function saveReadingSettings(){
+
+const settings =
+getSettings();
+
+settings.reading = {
+
+antiCopy:
+document.getElementById(
+"antiCopy"
+).checked,
+
+readerDark:
+document.getElementById(
+"readerDark"
+).checked,
+
+readingProgress:
+document.getElementById(
+"readingProgress"
+).checked
+
+};
+
+saveSettings(settings);
+
+showSuccess("readingSuccess");
+
+}
+
+/* SAVE SECURITY */
+
+function saveSecuritySettings(){
+
+const settings =
+getSettings();
+
+settings.sessionDuration =
+document.getElementById(
+"sessionDuration"
+).value;
+
+saveSettings(settings);
+
+showSuccess("securitySuccess");
+
+}
+
+/* GET SETTINGS */
+
+function getSettings(){
+
+try{
+
+return JSON.parse(
+localStorage.getItem(
+"netsimulizi_admin_settings"
+) || "{}"
+);
+
+}catch(error){
+
+return {};
+
+}
+
+}
+
+/* SAVE */
+
+function saveSettings(settings){
+
+localStorage.setItem(
+"netsimulizi_admin_settings",
+JSON.stringify(settings)
+);
+
+}
+
+/* SUCCESS */
+
+function showSuccess(id){
+
+const element =
+document.getElementById(id);
+
+element.style.display =
+"block";
+
+setTimeout(
+() => {
+element.style.display =
+"none";
+},
+2500
+);
+
+}
+
+/* CLEAR TESTING DATA */
+
+function clearLocalData(){
+
+const confirmed =
+confirm(
+"Una uhakika? Hii itafuta data za testing zilizohifadhiwa kwenye browser."
+);
+
+if(!confirmed){
+return;
+}
+
+/*
+Hatufuti login ya admin ili
+mtumiaji asiwe logged out bila sababu.
+*/
+
+const admin =
+localStorage.getItem(
+"netsimulizi_user"
+);
+
+const keysToRemove = [
+
+"netsimulizi_withdrawals",
+"netsimulizi_admin_settings",
+"netsimulizi_notifications",
+"netsimulizi_contact_messages",
+"netsimulizi_font_size",
+"netsimulizi_dark"
+
+];
+
+keysToRemove.forEach(
+key => localStorage.removeItem(key)
+);
+
+if(admin){
+localStorage.setItem(
+"netsimulizi_user",
+admin
+);
+}
+
+alert(
+"Testing data imefutwa."
+);
+
+loadSettings();
+
+}
+
+/* MOBILE MENU */
+
+function openMenu(){
+
+document
+.getElementById("sidebar")
+.classList.add("open");
+
+document
+.getElementById("overlay")
+.classList.add("show");
+
+}
+
+function closeMenu(){
+
+document
+.getElementById("sidebar")
+.classList.remove("open");
+
+document
+.getElementById("overlay")
+.classList.remove("show");
+
+}
+
+/* LOGOUT */
+
+function logout(){
+
+localStorage.removeItem(
+"netsimulizi_user"
+);
+
+window.location.href =
+"admin-login.html";
+
+}
+
+/* START */
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+const admin =
+checkAdmin();
+
+if(admin){
+loadSettings();
+}
+
+}
+);
+
+</script>
+
+</body>
+</html>
