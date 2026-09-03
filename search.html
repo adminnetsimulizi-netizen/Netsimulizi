@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Tafuta - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09);
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html{
+      scroll-behavior:smooth;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button,
+    input{
+      font:inherit;
+    }
+
+    /* HEADER */
+
+    header{
+      height:68px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:18px;
+    }
+
+    .menu-btn{
+      width:40px;
+      height:40px;
+      border:none;
+      background:transparent;
+      color:var(--text);
+      font-size:24px;
+      cursor:pointer;
+      border-radius:8px;
+    }
+
+    .menu-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .logo{
+      height:42px;
+      width:auto;
+      display:block;
+    }
+
+    .header-right{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .login-btn,
+    .register-btn{
+      border-radius:8px;
+      padding:10px 16px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+
+    .login-btn{
+      background:transparent;
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+
+    .register-btn{
+      background:var(--gold);
+      border:1px solid var(--gold);
+      color:#111;
+    }
+
+    .login-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .register-btn:hover{
+      background:var(--gold-light);
+    }
+
+    .user-box{
+      display:none;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user-avatar{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      background:var(--gold);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+    }
+
+    .user-name{
+      font-weight:700;
+      color:var(--text);
+    }
+
+    /* SIDE NAV */
+
+    .side-nav{
+      position:fixed;
+      left:-280px;
+      top:0;
+      width:280px;
+      height:100vh;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:2000;
+      padding:22px 16px;
+      transition:.25s ease;
+      overflow-y:auto;
+    }
+
+    .side-nav.open{
+      left:0;
+    }
+
+    .side-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:25px;
+      padding:0 6px;
+    }
+
+    .side-logo{
+      height:38px;
+    }
+
+    .close-nav{
+      background:transparent;
+      border:none;
+      color:var(--text);
+      font-size:26px;
+      cursor:pointer;
+    }
+
+    .nav-list{
+      list-style:none;
+    }
+
+    .nav-list li{
+      margin-bottom:5px;
+    }
+
+    .nav-list a{
+      display:flex;
+      align-items:center;
+      gap:13px;
+      padding:13px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      transition:.2s;
+    }
+
+    .nav-list a:hover,
+    .nav-list a.active{
+      background:var(--surface-2);
+      color:var(--gold-light);
+    }
+
+    .nav-icon{
+      width:23px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .nav-divider{
+      height:1px;
+      background:var(--border);
+      margin:18px 0;
+    }
+
+    .overlay{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.65);
+      z-index:1500;
+    }
+
+    .overlay.show{
+      display:block;
+    }
+
+    /* MAIN */
+
+    main{
+      width:100%;
+      max-width:1450px;
+      margin:0 auto;
+      padding:32px 28px 70px;
+    }
+
+    .page-title{
+      margin-bottom:24px;
+    }
+
+    .page-title h1{
+      font-size:32px;
+      margin-bottom:7px;
+    }
+
+    .page-title p{
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    /* SEARCH AREA */
+
+    .search-area{
+      width:100%;
+      max-width:850px;
+      margin:0 auto 35px;
+    }
+
+    .search-box{
+      position:relative;
+      width:100%;
+    }
+
+    .search-box input{
+      width:100%;
+      height:58px;
+      padding:0 55px 0 52px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      outline:none;
+      background:var(--surface);
+      color:var(--text);
+      font-size:16px;
+    }
+
+    .search-box input:focus{
+      border-color:var(--gold);
+      box-shadow:0 0 0 2px rgba(229,165,28,.08);
+    }
+
+    .search-icon{
+      position:absolute;
+      left:18px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      font-size:21px;
+    }
+
+    .clear-btn{
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      width:35px;
+      height:35px;
+      border:none;
+      border-radius:8px;
+      background:var(--surface-2);
+      color:var(--muted);
+      cursor:pointer;
+      display:none;
+    }
+
+    .clear-btn:hover{
+      color:var(--text);
+    }
+
+    .search-hint{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      margin-top:12px;
+    }
+
+    /* RESULTS HEADER */
+
+    .results-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      margin-bottom:18px;
+    }
+
+    .results-header h2{
+      font-size:20px;
+    }
+
+    .result-count{
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* STORIES */
+
+    .stories{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:18px;
+      align-items:start;
+    }
+
+    .story-card{
+      overflow:hidden;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      transition:.2s;
+      display:block;
+      min-width:0;
+    }
+
+    .story-card:hover{
+      transform:translateY(-4px);
+      border-color:rgba(229,165,28,.35);
+    }
+
+    .cover{
+      width:100%;
+      aspect-ratio:2/3;
+      background:var(--surface-2);
+      overflow:hidden;
+    }
+
+    .cover img{
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    .cover-placeholder{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:15px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .story-info{
+      padding:13px;
+    }
+
+    .story-title{
+      font-size:16px;
+      font-weight:800;
+      line-height:1.35;
+      margin-bottom:7px;
+
+      display:-webkit-box;
+      -webkit-line-clamp:2;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
+
+    .story-author{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:9px;
+
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .story-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:7px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .readers{
+      color:var(--gold-light);
+      font-weight:700;
+    }
+
+    .category{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* STATES */
+
+    .initial-state,
+    .loading,
+    .empty,
+    .error{
+      grid-column:1/-1;
+      text-align:center;
+      padding:65px 20px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:12px;
+      color:var(--muted);
+    }
+
+    .initial-icon{
+      font-size:40px;
+      margin-bottom:12px;
+    }
+
+    .initial-state h3,
+    .empty h3{
+      color:var(--text);
+      margin-bottom:7px;
+      font-size:18px;
+    }
+
+    .loading{
+      color:var(--gold-light);
+    }
+
+    .error{
+      color:#ff8f84;
+    }
+
+    /* FOOTER */
+
+    footer{
+      border-top:1px solid var(--border);
+      background:var(--surface);
+      padding:30px 28px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    footer strong{
+      color:var(--gold-light);
+    }
+
+    /* RESPONSIVE */
+
+    @media(max-width:1200px){
+
+      .stories{
+        grid-template-columns:repeat(4,1fr);
+      }
+
+    }
+
+    @media(max-width:850px){
+
+      header{
+        padding:0 18px;
+      }
+
+      .logo{
+        height:38px;
+      }
+
+      .header-right .login-btn,
+      .header-right .register-btn{
+        padding:8px 11px;
+        font-size:13px;
+      }
+
+      main{
+        padding:25px 18px 60px;
+      }
+
+      .stories{
+        grid-template-columns:repeat(3,1fr);
+      }
+
+    }
+
+    @media(max-width:600px){
+
+      header{
+        height:62px;
+      }
+
+      .header-left{
+        gap:10px;
+      }
+
+      .menu-btn{
+        width:36px;
+        height:36px;
+      }
+
+      .logo{
+        height:34px;
+      }
+
+      .header-right{
+        gap:6px;
+      }
+
+      .header-right .login-btn,
+      .header-right .register-btn{
+        padding:7px 9px;
+        font-size:12px;
+      }
+
+      .user-name{
+        display:none;
+      }
+
+      main{
+        padding:22px 12px 50px;
+      }
+
+      .page-title h1{
+        font-size:26px;
+      }
+
+      .search-box input{
+        height:52px;
+        font-size:15px;
+      }
+
+      .results-header h2{
+        font-size:18px;
+      }
+
+      .stories{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+      }
+
+      .story-info{
+        padding:10px;
+      }
+
+      .story-title{
+        font-size:14px;
+      }
+
+      .story-author{
+        font-size:12px;
+      }
+
+      .story-meta{
+        font-size:11px;
+      }
+
+    }
+
+    @media(max-width:360px){
+
+      .header-right .login-btn{
+        display:none;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDE NAV -->
+
+  <aside class="side-nav" id="sideNav">
+
+    <div class="side-head">
+
+      <img
+        src="Logo.png"
+        alt="Net Simulizi"
+        class="side-logo"
+      >
+
+      <button
+        class="close-nav"
+        id="closeNav"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <ul class="nav-list">
+
+      <li>
+        <a href="index.html">
+          <span class="nav-icon">⌂</span>
+          <span>Nyumbani</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="discover.html">
+          <span class="nav-icon">🔎</span>
+          <span>Gundua</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="search.html" class="active">
+          <span class="nav-icon">🔍</span>
+          <span>Tafuta</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="categories.html">
+          <span class="nav-icon">☰</span>
+          <span>Categories</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="trending.html">
+          <span class="nav-icon">🔥</span>
+          <span>Trending</span>
+        </a>
+      </li>
+
+      <div class="nav-divider"></div>
+
+      <li>
+        <a href="library.html">
+          <span class="nav-icon">📚</span>
+          <span>Maktaba Yangu</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="history.html">
+          <span class="nav-icon">🕘</span>
+          <span>Historia ya Kusoma</span>
+        </a>
+      </li>
+
+      <li>
+        <a href="profile.html">
+          <span class="nav-icon">👤</span>
+          <span>Wasifu</span>
+        </a>
+      </li>
+
+    </ul>
+
+  </aside>
+
+  <div
+    class="overlay"
+    id="overlay"
+  ></div>
+
+  <!-- HEADER -->
+
+  <header>
+
+    <div class="header-left">
+
+      <button
+        class="menu-btn"
+        id="menuBtn"
+      >
+        ☰
+      </button>
+
+      <a href="index.html">
+
+        <img
+          src="Logo.png"
+          alt="Net Simulizi"
+          class="logo"
+        >
+
+      </a>
+
+    </div>
+
+    <div class="header-right">
+
+      <div id="guestButtons">
+
+        <a href="login.html">
+          <button class="login-btn">
+            Ingia
+          </button>
+        </a>
+
+        <a href="register.html">
+          <button class="register-btn">
+            Jisajili
+          </button>
+        </a>
+
+      </div>
+
+      <div
+        class="user-box"
+        id="userBox"
+      >
+
+        <div
+          class="user-avatar"
+          id="userAvatar"
+        >
+          U
+        </div>
+
+        <a href="profile.html">
+
+          <span
+            class="user-name"
+            id="userName"
+          >
+            Mtumiaji
+          </span>
+
+        </a>
+
+      </div>
+
+    </div>
+
+  </header>
+
+  <!-- MAIN -->
+
+  <main>
+
+    <section class="page-title">
+
+      <h1>Tafuta Hadithi</h1>
+
+      <p>
+        Tafuta hadithi unayotaka kusoma kwenye Net Simulizi.
+      </p>
+
+    </section>
+
+    <section class="search-area">
+
+      <div class="search-box">
+
+        <span class="search-icon">
+          🔎
+        </span>
+
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Andika jina la hadithi, mwandishi au category..."
+          autocomplete="off"
+        >
+
+        <button
+          class="clear-btn"
+          id="clearBtn"
+          type="button"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <p class="search-hint">
+        Anza kuandika ili kuona matokeo.
+      </p>
+
+    </section>
+
+    <div class="results-header">
+
+      <h2 id="resultsTitle">
+        Tafuta hadithi
+      </h2>
+
+      <span
+        class="result-count"
+        id="resultCount"
+      >
+      </span>
+
+    </div>
+
+    <section
+      class="stories"
+      id="stories"
+    >
+
+      <div class="initial-state">
+
+        <div class="initial-icon">
+          🔎
+        </div>
+
+        <h3>
+          Tafuta hadithi
+        </h3>
+
+        <p>
+          Andika jina la hadithi, mwandishi au category hapo juu.
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <p>
+      © 2026 <strong>Net Simulizi</strong>.
+      Haki zote zimehifadhiwa.
+    </p>
+
+  </footer>
+
+  <script>
+
+    const API = "/api";
+
+    const storiesContainer =
+      document.getElementById("stories");
+
+    const searchInput =
+      document.getElementById("searchInput");
+
+    const clearBtn =
+      document.getElementById("clearBtn");
+
+    const resultsTitle =
+      document.getElementById("resultsTitle");
+
+    const resultCount =
+      document.getElementById("resultCount");
+
+    let allStories = [];
+
+    /* =========================
+       USER
+    ========================= */
+
+    function loadUser(){
+
+      const guestButtons =
+        document.getElementById("guestButtons");
+
+      const userBox =
+        document.getElementById("userBox");
+
+      const userName =
+        document.getElementById("userName");
+
+      const userAvatar =
+        document.getElementById("userAvatar");
+
+      let user = null;
+
+      try{
+
+        user = JSON.parse(
+          localStorage.getItem("netsimulizi_user")
+        );
+
+      }catch(error){
+
+        user = null;
+
+      }
+
+      if(user){
+
+        guestButtons.style.display = "none";
+        userBox.style.display = "flex";
+
+        const name =
+          user.username ||
+          user.name ||
+          user.email ||
+          "Mtumiaji";
+
+        userName.textContent = name;
+
+        userAvatar.textContent =
+          name.charAt(0).toUpperCase();
+
+      }else{
+
+        guestButtons.style.display = "flex";
+        userBox.style.display = "none";
+
+      }
+
+    }
+
+    /* =========================
+       READERS
+    ========================= */
+
+    function getReaders(story){
+
+      return Number(
+        story.readers_count ??
+        story.readersCount ??
+        story.readers ??
+        story.views ??
+        story.view_count ??
+        story.read_count ??
+        0
+      );
+
+    }
+
+    function formatReaders(value){
+
+      const number =
+        Number(value || 0);
+
+      if(number >= 1000000){
+
+        return (
+          (number / 1000000)
+            .toFixed(number >= 10000000 ? 0 : 1)
+            .replace(".0","")
+          + "M"
+        );
+
+      }
+
+      if(number >= 1000){
+
+        return (
+          (number / 1000)
+            .toFixed(number >= 10000 ? 0 : 1)
+            .replace(".0","")
+          + "K"
+        );
+
+      }
+
+      return number.toLocaleString();
+
+    }
+
+    /* =========================
+       DATA HELPERS
+    ========================= */
+
+    function getTitle(story){
+
+      return (
+        story.title ||
+        story.name ||
+        "Hadithi bila jina"
+      );
+
+    }
+
+    function getAuthor(story){
+
+      return (
+        story.author_name ||
+        story.author ||
+        story.writer ||
+        "Mwandishi"
+      );
+
+    }
+
+    function getCategory(story){
+
+      return (
+        story.category_name ||
+        story.category ||
+        story.category_slug ||
+        "Hadithi"
+      );
+
+    }
+
+    function getCover(story){
+
+      return (
+        story.cover_url ||
+        story.cover ||
+        story.cover_image ||
+        story.image ||
+        story.thumbnail ||
+        ""
+      );
+
+    }
+
+    /* =========================
+       ESCAPE HTML
+    ========================= */
+
+    function escapeHTML(value){
+
+      return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+    }
+
+    /* =========================
+       RENDER
+    ========================= */
+
+    function renderStories(stories){
+
+      storiesContainer.innerHTML = "";
+
+      resultCount.textContent =
+        `${stories.length} ${stories.length === 1 ? "hadithi" : "hadithi"}`;
+
+      if(!stories.length){
+
+        storiesContainer.innerHTML = `
+
+          <div class="empty">
+
+            <div class="initial-icon">
+              📚
+            </div>
+
+            <h3>
+              Hakuna hadithi iliyopatikana
+            </h3>
+
+            <p>
+              Jaribu kutumia jina jingine la hadithi,
+              mwandishi au category.
+            </p>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+      stories.forEach(story => {
+
+        const id =
+          story.id ||
+          story.story_id;
+
+        const title =
+          getTitle(story);
+
+        const author =
+          getAuthor(story);
+
+        const category =
+          getCategory(story);
+
+        const cover =
+          getCover(story);
+
+        const readers =
+          getReaders(story);
+
+        const card =
+          document.createElement("a");
+
+        card.className =
+          "story-card";
+
+        card.href =
+          `story.html?id=${encodeURIComponent(id)}`;
+
+        let imageHTML;
+
+        if(cover){
+
+          imageHTML = `
+
+            <img
+              src="${escapeHTML(cover)}"
+              alt="${escapeHTML(title)}"
+              loading="lazy"
+              onerror="this.style.display='none';this.parentElement.innerHTML='<div class=&quot;cover-placeholder&quot;>${escapeHTML(title)}</div>';"
+            >
+
+          `;
+
+        }else{
+
+          imageHTML = `
+
+            <div class="cover-placeholder">
+              ${escapeHTML(title)}
+            </div>
+
+          `;
+
+        }
+
+        card.innerHTML = `
+
+          <div class="cover">
+            ${imageHTML}
+          </div>
+
+          <div class="story-info">
+
+            <div class="story-title">
+              ${escapeHTML(title)}
+            </div>
+
+            <div class="story-author">
+              ${escapeHTML(author)}
+            </div>
+
+            <div class="story-meta">
+
+              <span class="readers">
+                👁 ${formatReaders(readers)}
+              </span>
+
+              <span class="category">
+                ${escapeHTML(category)}
+              </span>
+
+            </div>
+
+          </div>
+
+        `;
+
+        storiesContainer.appendChild(card);
+
+      });
+
+    }
+
+    /* =========================
+       LOAD STORIES
+    ========================= */
+
+    async function loadStories(){
+
+      try{
+
+        const response =
+          await fetch(
+            `${API}/stories`,
+            {
+              cache:"no-store"
+            }
+          );
+
+        if(!response.ok){
+
+          throw new Error(
+            "Server returned " +
+            response.status
+          );
+
+        }
+
+        const data =
+          await response.json();
+
+        if(Array.isArray(data)){
+
+          allStories = data;
+
+        }else if(Array.isArray(data.stories)){
+
+          allStories = data.stories;
+
+        }else if(Array.isArray(data.data)){
+
+          allStories = data.data;
+
+        }else{
+
+          allStories = [];
+
+        }
+
+      }catch(error){
+
+        console.error(
+          "Search stories error:",
+          error
+        );
+
+        allStories = [];
+
+      }
+
+    }
+
+    /* =========================
+       SEARCH
+    ========================= */
+
+    function performSearch(){
+
+      const query =
+        searchInput.value
+          .trim()
+          .toLowerCase();
+
+      clearBtn.style.display =
+        query ? "block" : "none";
+
+      if(!query){
+
+        resultsTitle.textContent =
+          "Tafuta hadithi";
+
+        resultCount.textContent =
+          "";
+
+        storiesContainer.innerHTML = `
+
+          <div class="initial-state">
+
+            <div class="initial-icon">
+              🔎
+            </div>
+
+            <h3>
+              Tafuta hadithi
+            </h3>
+
+            <p>
+              Andika jina la hadithi, mwandishi au category hapo juu.
+            </p>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+      const filtered =
+        allStories.filter(story => {
+
+          const title =
+            getTitle(story)
+              .toLowerCase();
+
+          const author =
+            getAuthor(story)
+              .toLowerCase();
+
+          const category =
+            getCategory(story)
+              .toLowerCase();
+
+          return (
+            title.includes(query) ||
+            author.includes(query) ||
+            category.includes(query)
+          );
+
+        });
+
+      resultsTitle.textContent =
+        `Matokeo ya "${searchInput.value.trim()}"`;
+
+      renderStories(filtered);
+
+    }
+
+    searchInput.addEventListener(
+      "input",
+      performSearch
+    );
+
+    /* =========================
+       CLEAR SEARCH
+    ========================= */
+
+    clearBtn.addEventListener(
+      "click",
+      function(){
+
+        searchInput.value = "";
+
+        searchInput.focus();
+
+        performSearch();
+
+      }
+    );
+
+    /* =========================
+       SIDE MENU
+    ========================= */
+
+    const menuBtn =
+      document.getElementById("menuBtn");
+
+    const closeNav =
+      document.getElementById("closeNav");
+
+    const sideNav =
+      document.getElementById("sideNav");
+
+    const overlay =
+      document.getElementById("overlay");
+
+    function openMenu(){
+
+      sideNav.classList.add("open");
+
+      overlay.classList.add("show");
+
+    }
+
+    function closeMenu(){
+
+      sideNav.classList.remove("open");
+
+      overlay.classList.remove("show");
+
+    }
+
+    menuBtn.addEventListener(
+      "click",
+      openMenu
+    );
+
+    closeNav.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    overlay.addEventListener(
+      "click",
+      closeMenu
+    );
+
+    document
+      .querySelectorAll(".nav-list a")
+      .forEach(link => {
+
+        link.addEventListener(
+          "click",
+          closeMenu
+        );
+
+      });
+
+    /* =========================
+       START
+    ========================= */
+
+    loadUser();
+
+    loadStories();
+
+  </script>
+
+</body>
+</html>
