@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Masharti ya Matumizi - Net Simulizi</title>
+
+  <style>
+    :root{
+      --bg:#090b10;
+      --surface:#11141b;
+      --surface-2:#171b24;
+      --gold:#e5a51c;
+      --gold-light:#f2bd3d;
+      --text:#fff;
+      --muted:#a8afbd;
+      --border:rgba(255,255,255,.09)
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:Arial,Helvetica,sans-serif;
+      min-height:100vh;
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    button{
+      font-family:inherit;
+    }
+
+    /* HEADER */
+    .topbar{
+      height:70px;
+      background:var(--surface);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:20px;
+      font-weight:700;
+    }
+
+    .brand img{
+      width:42px;
+      height:42px;
+      object-fit:contain;
+      border-radius:8px;
+    }
+
+    .brand span{
+      color:var(--gold);
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .top-btn{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .top-btn:hover{
+      border-color:var(--gold);
+      color:var(--gold);
+    }
+
+    /* LAYOUT */
+    .layout{
+      display:flex;
+      min-height:calc(100vh - 70px);
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      width:240px;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      padding:24px 14px;
+      flex-shrink:0;
+    }
+
+    .nav-title{
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin:10px 12px;
+    }
+
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 14px;
+      border-radius:9px;
+      color:var(--muted);
+      margin-bottom:4px;
+      font-size:14px;
+      transition:.2s;
+    }
+
+    .nav-item:hover{
+      background:var(--surface-2);
+      color:var(--text);
+    }
+
+    .nav-item.active{
+      background:rgba(229,165,28,.12);
+      color:var(--gold);
+    }
+
+    .nav-icon{
+      width:20px;
+      text-align:center;
+    }
+
+    /* MAIN */
+    .main{
+      flex:1;
+      padding:35px;
+      min-width:0;
+    }
+
+    .page-header{
+      margin-bottom:28px;
+    }
+
+    .page-header h1{
+      font-size:32px;
+      margin-bottom:8px;
+    }
+
+    .page-header p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .content-card{
+      max-width:950px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:30px;
+    }
+
+    .updated{
+      display:inline-block;
+      background:rgba(229,165,28,.10);
+      border:1px solid rgba(229,165,28,.25);
+      color:var(--gold-light);
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:12px;
+      margin-bottom:25px;
+    }
+
+    .section{
+      margin-bottom:30px;
+    }
+
+    .section:last-child{
+      margin-bottom:0;
+    }
+
+    .section h2{
+      color:var(--gold-light);
+      font-size:19px;
+      margin-bottom:12px;
+    }
+
+    .section p{
+      color:#d8dce4;
+      font-size:14px;
+      line-height:1.8;
+      margin-bottom:10px;
+    }
+
+    .section ul{
+      margin:10px 0 0 20px;
+      color:#d8dce4;
+    }
+
+    .section li{
+      margin-bottom:9px;
+      line-height:1.7;
+      font-size:14px;
+    }
+
+    .notice{
+      background:var(--surface-2);
+      border-left:3px solid var(--gold);
+      padding:16px;
+      border-radius:8px;
+      margin-top:12px;
+    }
+
+    .notice p{
+      margin:0;
+    }
+
+    .highlight{
+      color:var(--gold-light);
+      font-weight:600;
+    }
+
+    /* FOOTER */
+    footer{
+      margin-top:35px;
+      border-top:1px solid var(--border);
+      padding:25px 0;
+      color:var(--muted);
+      font-size:12px;
+      text-align:center;
+    }
+
+    footer a{
+      color:var(--muted);
+      margin:0 8px;
+    }
+
+    footer a:hover{
+      color:var(--gold);
+    }
+
+    /* MOBILE NAV */
+    .mobile-nav{
+      display:none;
+    }
+
+    @media(max-width:800px){
+
+      .topbar{
+        height:62px;
+        padding:0 15px;
+      }
+
+      .brand{
+        font-size:17px;
+      }
+
+      .brand img{
+        width:36px;
+        height:36px;
+      }
+
+      .layout{
+        display:block;
+      }
+
+      .sidebar{
+        display:none;
+      }
+
+      .main{
+        padding:22px 15px 85px;
+      }
+
+      .page-header h1{
+        font-size:26px;
+      }
+
+      .content-card{
+        padding:20px 17px;
+        border-radius:12px;
+      }
+
+      .section h2{
+        font-size:17px;
+      }
+
+      .section p,
+      .section li{
+        font-size:13px;
+      }
+
+      .mobile-nav{
+        position:fixed;
+        display:flex;
+        left:0;
+        right:0;
+        bottom:0;
+        height:62px;
+        background:var(--surface);
+        border-top:1px solid var(--border);
+        z-index:200;
+        justify-content:space-around;
+        align-items:center;
+      }
+
+      .mobile-nav a{
+        color:var(--muted);
+        font-size:10px;
+        text-align:center;
+      }
+
+      .mobile-nav a.active{
+        color:var(--gold);
+      }
+
+      .mobile-nav .m-icon{
+        display:block;
+        font-size:19px;
+        margin-bottom:3px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="topbar">
+
+    <a href="index.html" class="brand">
+      <img src="Logo.png" alt="Net Simulizi">
+      <div>Net <span>Simulizi</span></div>
+    </a>
+
+    <div class="top-actions">
+      <button class="top-btn" onclick="toggleDark()" title="Muonekano">☾</button>
+      <button class="top-btn" onclick="goProfile()" title="Akaunti">👤</button>
+    </div>
+
+  </header>
+
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="nav-title">Menyu</div>
+
+      <a href="index.html" class="nav-item">
+        <span class="nav-icon">⌂</span>
+        <span>Nyumbani</span>
+      </a>
+
+      <a href="discover.html" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span>Gundua</span>
+      </a>
+
+      <a href="search.html" class="nav-item">
+        <span class="nav-icon">⌕</span>
+        <span>Tafuta</span>
+      </a>
+
+      <a href="categories.html" class="nav-item">
+        <span class="nav-icon">☷</span>
+        <span>Makundi</span>
+      </a>
+
+      <a href="trending.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>Trending</span>
+      </a>
+
+      <div class="nav-title">Maktaba</div>
+
+      <a href="library.html" class="nav-item">
+        <span class="nav-icon">▣</span>
+        <span>Maktaba Yangu</span>
+      </a>
+
+      <a href="history.html" class="nav-item">
+        <span class="nav-icon">◷</span>
+        <span>Historia</span>
+      </a>
+
+      <div class="nav-title">Akaunti</div>
+
+      <a href="profile.html" class="nav-item">
+        <span class="nav-icon">♙</span>
+        <span>Wasifu</span>
+      </a>
+
+      <a href="notifications.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Taarifa</span>
+      </a>
+
+      <a href="settings.html" class="nav-item">
+        <span class="nav-icon">⚙</span>
+        <span>Mipangilio</span>
+      </a>
+
+      <div class="nav-title">Msaada</div>
+
+      <a href="about.html" class="nav-item">
+        <span class="nav-icon">ⓘ</span>
+        <span>Kuhusu Sisi</span>
+      </a>
+
+      <a href="contact.html" class="nav-item">
+        <span class="nav-icon">✉</span>
+        <span>Wasiliana Nasi</span>
+      </a>
+
+      <a href="privacy.html" class="nav-item">
+        <span class="nav-icon">🔒</span>
+        <span>Faragha</span>
+      </a>
+
+      <a href="terms.html" class="nav-item active">
+        <span class="nav-icon">📄</span>
+        <span>Masharti</span>
+      </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <div class="page-header">
+        <h1>Masharti ya Matumizi</h1>
+        <p>Masharti yanayoongoza matumizi ya huduma za Net Simulizi.</p>
+      </div>
+
+
+      <div class="content-card">
+
+        <div class="updated">
+          Tarehe ya mwisho ya kusasishwa: 3 Septemba 2026
+        </div>
+
+
+        <section class="section">
+
+          <h2>1. Utangulizi</h2>
+
+          <p>
+            Karibu Net Simulizi. Kwa kutumia tovuti, programu na huduma
+            zinazotolewa na Net Simulizi, unakubali kufuata Masharti haya
+            ya Matumizi.
+          </p>
+
+          <p>
+            Ikiwa hukubaliani na masharti haya, tafadhali usitumie huduma
+            za Net Simulizi.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>2. Akaunti ya Mtumiaji</h2>
+
+          <p>
+            Baadhi ya huduma za Net Simulizi zinaweza kuhitaji mtumiaji
+            kuwa na akaunti.
+          </p>
+
+          <ul>
+            <li>Mtumiaji anapaswa kutoa taarifa sahihi wakati wa kuunda akaunti.</li>
+            <li>Mtumiaji anawajibika kulinda taarifa za akaunti yake.</li>
+            <li>Akaunti haipaswi kutumiwa kwa shughuli zisizo halali.</li>
+            <li>Mtumiaji hapaswi kutumia akaunti ya mtu mwingine bila ruhusa.</li>
+            <li>Net Simulizi inaweza kuchukua hatua dhidi ya akaunti inayokiuka masharti.</li>
+          </ul>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>3. Matumizi ya Maudhui</h2>
+
+          <p>
+            Hadithi, sura, picha, maelezo na maudhui mengine yanayopatikana
+            kwenye Net Simulizi yanaweza kuwa chini ya ulinzi wa hakimiliki.
+          </p>
+
+          <p>
+            Mtumiaji haruhusiwi kunakili, kusambaza, kuuza, kuchapisha tena
+            au kutumia maudhui ya Net Simulizi bila ruhusa inayohitajika.
+          </p>
+
+          <div class="notice">
+            <p>
+              <span class="highlight">Muhimu:</span>
+              Maudhui yanayopatikana kwa ajili ya kusomwa kwenye Net Simulizi
+              hayatoi ruhusa ya kuyatumia kibiashara au kuyasambaza bila idhini.
+            </p>
+          </div>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>4. Waandishi na Maudhui Yao</h2>
+
+          <p>
+            Waandishi wanaowasilisha hadithi kwenye Net Simulizi wanawajibika
+            kuhakikisha kuwa wana haki ya kutumia na kuchapisha maudhui hayo.
+          </p>
+
+          <ul>
+            <li>Hadithi inapaswa kuwa kazi halisi ya mwandishi au mwandishi awe na haki zinazohitajika.</li>
+            <li>Mwandishi hapaswi kuwasilisha kazi ya mtu mwingine kama yake.</li>
+            <li>Mwandishi anawajibika kwa maudhui anayowasilisha.</li>
+            <li>Net Simulizi inaweza kukagua na kuidhinisha au kukataa maudhui yaliyowasilishwa.</li>
+            <li>Maudhui yanayokiuka sheria au sera za jukwaa yanaweza kuondolewa.</li>
+          </ul>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>5. Uuzaji wa Hadithi</h2>
+
+          <p>
+            Baadhi ya hadithi au sura zinaweza kuwekwa kama maudhui ya kulipia.
+            Bei itaonyeshwa kwenye huduma husika pale inapohitajika.
+          </p>
+
+          <p>
+            Upatikanaji wa maudhui ya kulipia unaweza kutegemea malipo
+            yaliyothibitishwa na mfumo.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>6. Mapato ya Waandishi</h2>
+
+          <p>
+            Kwa hadithi zinazostahili mgawanyo wa mapato, mfumo wa Net Simulizi
+            unaweza kugawa mapato kati ya mwandishi na Net Simulizi kulingana
+            na masharti ya programu ya waandishi.
+          </p>
+
+          <p>
+            Kwa mpango wa kawaida wa mapato, sehemu ya mwandishi ni
+            <span class="highlight">70%</span> na sehemu ya Net Simulizi ni
+            <span class="highlight">30%</span>.
+          </p>
+
+          <p>
+            Mwandishi anaweza kuomba kutoa mapato yake pale anapofikia kiwango
+            cha chini kinachoruhusiwa na mfumo.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>7. Malipo</h2>
+
+          <p>
+            Mtumiaji anayenunua maudhui anapaswa kutumia njia za malipo
+            zinazotolewa na Net Simulizi.
+          </p>
+
+          <p>
+            Net Simulizi haiwajibiki kwa matatizo yanayosababishwa na
+            mtoa huduma wa malipo ikiwa tatizo hilo liko nje ya udhibiti
+            wa Net Simulizi.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>8. Tabia Zisizoruhusiwa</h2>
+
+          <p>
+            Mtumiaji haruhusiwi kutumia Net Simulizi kwa madhumuni
+            yanayoweza kuathiri huduma, watumiaji wengine au usalama wa mfumo.
+          </p>
+
+          <ul>
+            <li>Kujaribu kuingia kwenye akaunti ya mtu mwingine.</li>
+            <li>Kuvuruga au kuharibu huduma.</li>
+            <li>Kutumia programu au mbinu za kuathiri mfumo bila ruhusa.</li>
+            <li>Kusambaza maudhui yaliyolindwa bila ruhusa.</li>
+            <li>Kutoa taarifa za uongo kwa madhumuni ya udanganyifu.</li>
+            <li>Kutumia huduma kwa shughuli zinazokiuka sheria.</li>
+          </ul>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>9. Ulinzi wa Maudhui</h2>
+
+          <p>
+            Net Simulizi inaweza kutumia teknolojia za kuzuia au kupunguza
+            kunakili maudhui, kupakua bila ruhusa, au matumizi mengine
+            yasiyoruhusiwa.
+          </p>
+
+          <p>
+            Mtumiaji hapaswi kujaribu kukwepa hatua za kiusalama zilizowekwa
+            kulinda maudhui ya jukwaa.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>10. Kusimamishwa kwa Akaunti</h2>
+
+          <p>
+            Net Simulizi inaweza kusimamisha au kufunga akaunti ikiwa kuna
+            sababu ya msingi ya kuamini kuwa mtumiaji amekiuka masharti,
+            ametumia huduma vibaya au amehatarisha usalama wa jukwaa.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>11. Upatikanaji wa Huduma</h2>
+
+          <p>
+            Tunajitahidi kuhakikisha kuwa Net Simulizi inapatikana kwa
+            matumizi ya kawaida. Hata hivyo, huduma inaweza kukatizwa
+            kwa muda kutokana na matengenezo, masasisho, hitilafu za
+            kiufundi au sababu nyingine zilizo nje ya udhibiti wetu.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>12. Mabadiliko ya Masharti</h2>
+
+          <p>
+            Net Simulizi inaweza kusasisha Masharti haya ya Matumizi
+            wakati wowote inapohitajika.
+          </p>
+
+          <p>
+            Tarehe ya mwisho ya kusasishwa itaonyeshwa kwenye ukurasa huu.
+            Kuendelea kutumia huduma baada ya mabadiliko kunaweza
+            kuchukuliwa kuwa kukubali masharti yaliyosasishwa.
+          </p>
+
+        </section>
+
+
+        <section class="section">
+
+          <h2>13. Mawasiliano</h2>
+
+          <p>
+            Ikiwa una swali kuhusu Masharti haya ya Matumizi, unaweza
+            kuwasiliana na Net Simulizi kupitia ukurasa wetu wa mawasiliano.
+          </p>
+
+          <p>
+            <a href="contact.html" style="color:var(--gold-light);">
+              Wasiliana Nasi →
+            </a>
+          </p>
+
+        </section>
+
+
+      </div>
+
+
+      <footer>
+
+        <div>
+          © 2026 Net Simulizi. Haki zote zimehifadhiwa.
+        </div>
+
+        <div style="margin-top:10px;">
+          <a href="about.html">Kuhusu Sisi</a>
+          <a href="contact.html">Mawasiliano</a>
+          <a href="privacy.html">Faragha</a>
+          <a href="terms.html">Masharti</a>
+        </div>
+
+      </footer>
+
+    </main>
+
+  </div>
+
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav">
+
+    <a href="index.html">
+      <span class="m-icon">⌂</span>
+      Nyumbani
+    </a>
+
+    <a href="discover.html">
+      <span class="m-icon">✦</span>
+      Gundua
+    </a>
+
+    <a href="library.html">
+      <span class="m-icon">▣</span>
+      Maktaba
+    </a>
+
+    <a href="notifications.html">
+      <span class="m-icon">🔔</span>
+      Taarifa
+    </a>
+
+    <a href="profile.html">
+      <span class="m-icon">♙</span>
+      Wasifu
+    </a>
+
+  </nav>
+
+
+  <script>
+
+    function goProfile(){
+      window.location.href = "profile.html";
+    }
+
+    function toggleDark(){
+
+      const current = localStorage.getItem("netsimulizi_theme");
+
+      if(current === "light"){
+        localStorage.setItem("netsimulizi_theme","dark");
+        document.body.style.background = "#090b10";
+        document.body.style.color = "#fff";
+      }else{
+        localStorage.setItem("netsimulizi_theme","light");
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+      }
+
+    }
+
+    function loadTheme(){
+
+      const theme = localStorage.getItem("netsimulizi_theme");
+
+      if(theme === "light"){
+        document.body.style.background = "#f5f5f5";
+        document.body.style.color = "#111";
+      }
+
+    }
+
+    loadTheme();
+
+  </script>
+
+</body>
+</html>
