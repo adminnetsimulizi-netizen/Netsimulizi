@@ -1,0 +1,1254 @@
+```html
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chapters — Net Simulizi</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --bg:#090b10;
+    --surface:#11141b;
+    --surface2:#171b24;
+    --gold:#e5a51c;
+    --gold2:#f2bd3d;
+    --text:#fff;
+    --muted:#a8afbd;
+    --border:rgba(255,255,255,.09);
+    --danger:#ff6b6b;
+    --success:#63d49b;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    line-height:1.5;
+    min-height:100vh;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+button{
+    font:inherit;
+}
+
+header{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    background:rgba(9,11,16,.96);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+    max-width:1200px;
+    min-height:70px;
+    margin:auto;
+    padding:10px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.logo{
+    color:var(--gold);
+    font-size:20px;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+.header-actions{
+    display:flex;
+    gap:8px;
+}
+
+.btn{
+    border:1px solid var(--border);
+    background:transparent;
+    color:white;
+    border-radius:8px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.btn:hover{
+    border-color:var(--gold);
+    color:var(--gold);
+}
+
+.primary{
+    background:var(--gold);
+    color:#111;
+    border-color:var(--gold);
+}
+
+.primary:hover{
+    background:var(--gold2);
+    color:#111;
+}
+
+.wrap{
+    max-width:1100px;
+    margin:auto;
+    padding:30px 20px 70px;
+}
+
+.hero{
+    background:
+        radial-gradient(
+            circle at 85% 20%,
+            rgba(229,165,28,.14),
+            transparent 35%
+        ),
+        linear-gradient(120deg,#0d1016,#151922);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:30px;
+    margin-bottom:25px;
+}
+
+.back{
+    display:inline-block;
+    color:var(--muted);
+    margin-bottom:20px;
+    font-size:14px;
+}
+
+.back:hover{
+    color:var(--gold);
+}
+
+.story-info{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:25px;
+    align-items:start;
+}
+
+.cover{
+    width:150px;
+    aspect-ratio:2/3;
+    border-radius:12px;
+    overflow:hidden;
+    background:linear-gradient(145deg,#303542,#11131a);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:15px;
+    font-weight:900;
+}
+
+.cover img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.category{
+    display:inline-block;
+    padding:6px 11px;
+    border:1px solid rgba(229,165,28,.45);
+    border-radius:20px;
+    color:var(--gold);
+    font-size:12px;
+    font-weight:800;
+    margin-bottom:10px;
+}
+
+h1{
+    font-size:clamp(28px,5vw,44px);
+    margin-bottom:8px;
+}
+
+.author{
+    color:var(--muted);
+    margin-bottom:15px;
+}
+
+.description{
+    color:#c8cdd6;
+    max-width:750px;
+}
+
+.stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin-top:18px;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    overflow:hidden;
+}
+
+.section-header{
+    padding:22px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.section-header h2{
+    font-size:24px;
+}
+
+.chapter-count{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.chapters{
+    display:grid;
+}
+
+.chapter{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:18px 22px;
+    border-bottom:1px solid var(--border);
+    transition:.2s;
+}
+
+.chapter:last-child{
+    border-bottom:0;
+}
+
+.chapter:hover{
+    background:var(--surface2);
+}
+
+.chapter-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    min-width:0;
+}
+
+.chapter-number{
+    width:42px;
+    height:42px;
+    border-radius:10px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--gold);
+    font-weight:900;
+    flex-shrink:0;
+}
+
+.chapter-title{
+    font-weight:800;
+    margin-bottom:4px;
+}
+
+.chapter-meta{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.chapter-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-shrink:0;
+}
+
+.free{
+    color:var(--success);
+    font-size:12px;
+    font-weight:900;
+}
+
+.paid{
+    color:var(--gold);
+    font-size:12px;
+    font-weight:900;
+}
+
+.read-btn{
+    padding:8px 12px;
+    border-radius:7px;
+    border:1px solid var(--gold);
+    background:var(--gold);
+    color:#111;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.locked{
+    padding:8px 12px;
+    border-radius:7px;
+    border:1px solid var(--border);
+    background:var(--surface2);
+    color:var(--muted);
+    font-weight:800;
+}
+
+.loading,
+.empty,
+.error{
+    padding:45px 20px;
+    text-align:center;
+    color:var(--muted);
+}
+
+.error{
+    color:var(--danger);
+}
+
+.retry{
+    margin-top:15px;
+}
+
+footer{
+    background:#07090d;
+    border-top:1px solid var(--border);
+    text-align:center;
+    padding:35px 20px;
+    color:var(--muted);
+}
+
+footer .logo{
+    display:block;
+    margin-bottom:8px;
+}
+
+@media(max-width:700px){
+
+    .header-inner{
+        padding:10px 14px;
+    }
+
+    .logo{
+        font-size:16px;
+    }
+
+    .header-actions .btn{
+        padding:8px 9px;
+        font-size:12px;
+    }
+
+    .wrap{
+        padding:20px 12px 50px;
+    }
+
+    .hero{
+        padding:20px;
+    }
+
+    .story-info{
+        grid-template-columns:1fr;
+    }
+
+    .cover{
+        width:160px;
+        margin:auto;
+    }
+
+    .section-header{
+        padding:18px;
+    }
+
+    .chapter{
+        padding:15px;
+    }
+
+    .chapter-right{
+        flex-direction:column;
+        align-items:flex-end;
+    }
+
+    .chapter-title{
+        font-size:14px;
+    }
+}
+
+@media(max-width:420px){
+
+    .cover{
+        width:140px;
+    }
+
+    h1{
+        font-size:28px;
+    }
+
+    .chapter-number{
+        width:36px;
+        height:36px;
+    }
+
+    .chapter-left{
+        gap:10px;
+    }
+
+    .chapter-right{
+        gap:5px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div class="header-inner">
+
+<a href="index.html" class="logo">
+NET SIMULIZI
+</a>
+
+<div class="header-actions">
+
+<button
+class="btn"
+onclick="toggleDark()"
+>
+◐
+</button>
+
+<button
+class="btn"
+onclick="location.href='categories.html'"
+>
+Categories
+</button>
+
+</div>
+
+</div>
+
+</header>
+
+
+<main class="wrap">
+
+<section
+id="storyInfo"
+class="hero"
+>
+
+<div class="loading">
+Inapakia hadithi...
+</div>
+
+</section>
+
+
+<section class="section">
+
+<div class="section-header">
+
+<h2>
+Chapters
+</h2>
+
+<div
+id="chapterCount"
+class="chapter-count"
+>
+Inapakia...
+</div>
+
+</div>
+
+
+<div
+id="chapterList"
+class="chapters"
+>
+
+<div class="loading">
+Inapakia chapters...
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+<span class="logo">
+NET SIMULIZI
+</span>
+
+<p>
+Digital Storytelling Platform
+</p>
+
+<p>
+© 2026 Net Simulizi. All rights reserved.
+</p>
+
+</footer>
+
+
+<script>
+
+const API = "/api";
+
+
+/* DARK MODE */
+
+function toggleDark(){
+
+    document.body.classList.toggle("light-mode");
+
+    const dark =
+        document.body.classList.contains("light-mode");
+
+    localStorage.setItem(
+        "netsimulizi_dark",
+        dark ? "false" : "true"
+    );
+
+}
+
+
+function loadDarkMode(){
+
+    const dark =
+        localStorage.getItem(
+            "netsimulizi_dark"
+        );
+
+    if(dark === "true"){
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+    }
+
+}
+
+
+/* STORY ID */
+
+function getStoryId(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const id =
+        Number(
+            params.get("id")
+        );
+
+    if(
+        !Number.isInteger(id) ||
+        id <= 0
+    ){
+
+        return null;
+
+    }
+
+    return id;
+
+}
+
+
+/* ESCAPE */
+
+function escapeHTML(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* NUMBER */
+
+function number(value){
+
+    return Number(
+        value || 0
+    ).toLocaleString();
+
+}
+
+
+/* LOAD STORY */
+
+async function loadStory(){
+
+    const storyId =
+        getStoryId();
+
+    const container =
+        document.getElementById(
+            "storyInfo"
+        );
+
+
+    if(!storyId){
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Story ID haijapatikana.
+
+                <br><br>
+
+                <button
+                    class="btn"
+                    onclick="location.href='index.html'"
+                >
+                    Rudi Home
+                </button>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    try{
+
+        const response =
+            await fetch(
+                `${API}/stories/${storyId}`,
+                {
+                    headers:{
+                        "Accept":
+                            "application/json"
+                    },
+                    cache:"no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if(
+            !response.ok ||
+            !data.success ||
+            !data.story
+        ){
+
+            throw new Error(
+                data.message ||
+                "Hadithi haijapatikana."
+            );
+
+        }
+
+
+        const story =
+            data.story;
+
+
+        const cover =
+            story.cover_url
+            ? `
+                <img
+                    src="${escapeHTML(
+                        story.cover_url
+                    )}"
+                    alt="${escapeHTML(
+                        story.title
+                    )}"
+                >
+              `
+            : `
+                <span>
+                    ${escapeHTML(
+                        story.title ||
+                        "Net Simulizi"
+                    )}
+                </span>
+              `;
+
+
+        container.innerHTML = `
+
+            <a
+                href="story.html?id=${storyId}"
+                class="back"
+            >
+                ← Rudi kwenye hadithi
+            </a>
+
+            <div class="story-info">
+
+                <div class="cover">
+
+                    ${cover}
+
+                </div>
+
+
+                <div>
+
+                    <span class="category">
+
+                        ${escapeHTML(
+                            story.category_name ||
+                            story.category ||
+                            "Story"
+                        )}
+
+                    </span>
+
+
+                    <h1>
+
+                        ${escapeHTML(
+                            story.title ||
+                            "Untitled Story"
+                        )}
+
+                    </h1>
+
+
+                    <p class="author">
+
+                        Na
+                        <strong>
+
+                            ${escapeHTML(
+                                story.author_name ||
+                                story.author ||
+                                "Net Simulizi"
+                            )}
+
+                        </strong>
+
+                    </p>
+
+
+                    <p class="description">
+
+                        ${escapeHTML(
+                            story.description ||
+                            "Hakuna maelezo ya hadithi kwa sasa."
+                        )}
+
+                    </p>
+
+
+                    <div class="stats">
+
+                        <span>
+                            👁
+                            ${number(
+                                story.readers_count
+                            )}
+                            readers
+                        </span>
+
+                        <span>
+                            🌐
+                            ${escapeHTML(
+                                story.language ||
+                                "sw"
+                            )}
+                        </span>
+
+                        <span>
+                            📚
+                            ${escapeHTML(
+                                story.status ||
+                                "published"
+                            )}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+    }catch(error){
+
+        console.error(
+            "Story error:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Imeshindikana kupakia hadithi.
+
+                <br><br>
+
+                <button
+                    class="btn"
+                    onclick="loadStory()"
+                >
+                    Jaribu Tena
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* LOAD CHAPTERS */
+
+async function loadChapters(){
+
+    const storyId =
+        getStoryId();
+
+    const list =
+        document.getElementById(
+            "chapterList"
+        );
+
+    const count =
+        document.getElementById(
+            "chapterCount"
+        );
+
+
+    if(!storyId){
+
+        list.innerHTML = `
+
+            <div class="error">
+
+                Story ID haijapatikana.
+
+            </div>
+
+        `;
+
+        count.textContent =
+            "0 chapters";
+
+        return;
+
+    }
+
+
+    try{
+
+        const response =
+            await fetch(
+                `${API}/stories/${storyId}/chapters`,
+                {
+                    method:"GET",
+                    headers:{
+                        "Accept":
+                            "application/json"
+                    },
+                    cache:"no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Net Simulizi chapters:",
+            data
+        );
+
+
+        if(
+            !response.ok ||
+            !data.success
+        ){
+
+            throw new Error(
+                data.message ||
+                "Chapters hazikupatikana."
+            );
+
+        }
+
+
+        const chapters =
+            Array.isArray(
+                data.chapters
+            )
+            ? data.chapters
+            : [];
+
+
+        count.textContent =
+            chapters.length +
+            (
+                chapters.length === 1
+                ? " chapter"
+                : " chapters"
+            );
+
+
+        if(!chapters.length){
+
+            list.innerHTML = `
+
+                <div class="empty">
+
+                    Bado hakuna chapters
+                    zilizochapishwa kwa hadithi hii.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        const fragment =
+            document.createDocumentFragment();
+
+
+        chapters.forEach(
+            function(chapter,index){
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+                item.className =
+                    "chapter";
+
+
+                const chapterId =
+                    chapter.id;
+
+
+                const chapterNumber =
+                    chapter.chapter_number ||
+                    chapter.number ||
+                    index + 1;
+
+
+                const title =
+                    chapter.title ||
+                    `Chapter ${chapterNumber}`;
+
+
+                const isPaid =
+                    Boolean(
+                        chapter.is_paid ||
+                        chapter.paid ||
+                        chapter.price > 0
+                    );
+
+
+                const price =
+                    Number(
+                        chapter.price || 0
+                    );
+
+
+                const left =
+                    document.createElement(
+                        "div"
+                    );
+
+                left.className =
+                    "chapter-left";
+
+
+                left.innerHTML = `
+
+                    <div class="chapter-number">
+
+                        ${escapeHTML(
+                            chapterNumber
+                        )}
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="chapter-title">
+
+                            ${escapeHTML(
+                                title
+                            )}
+
+                        </div>
+
+
+                        <div class="chapter-meta">
+
+                            ${
+                                chapter.word_count
+                                ? number(
+                                    chapter.word_count
+                                  ) +
+                                  " words"
+                                : "Chapter"
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                const right =
+                    document.createElement(
+                        "div"
+                    );
+
+                right.className =
+                    "chapter-right";
+
+
+                if(isPaid){
+
+                    right.innerHTML = `
+
+                        <span class="paid">
+
+                            🔒 Paid
+
+                            ${
+                                price
+                                ? " · TSh " +
+                                  number(price)
+                                : ""
+                            }
+
+                        </span>
+
+                        <button
+                            class="locked"
+                            onclick="openChapter(${Number(
+                                chapterId || 0
+                            )},true)"
+                        >
+                            Fungua
+                        </button>
+
+                    `;
+
+                }else{
+
+                    right.innerHTML = `
+
+                        <span class="free">
+
+                            FREE
+
+                        </span>
+
+                        <button
+                            class="read-btn"
+                            onclick="openChapter(${Number(
+                                chapterId || 0
+                            )},false)"
+                        >
+                            Soma
+                        </button>
+
+                    `;
+
+                }
+
+
+                item.appendChild(left);
+
+                item.appendChild(right);
+
+                fragment.appendChild(item);
+
+            }
+        );
+
+
+        list.innerHTML = "";
+
+        list.appendChild(
+            fragment
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Chapters error:",
+            error
+        );
+
+
+        count.textContent =
+            "Error";
+
+
+        list.innerHTML = `
+
+            <div class="error">
+
+                Imeshindikana kupakia chapters.
+
+                <br><br>
+
+                <button
+                    class="btn primary"
+                    onclick="loadChapters()"
+                >
+                    Jaribu Tena
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* OPEN CHAPTER */
+
+function openChapter(
+    chapterId,
+    paid
+){
+
+    if(!chapterId){
+
+        alert(
+            "Chapter haijatambuliwa."
+        );
+
+        return;
+
+    }
+
+
+    if(paid){
+
+        const user =
+            localStorage.getItem(
+                "netsimulizi_user"
+            );
+
+
+        if(!user){
+
+            alert(
+                "Tafadhali ingia kwenye akaunti kwanza ili kufungua chapter hii."
+            );
+
+            location.href =
+                "login.html?redirect=" +
+                encodeURIComponent(
+                    window.location.href
+                );
+
+            return;
+
+        }
+
+
+        /*
+         * Payment integration itaongezwa
+         * wakati mfumo wa malipo
+         * utakapounganishwa.
+         */
+
+        alert(
+            "Chapter hii ni ya malipo. Mfumo wa malipo utaunganishwa hatua inayofuata."
+        );
+
+        return;
+
+    }
+
+
+    location.href =
+        "reader.html?chapter_id=" +
+        encodeURIComponent(
+            chapterId
+        );
+
+}
+
+
+/* START */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadDarkMode();
+
+        loadStory();
+
+        loadChapters();
+
+    }
+);
+
+</script>
+
+</body>
+</html>
+```
