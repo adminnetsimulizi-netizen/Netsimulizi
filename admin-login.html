@@ -1,1 +1,689 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Login — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="card form"><h1>Admin Login</h1><p class="muted">Authorized administrators only.</p><form onsubmit="event.preventDefault();alert('Authentication API integration pending.')"><label>Email / Username</label><input required><label>Password</label><input type="password" required><button class="btn primary">Login</button></form></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script></script></body></html>
+```html
+<!doctype html>
+<html lang="sw">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <title>Admin Login — Net Simulizi</title>
+
+  <style>
+
+    *{
+      box-sizing:border-box;
+    }
+
+    body{
+      margin:0;
+      background:#f6f0e5;
+      color:#191713;
+      font-family:Arial,sans-serif;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+    }
+
+    body.dark{
+      background:#111;
+      color:#eee;
+    }
+
+    .top{
+      background:#171512;
+      color:#fff;
+      padding:16px 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .logo{
+      color:#d4aa43;
+      font-weight:900;
+      letter-spacing:2px;
+      text-decoration:none;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:8px;
+    }
+
+    .btn{
+      padding:10px 14px;
+      border-radius:8px;
+      border:1px solid #d4aa43;
+      background:transparent;
+      color:inherit;
+      cursor:pointer;
+      font-weight:600;
+    }
+
+    .btn:hover{
+      opacity:.9;
+    }
+
+    .primary{
+      background:#d4aa43;
+      color:#171512;
+      border:0;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1100px;
+      margin:auto;
+      padding:30px 20px;
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .card{
+      width:100%;
+      max-width:550px;
+      background:#fffdf8;
+      border:1px solid #e4dccd;
+      border-radius:16px;
+      padding:30px;
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .dark .card{
+      background:#1d1b18;
+      border-color:#38342d;
+      box-shadow:none;
+    }
+
+    .card-header{
+      text-align:center;
+      margin-bottom:25px;
+    }
+
+    .admin-icon{
+      width:65px;
+      height:65px;
+      border-radius:50%;
+      background:rgba(212,170,67,.15);
+      color:#d4aa43;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      margin:0 auto 15px;
+    }
+
+    h1{
+      margin:0 0 8px;
+      font-size:28px;
+    }
+
+    .muted{
+      color:#777;
+    }
+
+    .dark .muted{
+      color:#aaa;
+    }
+
+    .form label{
+      display:block;
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:5px;
+    }
+
+    .form input{
+      width:100%;
+      padding:13px;
+      margin:6px 0 17px;
+      border:1px solid #ddd;
+      border-radius:8px;
+      background:transparent;
+      color:inherit;
+      outline:none;
+    }
+
+    .dark .form input{
+      border-color:#45413a;
+    }
+
+    .form input:focus{
+      border-color:#d4aa43;
+    }
+
+    .login-btn{
+      width:100%;
+      padding:13px;
+      font-size:15px;
+    }
+
+    .message{
+      display:none;
+      padding:12px;
+      border-radius:8px;
+      margin-bottom:18px;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .message.error{
+      display:block;
+      background:rgba(220,60,60,.10);
+      border:1px solid rgba(220,60,60,.25);
+      color:#c62828;
+    }
+
+    .dark .message.error{
+      color:#ff8a80;
+    }
+
+    .message.success{
+      display:block;
+      background:rgba(76,175,80,.10);
+      border:1px solid rgba(76,175,80,.25);
+      color:#2e7d32;
+    }
+
+    .dark .message.success{
+      color:#81c784;
+    }
+
+    .loading{
+      opacity:.7;
+      pointer-events:none;
+    }
+
+    .security-note{
+      margin-top:22px;
+      padding:13px;
+      border-radius:9px;
+      background:#f6f0e5;
+      color:#666;
+      font-size:11px;
+      line-height:1.6;
+      text-align:center;
+    }
+
+    .dark .security-note{
+      background:#151412;
+      color:#aaa;
+    }
+
+    .back{
+      display:block;
+      text-align:center;
+      margin-top:18px;
+      color:#a47b28;
+      font-size:13px;
+      text-decoration:none;
+    }
+
+    .back:hover{
+      text-decoration:underline;
+    }
+
+    .footer{
+      background:#171512;
+      color:#aaa;
+      text-align:center;
+      padding:30px;
+    }
+
+    .footer p{
+      margin:7px 0;
+      font-size:12px;
+    }
+
+    @media(max-width:600px){
+
+      .top{
+        padding:14px;
+      }
+
+      .wrap{
+        padding:20px 14px;
+      }
+
+      .card{
+        padding:23px 18px;
+      }
+
+      h1{
+        font-size:24px;
+      }
+
+      .top-actions .btn:last-child{
+        display:none;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<header class="top">
+
+  <a
+    class="logo"
+    href="index.html"
+  >
+    NET SIMULIZI
+  </a>
+
+  <div class="top-actions">
+
+    <button
+      class="btn"
+      id="themeBtn"
+      type="button"
+    >
+      ◐
+    </button>
+
+    <button
+      class="btn"
+      type="button"
+      onclick="location.href='index.html'"
+    >
+      Website
+    </button>
+
+  </div>
+
+</header>
+
+
+<main class="wrap">
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <div class="admin-icon">
+        🔐
+      </div>
+
+      <h1>
+        Admin Login
+      </h1>
+
+      <p class="muted">
+        Authorized administrators only.
+      </p>
+
+    </div>
+
+
+    <div
+      id="message"
+      class="message"
+    ></div>
+
+
+    <form
+      id="adminLoginForm"
+      class="form"
+    >
+
+      <label for="login">
+        Email / Username
+      </label>
+
+      <input
+        id="login"
+        name="login"
+        type="text"
+        autocomplete="username"
+        placeholder="Ingiza email au username"
+        required
+      >
+
+
+      <label for="password">
+        Password
+      </label>
+
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Ingiza password"
+        required
+      >
+
+
+      <button
+        id="loginBtn"
+        class="btn primary login-btn"
+        type="submit"
+      >
+        Login
+      </button>
+
+    </form>
+
+
+    <div class="security-note">
+
+      🔒 Ukurasa huu ni wa wasimamizi wa Net Simulizi pekee.
+      <br>
+      Account lazima iwe na role ya <b>admin</b> ili kuingia.
+
+    </div>
+
+
+    <a
+      href="index.html"
+      class="back"
+    >
+      ← Rudi kwenye Net Simulizi
+    </a>
+
+  </section>
+
+</main>
+
+
+<footer class="footer">
+
+  <b class="logo">
+    NET SIMULIZI
+  </b>
+
+  <p>
+    Digital Storytelling Platform
+  </p>
+
+  <p>
+    © 2026 Net Simulizi
+  </p>
+
+</footer>
+
+
+<script>
+
+  const API = "/api";
+
+
+  /*
+   * THEME
+   */
+
+  const themeBtn =
+    document.getElementById("themeBtn");
+
+
+  const savedTheme =
+    localStorage.getItem("netsimulizi_theme");
+
+
+  if(savedTheme === "light"){
+
+    document.body.classList.remove("dark");
+
+  }else{
+
+    document.body.classList.add("dark");
+
+  }
+
+
+  themeBtn.addEventListener(
+    "click",
+    function(){
+
+      document.body.classList.toggle("dark");
+
+      if(document.body.classList.contains("dark")){
+
+        localStorage.removeItem(
+          "netsimulizi_theme"
+        );
+
+      }else{
+
+        localStorage.setItem(
+          "netsimulizi_theme",
+          "light"
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * MESSAGE
+   */
+
+  function showMessage(text,type){
+
+    const message =
+      document.getElementById("message");
+
+    message.textContent = text;
+
+    message.className =
+      "message " + type;
+
+  }
+
+
+  /*
+   * ADMIN LOGIN
+   */
+
+  document
+    .getElementById("adminLoginForm")
+    .addEventListener(
+      "submit",
+      async function(event){
+
+        event.preventDefault();
+
+
+        const login =
+          document
+            .getElementById("login")
+            .value
+            .trim();
+
+
+        const password =
+          document
+            .getElementById("password")
+            .value;
+
+
+        const button =
+          document.getElementById("loginBtn");
+
+
+        if(!login || !password){
+
+          showMessage(
+            "Tafadhali jaza username/email na password.",
+            "error"
+          );
+
+          return;
+
+        }
+
+
+        button.textContent =
+          "Inaingia...";
+
+        button.classList.add("loading");
+
+
+        try{
+
+          const response =
+            await fetch(
+              `${API}/login`,
+              {
+                method:"POST",
+
+                headers:{
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body:JSON.stringify({
+
+                  login:login,
+
+                  email:login,
+
+                  username:login,
+
+                  password:password
+
+                })
+
+              }
+            );
+
+
+          let data = {};
+
+          try{
+
+            data =
+              await response.json();
+
+          }catch(error){
+
+            data = {};
+
+          }
+
+
+          if(!response.ok){
+
+            throw new Error(
+              data.error ||
+              data.message ||
+              "Login imeshindikana."
+            );
+
+          }
+
+
+          /*
+           * Backend yetu inatarajiwa
+           * kurudisha user.
+           */
+
+          const user =
+            data.user ||
+            data;
+
+
+          /*
+           * HAKIKISHA NI ADMIN
+           */
+
+          const role =
+            String(
+              user.role ||
+              ""
+            ).toLowerCase();
+
+
+          if(role !== "admin"){
+
+            showMessage(
+              "Account hii si ya Admin. Huwezi kuingia kwenye Admin Dashboard.",
+              "error"
+            );
+
+            button.textContent =
+              "Login";
+
+            button.classList.remove("loading");
+
+            return;
+
+          }
+
+
+          /*
+           * SAVE ADMIN SESSION
+           */
+
+          localStorage.setItem(
+            "netsimulizi_user",
+            JSON.stringify(user)
+          );
+
+
+          /*
+           * SUCCESS
+           */
+
+          showMessage(
+            "Login imefanikiwa. Inaelekeza kwenye Admin Dashboard...",
+            "success"
+          );
+
+
+          setTimeout(
+            function(){
+
+              window.location.href =
+                "admin-dashboard.html";
+
+            },
+            700
+          );
+
+
+        }catch(error){
+
+          console.error(
+            "Admin login error:",
+            error
+          );
+
+
+          showMessage(
+            error.message ||
+            "Imeshindikana kuingia. Tafadhali jaribu tena.",
+            "error"
+          );
+
+
+          button.textContent =
+            "Login";
+
+          button.classList.remove("loading");
+
+        }
+
+      }
+    );
+
+</script>
+
+
+</body>
+</html>
+```
