@@ -1454,25 +1454,78 @@ let allStories=[];
 
 async function loadStories(){
 
-const grid=
-document.getElementById("storyGrid");
+    const grid =
+        document.getElementById("storyGrid");
 
-try{
+    try{
 
-const response=
-await fetch(
-API_BASE+"/stories"
-);
+        const response =
+            await fetch(
+                API_BASE + "/stories"
+            );
 
-const data=
-await response.json();
+        const data =
+            await response.json();
 
-if(!response.ok || !data.success){
+        if(!response.ok || !data.success){
 
-throw new Error(
-data.message ||
-"Stories hazikupatikana."
-);
+            throw new Error(
+                data.message ||
+                "Stories hazikupatikana."
+            );
+
+        }
+
+        const stories =
+            Array.isArray(data.stories)
+                ? data.stories
+                : [];
+
+        allStories = stories;
+
+        if(stories.length === 0){
+
+            grid.innerHTML = `
+                <div class="empty-message">
+                    Hakuna hadithi zinazopatikana kwa sasa.
+                </div>
+            `;
+
+            return;
+        }
+
+        grid.innerHTML = "";
+
+        stories.forEach(function(story){
+
+            const card =
+                createStoryCard(
+                    story,
+                    false
+                );
+
+            grid.appendChild(card);
+
+        });
+
+        renderTrending(stories);
+
+    }
+    catch(error){
+
+        console.error(
+            "Stories loading error:",
+            error
+        );
+
+        grid.innerHTML = `
+            <div class="empty-message">
+                Imeshindikana kupakia hadithi.
+                Tafadhali jaribu tena.
+            </div>
+        `;
+
+    }
 
 }
 
