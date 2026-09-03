@@ -1,579 +1,976 @@
+```html
 <!DOCTYPE html>
 <html lang="sw">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>My Profile - Net Simulizi</title>
+<title>Profile — Net Simulizi</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+<style>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #222;
-        }
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-        header {
-            background: #111;
-            color: white;
-            padding: 15px 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f6f0e5;
+    color:#191713;
+    transition:.2s;
+}
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+body.dark{
+    background:#111;
+    color:#eee;
+}
 
-        .brand img {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-        }
 
-        .brand h1 {
-            font-size: 22px;
-        }
+/* =========================
+   HEADER
+========================= */
 
-        .back-btn {
-            color: white;
-            text-decoration: none;
-            background: #333;
-            padding: 9px 15px;
-            border-radius: 6px;
-        }
+header{
+    background:#171512;
+    color:white;
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+}
 
-        main {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+}
 
-        .profile-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-        }
+.brand img{
+    width:48px;
+    height:48px;
+    object-fit:contain;
+}
 
-        .profile-top {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+.brand-name{
+    color:#d4aa43;
+    font-weight:900;
+    letter-spacing:2px;
+    font-size:18px;
+}
 
-        .profile-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #ddd;
-            background: #eee;
-        }
+.header-actions{
+    display:flex;
+    gap:8px;
+}
 
-        .photo-label {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 9px 15px;
-            background: #111;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #d4aa43;
+    background:transparent;
+    color:white;
+    cursor:pointer;
+    font-size:14px;
+}
 
-        #photoInput {
-            display: none;
-        }
+.btn:hover{
+    opacity:.9;
+}
 
-        .profile-name {
-            margin-top: 15px;
-            font-size: 25px;
-            font-weight: bold;
-        }
 
-        .profile-email {
-            margin-top: 6px;
-            color: #666;
-        }
+/* =========================
+   MAIN
+========================= */
 
-        .info {
-            margin-top: 20px;
-        }
+main{
+    max-width:850px;
+    margin:35px auto;
+    padding:0 20px;
+}
 
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
+.profile-card{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 8px 30px rgba(0,0,0,.08);
+}
 
-        .info-label {
-            color: #777;
-        }
+.dark .profile-card{
+    background:#1d1b18;
+    border-color:#38342d;
+    box-shadow:none;
+}
 
-        .info-value {
-            font-weight: bold;
-            text-align: right;
-        }
 
-        .actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 30px;
-        }
+/* =========================
+   PROFILE TOP
+========================= */
 
-        .action-btn {
-            border: none;
-            padding: 13px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-size: 15px;
-            background: #111;
-            color: white;
-        }
+.profile-top{
+    text-align:center;
+    margin-bottom:30px;
+}
 
-        .logout-btn {
-            background: #b00020;
-        }
+.profile-photo{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #d4aa43;
+    background:#eee;
+}
 
-        .loading {
-            text-align: center;
-            padding: 30px;
-        }
+.photo-label{
+    display:inline-block;
+    margin-top:12px;
+    padding:9px 15px;
+    background:#171512;
+    color:white;
+    border-radius:7px;
+    cursor:pointer;
+    font-size:14px;
+}
 
-        .error {
-            text-align: center;
-            color: #b00020;
-            padding: 20px;
-        }
+#photoInput{
+    display:none;
+}
 
-        @media (max-width: 600px) {
-            main {
-                margin: 20px auto;
-            }
+.profile-name{
+    margin-top:15px;
+    font-size:25px;
+    font-weight:bold;
+}
 
-            .profile-card {
-                padding: 20px;
-            }
+.profile-email{
+    margin-top:6px;
+    color:#777;
+}
 
-            .actions {
-                grid-template-columns: 1fr;
-            }
+.dark .profile-email{
+    color:#aaa;
+}
 
-            .info-row {
-                flex-direction: column;
-                gap: 5px;
-            }
 
-            .info-value {
-                text-align: left;
-            }
+/* =========================
+   ACCOUNT INFO
+========================= */
 
-            header {
-                padding: 12px 15px;
-            }
+.info{
+    margin-top:20px;
+}
 
-            .brand h1 {
-                font-size: 18px;
-            }
-        }
-    </style>
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:15px 0;
+    border-bottom:1px solid #e5dfd4;
+}
+
+.dark .info-row{
+    border-color:#38342d;
+}
+
+.info-label{
+    color:#777;
+}
+
+.dark .info-label{
+    color:#aaa;
+}
+
+.info-value{
+    font-weight:bold;
+    text-align:right;
+}
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+    margin-top:30px;
+}
+
+.action-btn{
+    border:1px solid #d4aa43;
+    padding:13px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:15px;
+    background:#171512;
+    color:white;
+}
+
+.action-btn:hover{
+    opacity:.9;
+}
+
+.logout-btn{
+    background:#9b1829;
+    border-color:#9b1829;
+}
+
+
+/* =========================
+   LOADING / ERROR
+========================= */
+
+.loading{
+    text-align:center;
+    padding:35px;
+    color:#777;
+}
+
+.dark .loading{
+    color:#aaa;
+}
+
+.error{
+    text-align:center;
+    color:#b00020;
+    padding:20px;
+}
+
+.retry-btn{
+    margin-top:15px;
+    padding:10px 16px;
+    border:1px solid #d4aa43;
+    border-radius:8px;
+    background:#d4aa43;
+    color:#171512;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    background:#171512;
+    color:#aaa;
+    text-align:center;
+    padding:30px 20px;
+    margin-top:40px;
+}
+
+.footer-logo{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+}
+
+.footer-logo img{
+    width:38px;
+    height:38px;
+    object-fit:contain;
+}
+
+.footer-logo span{
+    color:#d4aa43;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:600px){
+
+    header{
+        padding:12px 15px;
+    }
+
+    .brand img{
+        width:40px;
+        height:40px;
+    }
+
+    .brand-name{
+        font-size:15px;
+    }
+
+    main{
+        margin:20px auto;
+        padding:0 15px;
+    }
+
+    .profile-card{
+        padding:22px 18px;
+    }
+
+    .actions{
+        grid-template-columns:1fr;
+    }
+
+    .info-row{
+        flex-direction:column;
+        gap:5px;
+    }
+
+    .info-value{
+        text-align:left;
+    }
+
+    .profile-photo{
+        width:100px;
+        height:100px;
+    }
+
+}
+
+</style>
+
 </head>
+
 
 <body>
 
+
 <header>
 
-    <div class="brand">
-        <img src="Logo.png" alt="Net Simulizi">
-        <h1>Net Simulizi</h1>
-    </div>
+<a class="brand" href="index.html">
 
-    <a href="index.html" class="back-btn">
-        Home
-    </a>
+<img
+    src="Logo.png"
+    alt="Net Simulizi">
+
+<span class="brand-name">
+    NET SIMULIZI
+</span>
+
+</a>
+
+
+<div class="header-actions">
+
+<button
+    class="btn"
+    type="button"
+    onclick="toggleDarkMode()">
+    ◐
+</button>
+
+
+<button
+    class="btn"
+    type="button"
+    onclick="window.location.href='index.html'">
+    Home
+</button>
+
+</div>
 
 </header>
 
 
+
 <main>
 
-    <div class="profile-card">
-
-        <div id="loading" class="loading">
-            Inapakia profile...
-        </div>
-
-        <div id="profileContent" style="display:none;">
-
-            <div class="profile-top">
-
-                <img
-                    id="profilePhoto"
-                    class="profile-photo"
-                    src="Logo.png"
-                    alt="Profile Photo"
-                >
-
-                <br>
-
-                <label for="photoInput" class="photo-label">
-                    Badili Picha
-                </label>
-
-                <input
-                    type="file"
-                    id="photoInput"
-                    accept="image/*"
-                >
-
-                <div id="profileName" class="profile-name">
-                </div>
-
-                <div id="profileEmail" class="profile-email">
-                </div>
-
-            </div>
+<div class="profile-card">
 
 
-            <div class="info">
+<div
+    id="loading"
+    class="loading">
 
-                <div class="info-row">
-                    <span class="info-label">
-                        Username
-                    </span>
+    Inapakia profile...
 
-                    <span
-                        id="username"
-                        class="info-value">
-                    </span>
-                </div>
+</div>
 
 
-                <div class="info-row">
-                    <span class="info-label">
-                        Email
-                    </span>
 
-                    <span
-                        id="email"
-                        class="info-value">
-                    </span>
-                </div>
+<div
+    id="profileContent"
+    style="display:none;">
 
 
-                <div class="info-row">
-                    <span class="info-label">
-                        Account Type
-                    </span>
-
-                    <span
-                        id="role"
-                        class="info-value">
-                    </span>
-                </div>
+<div class="profile-top">
 
 
-                <div class="info-row">
-                    <span class="info-label">
-                        Status
-                    </span>
-
-                    <span
-                        id="status"
-                        class="info-value">
-                    </span>
-                </div>
+<img
+    id="profilePhoto"
+    class="profile-photo"
+    src="Logo.png"
+    alt="Profile Photo">
 
 
-                <div class="info-row">
-                    <span class="info-label">
-                        Member Since
-                    </span>
-
-                    <span
-                        id="createdAt"
-                        class="info-value">
-                    </span>
-                </div>
-
-            </div>
+<br>
 
 
-            <div class="actions">
+<label
+    for="photoInput"
+    class="photo-label">
 
-                <button
-                    class="action-btn"
-                    onclick="openLibrary()">
-                    My Library
-                </button>
+    Badili Picha
 
-                <button
-                    class="action-btn"
-                    onclick="openBookmarks()">
-                    Bookmarks
-                </button>
-
-                <button
-                    class="action-btn"
-                    onclick="openHistory()">
-                    Reading History
-                </button>
-
-                <button
-                    class="action-btn"
-                    onclick="openSettings()">
-                    Settings
-                </button>
-
-                <button
-                    class="action-btn logout-btn"
-                    onclick="logoutUser()">
-                    Logout
-                </button>
-
-            </div>
-
-        </div>
+</label>
 
 
-        <div id="errorMessage"
-             class="error"
-             style="display:none;">
-        </div>
+<input
+    type="file"
+    id="photoInput"
+    accept="image/*">
 
-    </div>
+
+<div
+    id="profileName"
+    class="profile-name">
+</div>
+
+
+<div
+    id="profileEmail"
+    class="profile-email">
+</div>
+
+
+</div>
+
+
+
+<div class="info">
+
+
+<div class="info-row">
+
+<span class="info-label">
+Username
+</span>
+
+<span
+    id="username"
+    class="info-value">
+</span>
+
+</div>
+
+
+
+<div class="info-row">
+
+<span class="info-label">
+Email
+</span>
+
+<span
+    id="email"
+    class="info-value">
+</span>
+
+</div>
+
+
+
+<div class="info-row">
+
+<span class="info-label">
+Account Type
+</span>
+
+<span
+    id="role"
+    class="info-value">
+</span>
+
+</div>
+
+
+
+<div class="info-row">
+
+<span class="info-label">
+Status
+</span>
+
+<span
+    id="status"
+    class="info-value">
+</span>
+
+</div>
+
+
+
+<div class="info-row">
+
+<span class="info-label">
+Member Since
+</span>
+
+<span
+    id="createdAt"
+    class="info-value">
+</span>
+
+</div>
+
+
+</div>
+
+
+
+<div class="actions">
+
+
+<button
+    class="action-btn"
+    onclick="openLibrary()">
+
+    📚 My Library
+
+</button>
+
+
+<button
+    class="action-btn"
+    onclick="openBookmarks()">
+
+    🔖 Bookmarks
+
+</button>
+
+
+<button
+    class="action-btn"
+    onclick="openHistory()">
+
+    📖 Reading History
+
+</button>
+
+
+<button
+    class="action-btn"
+    onclick="openSettings()">
+
+    ⚙️ Settings
+
+</button>
+
+
+<button
+    class="action-btn logout-btn"
+    onclick="logoutUser()">
+
+    🚪 Logout
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+<div
+    id="errorMessage"
+    class="error"
+    style="display:none;">
+
+</div>
+
+
+</div>
 
 </main>
 
 
+
+<footer class="footer">
+
+
+<div class="footer-logo">
+
+<img
+    src="Logo.png"
+    alt="Net Simulizi">
+
+<span>
+NET SIMULIZI
+</span>
+
+</div>
+
+
+<p>
+Digital Storytelling Platform
+</p>
+
+
+<p>
+© 2026 Net Simulizi
+</p>
+
+
+</footer>
+
+
+
 <script>
 
-    // =========================================
-    // LOAD USER FROM LOCAL STORAGE
-    // =========================================
 
-    async function loadProfile() {
+/* =========================
+   DARK MODE
+========================= */
 
-        const storedUser =
-            localStorage.getItem("netsimulizi_user");
+function loadDarkMode(){
 
-        if (!storedUser) {
-
-            window.location.href =
-                "index.html?open=login";
-
-            return;
-        }
+    const dark =
+        localStorage.getItem(
+            "netsimulizi_dark"
+        ) === "true";
 
 
-        let user;
+    if(dark){
 
-        try {
+        document.body.classList.add(
+            "dark"
+        );
 
-            user = JSON.parse(storedUser);
+    }
 
-        } catch (error) {
-
-            localStorage.removeItem(
-                "netsimulizi_user"
-            );
-
-            window.location.href =
-                "index.html?open=login";
-
-            return;
-        }
+}
 
 
-        if (!user.id) {
+function toggleDarkMode(){
 
-            showError(
-                "Taarifa za akaunti hazina user ID."
-            );
-
-            return;
-        }
+    document.body.classList.toggle(
+        "dark"
+    );
 
 
-        try {
+    localStorage.setItem(
+        "netsimulizi_dark",
+        document.body.classList.contains(
+            "dark"
+        )
+    );
 
-            const response = await fetch(
+}
+
+
+
+/* =========================
+   LOAD PROFILE
+========================= */
+
+async function loadProfile(){
+
+
+    const storedUser =
+        localStorage.getItem(
+            "netsimulizi_user"
+        );
+
+
+    if(!storedUser){
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+
+    let user;
+
+
+    try{
+
+        user =
+            JSON.parse(storedUser);
+
+    }catch(error){
+
+        localStorage.removeItem(
+            "netsimulizi_user"
+        );
+
+        window.location.href =
+            "login.html";
+
+        return;
+
+    }
+
+
+
+    if(!user.id){
+
+        showError(
+            "Taarifa za akaunti hazina user ID."
+        );
+
+        return;
+
+    }
+
+
+
+    try{
+
+
+        const response =
+            await fetch(
                 `/api/profile/${user.id}`
             );
 
 
-            const data = await response.json();
+        const data =
+            await response.json();
 
 
-            if (!response.ok || !data.success) {
+        if(!response.ok ||
+           !data.success){
 
-                throw new Error(
-                    data.message ||
-                    "Imeshindikana kupakia profile."
-                );
-            }
-
-
-            displayProfile(data.user);
-
-
-        } catch (error) {
-
-            console.error(error);
-
-            showError(
-                "Imeshindikana kupakia profile. Tafadhali jaribu tena."
+            throw new Error(
+                data.message ||
+                "Imeshindikana kupakia profile."
             );
+
         }
+
+
+
+        displayProfile(
+            data.user
+        );
+
+
+        /*
+         * Tunahakikisha localStorage
+         * ina taarifa mpya kutoka D1.
+         */
+
+        localStorage.setItem(
+            "netsimulizi_user",
+            JSON.stringify(data.user)
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Profile error:",
+            error
+        );
+
+
+        showError(
+            error.message ||
+            "Imeshindikana kupakia profile."
+        );
+
     }
 
-
-    // =========================================
-    // DISPLAY PROFILE
-    // =========================================
-
-    function displayProfile(user) {
-
-        document.getElementById(
-            "loading"
-        ).style.display = "none";
+}
 
 
-        document.getElementById(
-            "profileContent"
-        ).style.display = "block";
+
+/* =========================
+   DISPLAY PROFILE
+========================= */
+
+function displayProfile(user){
 
 
-        document.getElementById(
-            "profileName"
-        ).textContent = user.username;
+    document.getElementById(
+        "loading"
+    ).style.display = "none";
 
 
-        document.getElementById(
-            "profileEmail"
-        ).textContent = user.email;
+    document.getElementById(
+        "profileContent"
+    ).style.display = "block";
 
 
-        document.getElementById(
-            "username"
-        ).textContent = user.username;
+
+    document.getElementById(
+        "profileName"
+    ).textContent =
+        user.username || "-";
 
 
-        document.getElementById(
-            "email"
-        ).textContent = user.email;
+    document.getElementById(
+        "profileEmail"
+    ).textContent =
+        user.email || "-";
 
 
-        document.getElementById(
-            "role"
-        ).textContent = user.role;
+    document.getElementById(
+        "username"
+    ).textContent =
+        user.username || "-";
 
 
-        document.getElementById(
-            "status"
-        ).textContent = user.status;
+    document.getElementById(
+        "email"
+    ).textContent =
+        user.email || "-";
 
 
-        document.getElementById(
-            "createdAt"
-        ).textContent = formatDate(
+    document.getElementById(
+        "role"
+    ).textContent =
+        user.role || "reader";
+
+
+    document.getElementById(
+        "status"
+    ).textContent =
+        user.status || "active";
+
+
+    document.getElementById(
+        "createdAt"
+    ).textContent =
+        formatDate(
             user.created_at
         );
 
 
-        loadSavedPhoto();
+    loadSavedPhoto();
+
+}
+
+
+
+/* =========================
+   DATE
+========================= */
+
+function formatDate(dateString){
+
+    if(!dateString){
+
+        return "-";
+
     }
 
 
-    // =========================================
-    // DATE FORMAT
-    // =========================================
-
-    function formatDate(dateString) {
-
-        if (!dateString) {
-            return "-";
-        }
-
-        const date = new Date(
-            dateString.replace(" ", "T") + "Z"
+    const date =
+        new Date(
+            String(dateString)
+                .replace(" ","T") + "Z"
         );
 
-        if (isNaN(date.getTime())) {
-            return dateString;
-        }
 
-        return date.toLocaleDateString(
-            "en-GB",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
-        );
+    if(
+        isNaN(
+            date.getTime()
+        )
+    ){
+
+        return dateString;
+
     }
 
 
-    // =========================================
-    // PROFILE PHOTO
-    // =========================================
+    return date.toLocaleDateString(
+        "en-GB",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
 
-    function loadSavedPhoto() {
+}
 
-        const savedPhoto =
-            localStorage.getItem(
-                "netsimulizi_profile_photo"
+
+
+/* =========================
+   PROFILE PHOTO
+========================= */
+
+function loadSavedPhoto(){
+
+    const savedPhoto =
+        localStorage.getItem(
+            "netsimulizi_profile_photo"
+        );
+
+
+    if(savedPhoto){
+
+        document.getElementById(
+            "profilePhoto"
+        ).src =
+            savedPhoto;
+
+    }
+
+}
+
+
+
+document.getElementById(
+    "photoInput"
+).addEventListener(
+    "change",
+    function(event){
+
+
+        const file =
+            event.target.files[0];
+
+
+        if(!file){
+
+            return;
+
+        }
+
+
+        if(
+            !file.type.startsWith(
+                "image/"
+            )
+        ){
+
+            alert(
+                "Tafadhali chagua picha."
             );
 
-        if (savedPhoto) {
+            return;
 
-            document.getElementById(
-                "profilePhoto"
-            ).src = savedPhoto;
         }
-    }
 
 
-    document.getElementById(
-        "photoInput"
-    ).addEventListener(
-        "change",
-        function(event) {
+        /*
+         * Kwa sasa picha inawekwa
+         * kwenye localStorage.
+         *
+         * R2 tutaiunganisha baadaye
+         * ili picha ihifadhiwe cloud.
+         */
 
-            const file =
-                event.target.files[0];
-
-            if (!file) {
-                return;
-            }
+        const reader =
+            new FileReader();
 
 
-            if (!file.type.startsWith("image/")) {
-
-                alert(
-                    "Tafadhali chagua picha."
-                );
-
-                return;
-            }
-
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload = function(e) {
+        reader.onload =
+            function(e){
 
                 const imageData =
                     e.target.result;
@@ -581,99 +978,166 @@
 
                 document.getElementById(
                     "profilePhoto"
-                ).src = imageData;
+                ).src =
+                    imageData;
 
 
                 localStorage.setItem(
                     "netsimulizi_profile_photo",
                     imageData
                 );
+
             };
 
 
-            reader.readAsDataURL(file);
-        }
+        reader.readAsDataURL(file);
+
+    }
+);
+
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+function openLibrary(){
+
+    window.location.href =
+        "library.html";
+
+}
+
+
+function openBookmarks(){
+
+    window.location.href =
+        "library.html";
+
+}
+
+
+function openHistory(){
+
+    window.location.href =
+        "history.html";
+
+}
+
+
+function openSettings(){
+
+    alert(
+        "Settings itaunganishwa kwenye hatua inayofuata."
+    );
+
+}
+
+
+function logoutUser(){
+
+    const confirmLogout =
+        confirm(
+            "Una uhakika unataka kutoka kwenye akaunti?"
+        );
+
+
+    if(!confirmLogout){
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        "netsimulizi_user"
     );
 
 
-    // =========================================
-    // ACTIONS
-    // =========================================
-
-    function openLibrary() {
-
-        window.location.href =
-            "library.html";
-    }
+    localStorage.removeItem(
+        "netsimulizi_profile_photo"
+    );
 
 
-    function openBookmarks() {
+    window.location.href =
+        "index.html";
 
-        window.location.href =
-            "library.html";
-    }
-
-
-    function openHistory() {
-
-        alert(
-            "Reading History itaunganishwa kwenye mfumo wa kusoma."
-        );
-    }
+}
 
 
-    function openSettings() {
 
-        alert(
-            "Settings itaongezwa kwenye hatua inayofuata."
-        );
-    }
+/* =========================
+   ERROR
+========================= */
 
-
-    function logoutUser() {
-
-        localStorage.removeItem(
-            "netsimulizi_user"
-        );
-
-        localStorage.removeItem(
-            "netsimulizi_profile_photo"
-        );
-
-        window.location.href =
-            "index.html";
-    }
+function showError(message){
 
 
-    // =========================================
-    // ERROR
-    // =========================================
+    document.getElementById(
+        "loading"
+    ).style.display =
+        "none";
 
-    function showError(message) {
 
+    const error =
         document.getElementById(
-            "loading"
-        ).style.display = "none";
+            "errorMessage"
+        );
 
 
-        const error =
-            document.getElementById(
-                "errorMessage"
-            );
+    error.innerHTML = `
 
-        error.textContent = message;
+        <div>
+            ${escapeHTML(message)}
+        </div>
 
-        error.style.display = "block";
-    }
+        <button
+            class="retry-btn"
+            onclick="location.reload()">
+
+            Jaribu Tena
+
+        </button>
+
+    `;
 
 
-    // =========================================
-    // START
-    // =========================================
+    error.style.display =
+        "block";
 
-    loadProfile();
+}
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+
+/* =========================
+   START
+========================= */
+
+loadDarkMode();
+
+loadProfile();
+
 
 </script>
 
+
 </body>
 </html>
+```
