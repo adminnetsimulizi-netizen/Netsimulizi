@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="sw">
+
+<head>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Favorites — Net Simulizi</title>
+
+<style>
+
+*{
+  box-sizing:border-box
+}
+
+:root{
+  --bg:#090b10;
+  --surface:#11141b;
+  --surface2:#171b24;
+  --gold:#e5a51c;
+  --gold-light:#f2bd3d;
+  --text:#fff;
+  --muted:#a8afbd;
+  --border:rgba(255,255,255,.09)
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif
+}
+
+.top{
+  background:#0d0f14;
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:50
+}
+
+.logo{
+  color:var(--gold);
+  font-weight:900;
+  letter-spacing:2px;
+  text-decoration:none
+}
+
+.nav{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.btn{
+  padding:9px 13px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer
+}
+
+.btn:hover{
+  border-color:var(--gold);
+  color:var(--gold)
+}
+
+.primary{
+  background:var(--gold);
+  color:#111;
+  border:0;
+  font-weight:700
+}
+
+.primary:hover{
+  background:var(--gold-light);
+  color:#111
+}
+
+.wrap{
+  max-width:1200px;
+  margin:auto;
+  padding:25px 20px 50px
+}
+
+.hero{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(229,165,28,.15),
+      rgba(17,20,27,.95)
+    );
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:30px 25px;
+  margin-bottom:25px
+}
+
+.hero h1{
+  margin:0 0 8px;
+  font-size:30px
+}
+
+.hero p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.6
+}
+
+
+/* TOOLBAR */
+
+.toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:20px
+}
+
+.toolbar-title{
+  font-size:20px;
+  font-weight:800
+}
+
+.count{
+  color:var(--muted);
+  font-size:14px
+}
+
+
+/* STORIES */
+
+.stories{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:18px;
+  align-items:start
+}
+
+.story-card{
+  overflow:hidden;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  transition:.2s;
+  min-width:0
+}
+
+.story-card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(229,165,28,.6)
+}
+
+.cover{
+  width:100%;
+  aspect-ratio:2/3;
+  background:var(--surface2);
+  position:relative;
+  overflow:hidden
+}
+
+.cover img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block
+}
+
+.cover-placeholder{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--gold);
+  font-size:40px;
+  font-weight:900;
+  background:
+    linear-gradient(
+      145deg,
+      #151922,
+      #292113
+    )
+}
+
+.story-info{
+  padding:14px
+}
+
+.story-title{
+  font-size:16px;
+  font-weight:800;
+  line-height:1.35;
+  margin-bottom:7px
+}
+
+.story-author{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:10px
+}
+
+.story-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:6px;
+  margin-bottom:12px;
+  color:var(--muted);
+  font-size:11px
+}
+
+.language{
+  color:var(--gold-light)
+}
+
+.actions{
+  display:flex;
+  gap:7px
+}
+
+.read-btn,
+.remove-btn{
+  flex:1;
+  padding:9px 6px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:12px
+}
+
+.read-btn{
+  background:var(--gold);
+  color:#111;
+  border:0;
+  font-weight:700
+}
+
+.remove-btn{
+  background:transparent;
+  color:#aaa;
+  border:1px solid var(--border)
+}
+
+.remove-btn:hover{
+  border-color:#c55;
+  color:#ff8d8d
+}
+
+
+/* LOADING */
+
+.loading{
+  text-align:center;
+  padding:50px 20px;
+  color:var(--muted)
+}
+
+.spinner{
+  width:35px;
+  height:35px;
+  border:3px solid #333;
+  border-top-color:var(--gold);
+  border-radius:50%;
+  margin:0 auto 15px;
+  animation:spin .8s linear infinite
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg)
+  }
+}
+
+
+/* EMPTY */
+
+.empty{
+  display:none;
+  text-align:center;
+  padding:60px 20px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px
+}
+
+.empty-icon{
+  font-size:50px;
+  margin-bottom:15px
+}
+
+.empty h2{
+  margin:0 0 10px
+}
+
+.empty p{
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:20px
+}
+
+
+/* LOGIN */
+
+.login-box{
+  display:none;
+  text-align:center;
+  padding:60px 20px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px
+}
+
+.login-box h2{
+  margin:0 0 10px
+}
+
+.login-box p{
+  color:var(--muted);
+  line-height:1.6;
+  margin-bottom:20px
+}
+
+
+/* ERROR */
+
+.error{
+  display:none;
+  background:#32191d;
+  border:1px solid #71343c;
+  color:#ffb2b2;
+  padding:14px;
+  border-radius:9px;
+  margin-bottom:20px
+}
+
+
+/* FOOTER */
+
+.footer{
+  background:#080a0e;
+  border-top:1px solid var(--border);
+  color:var(--muted);
+  text-align:center;
+  padding:30px 20px
+}
+
+.footer p{
+  margin:8px 0
+}
+
+
+/* MOBILE */
+
+@media(max-width:1000px){
+
+  .stories{
+    grid-template-columns:repeat(4,1fr)
+  }
+
+}
+
+@media(max-width:800px){
+
+  .stories{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+}
+
+@media(max-width:600px){
+
+  .top{
+    padding:12px 14px
+  }
+
+  .nav .btn{
+    padding:8px 9px
+  }
+
+  .wrap{
+    padding:18px 14px 40px
+  }
+
+  .hero{
+    padding:25px 18px
+  }
+
+  .hero h1{
+    font-size:25px
+  }
+
+  .stories{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px
+  }
+
+}
+
+@media(max-width:380px){
+
+  .stories{
+    grid-template-columns:1fr 1fr
+  }
+
+  .story-info{
+    padding:10px
+  }
+
+  .story-title{
+    font-size:14px
+  }
+
+  .actions{
+    flex-direction:column
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header class="top">
+
+  <a
+    href="index.html"
+    class="logo"
+  >
+    NET SIMULIZI
+  </a>
+
+
+  <div class="nav">
+
+    <button
+      class="btn"
+      type="button"
+      onclick="location.href='index.html'"
+    >
+      Home
+    </button>
+
+    <button
+      class="btn"
+      type="button"
+      onclick="location.href='library.html'"
+    >
+      Library
+    </button>
+
+  </div>
+
+</header>
+
+
+
+<main class="wrap">
+
+
+  <section class="hero">
+
+    <h1>Favorites</h1>
+
+    <p>
+      Hadithi ulizozipenda na kuzihifadhi
+      kwa ajili ya kusoma baadaye.
+    </p>
+
+  </section>
+
+
+  <div
+    id="errorBox"
+    class="error"
+  ></div>
+
+
+  <!-- LOGIN -->
+
+  <section
+    id="loginBox"
+    class="login-box"
+  >
+
+    <div class="empty-icon">
+      🔐
+    </div>
+
+    <h2>Ingia kwanza</h2>
+
+    <p>
+      Tafadhali ingia kwenye akaunti yako
+      ili kuona hadithi ulizoweka kwenye favorites.
+    </p>
+
+    <button
+      class="btn primary"
+      type="button"
+      onclick="location.href='login.html'"
+    >
+      Ingia
+    </button>
+
+  </section>
+
+
+  <!-- CONTENT -->
+
+  <section id="content">
+
+
+    <div class="toolbar">
+
+      <div class="toolbar-title">
+        Hadithi Zilizopendwa
+      </div>
+
+      <div
+        id="count"
+        class="count"
+      >
+        0 hadithi
+      </div>
+
+    </div>
+
+
+    <!-- LOADING -->
+
+    <div
+      id="loading"
+      class="loading"
+    >
+
+      <div class="spinner"></div>
+
+      Inapakia favorites...
+
+    </div>
+
+
+    <!-- EMPTY -->
+
+    <div
+      id="empty"
+      class="empty"
+    >
+
+      <div class="empty-icon">
+        ❤️
+      </div>
+
+      <h2>
+        Hakuna favorites bado
+      </h2>
+
+      <p>
+        Hadithi utakazozipenda zitaonekana
+        hapa.
+      </p>
+
+      <button
+        class="btn primary"
+        type="button"
+        onclick="location.href='discover.html'"
+      >
+        Gundua Hadithi
+      </button>
+
+    </div>
+
+
+    <!-- STORIES -->
+
+    <div
+      id="stories"
+      class="stories"
+    ></div>
+
+
+  </section>
+
+
+</main>
+
+
+
+<footer class="footer">
+
+  <b class="logo">
+    NET SIMULIZI
+  </b>
+
+  <p>
+    Digital Storytelling Platform
+  </p>
+
+  <p>
+    © 2026 Net Simulizi
+  </p>
+
+</footer>
+
+
+
+<script>
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const loading =
+  document.getElementById("loading");
+
+const empty =
+  document.getElementById("empty");
+
+const storiesGrid =
+  document.getElementById("stories");
+
+const count =
+  document.getElementById("count");
+
+const loginBox =
+  document.getElementById("loginBox");
+
+const content =
+  document.getElementById("content");
+
+const errorBox =
+  document.getElementById("errorBox");
+
+
+/* =========================
+   USER
+========================= */
+
+let user = null;
+
+try{
+
+  user =
+    JSON.parse(
+      localStorage.getItem(
+        "netsimulizi_user"
+      ) || "null"
+    );
+
+}catch(error){
+
+  user = null;
+
+}
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   COVER
+========================= */
+
+function getCover(story){
+
+  const cover =
+    story.cover_url ||
+    story.cover ||
+    story.image ||
+    story.cover_image ||
+    "";
+
+  if(cover){
+
+    return `
+      <img
+        src="${escapeHTML(cover)}"
+        alt="${escapeHTML(
+          story.title || "Story"
+        )}"
+        onerror="
+          this.style.display='none';
+          this.nextElementSibling.style.display='flex';
+        "
+      >
+
+      <div
+        class="cover-placeholder"
+        style="display:none"
+      >
+        📖
+      </div>
+    `;
+
+  }
+
+  return `
+    <div class="cover-placeholder">
+      📖
+    </div>
+  `;
+
+}
+
+
+/* =========================
+   STORY CARD
+========================= */
+
+function storyCard(story){
+
+  const id =
+    story.id ||
+    story.story_id ||
+    "";
+
+  const title =
+    story.title ||
+    story.name ||
+    "Untitled Story";
+
+  const author =
+    story.author_name ||
+    story.author ||
+    story.username ||
+    "Unknown Author";
+
+  const language =
+    story.language ||
+    story.lang ||
+    "";
+
+  const chapters =
+    story.episode_count ??
+    story.chapter_count ??
+    story.chapters_count ??
+    0;
+
+
+  return `
+
+    <article class="story-card">
+
+
+      <div class="cover">
+
+        ${getCover(story)}
+
+      </div>
+
+
+      <div class="story-info">
+
+
+        <div class="story-title">
+
+          ${escapeHTML(title)}
+
+        </div>
+
+
+        <div class="story-author">
+
+          ${escapeHTML(author)}
+
+        </div>
+
+
+        <div class="story-meta">
+
+          <span>
+            ${escapeHTML(chapters)} Chapters
+          </span>
+
+          <span class="language">
+            ${escapeHTML(language)}
+          </span>
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="read-btn"
+            type="button"
+            onclick="openStory('${escapeHTML(id)}')"
+          >
+            Soma
+          </button>
+
+          <button
+            class="remove-btn"
+            type="button"
+            onclick="removeFavorite('${escapeHTML(id)}')"
+          >
+            Ondoa
+          </button>
+
+        </div>
+
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================
+   LOAD FAVORITES
+========================= */
+
+async function loadFavorites(){
+
+  if(!user || !user.id){
+
+    content.style.display = "none";
+    loading.style.display = "none";
+    loginBox.style.display = "block";
+
+    return;
+
+  }
+
+
+  loginBox.style.display = "none";
+  content.style.display = "block";
+  loading.style.display = "block";
+  empty.style.display = "none";
+  storiesGrid.innerHTML = "";
+  errorBox.style.display = "none";
+
+
+  try{
+
+    /*
+     * Tunatumia bookmarks API kama
+     * chanzo cha favorites.
+     */
+
+    const response =
+      await fetch(
+        "/api/bookmarks/" +
+        encodeURIComponent(user.id)
+      );
+
+
+    if(!response.ok){
+
+      throw new Error(
+        "Favorites hazijapatikana."
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    let bookmarks = [];
+
+
+    if(Array.isArray(data)){
+
+      bookmarks = data;
+
+    }else if(Array.isArray(data.bookmarks)){
+
+      bookmarks = data.bookmarks;
+
+    }else if(Array.isArray(data.data)){
+
+      bookmarks = data.data;
+
+    }
+
+
+    /*
+     * Kama API imerudisha bookmark objects
+     * zenye story ndani yake, tunazitumia moja kwa moja.
+     */
+
+    if(
+      bookmarks.length &&
+      (
+        bookmarks[0].title ||
+        bookmarks[0].story_title ||
+        bookmarks[0].cover_url
+      )
+    ){
+
+      renderStories(
+        bookmarks.map(item => {
+
+          if(item.story){
+
+            return item.story;
+
+          }
+
+          return {
+
+            ...item,
+
+            id:
+              item.story_id ||
+              item.id,
+
+            title:
+              item.story_title ||
+              item.title,
+
+            author_name:
+              item.author_name ||
+              item.author
+
+          };
+
+        })
+      );
+
+      return;
+
+    }
+
+
+    /*
+     * Ikiwa bookmarks API inarudisha story IDs tu,
+     * tunavuta stories zote kisha kuchuja.
+     */
+
+    const storiesResponse =
+      await fetch("/api/stories");
+
+
+    if(!storiesResponse.ok){
+
+      throw new Error(
+        "Stories API haijapatikana."
+      );
+
+    }
+
+
+    const storiesData =
+      await storiesResponse.json();
+
+
+    let allStories = [];
+
+
+    if(Array.isArray(storiesData)){
+
+      allStories = storiesData;
+
+    }else if(
+      Array.isArray(storiesData.stories)
+    ){
+
+      allStories =
+        storiesData.stories;
+
+    }else if(
+      Array.isArray(storiesData.data)
+    ){
+
+      allStories =
+        storiesData.data;
+
+    }
+
+
+    const favoriteIds =
+      new Set(
+        bookmarks.map(item =>
+          String(
+            item.story_id ||
+            item.storyId ||
+            item.id ||
+            ""
+          )
+        )
+      );
+
+
+    const favorites =
+      allStories.filter(story =>
+        favoriteIds.has(
+          String(
+            story.id ||
+            story.story_id ||
+            ""
+          )
+        )
+      );
+
+
+    renderStories(favorites);
+
+
+  }catch(error){
+
+    console.error(
+      "Favorites error:",
+      error
+    );
+
+    loading.style.display = "none";
+
+    errorBox.textContent =
+      "Imeshindikana kupakia favorites kwa sasa.";
+
+    errorBox.style.display = "block";
+
+    empty.style.display = "block";
+
+  }
+
+}
+
+
+/* =========================
+   RENDER STORIES
+========================= */
+
+function renderStories(stories){
+
+  loading.style.display = "none";
+
+  storiesGrid.innerHTML = "";
+
+  count.textContent =
+    `${stories.length} ${stories.length === 1 ? "hadithi" : "hadithi"}`;
+
+
+  if(!stories.length){
+
+    empty.style.display = "block";
+
+    return;
+
+  }
+
+
+  empty.style.display = "none";
+
+
+  storiesGrid.innerHTML =
+    stories
+      .map(storyCard)
+      .join("");
+
+}
+
+
+/* =========================
+   OPEN STORY
+========================= */
+
+function openStory(id){
+
+  if(!id){
+
+    return;
+
+  }
+
+
+  location.href =
+    "story.html?id=" +
+    encodeURIComponent(id);
+
+}
+
+
+/* =========================
+   REMOVE FAVORITE
+========================= */
+
+async function removeFavorite(storyId){
+
+  if(!user || !user.id || !storyId){
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "Una uhakika unataka kuondoa hadithi hii kwenye favorites?"
+    );
+
+
+  if(!confirmed){
+
+    return;
+
+  }
+
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/bookmarks/" +
+        encodeURIComponent(user.id) +
+        "/" +
+        encodeURIComponent(storyId),
+        {
+          method:"DELETE"
+        }
+      );
+
+
+    /*
+     * Hata kama backend bado haijaweka
+     * DELETE endpoint, tuna-refresh page.
+     */
+
+    if(!response.ok){
+
+      console.warn(
+        "Remove favorite endpoint haijapatikana."
+      );
+
+    }
+
+
+    loadFavorites();
+
+
+  }catch(error){
+
+    console.error(
+      "Remove favorite error:",
+      error
+    );
+
+    loadFavorites();
+
+  }
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadFavorites();
+
+
+</script>
+
+</body>
+
+</html>
