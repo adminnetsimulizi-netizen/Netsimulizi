@@ -1,237 +1,428 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sw">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Chapters — Net Simulizi</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chapters - Net Simulizi</title>
 
 <style>
-*{box-sizing:border-box}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+:root{
+--bg:#090b10;
+--surface:#11141b;
+--surface-2:#171b24;
+--gold:#e5a51c;
+--gold-light:#f2bd3d;
+--text:#fff;
+--muted:#a8afbd;
+--border:rgba(255,255,255,.09);
+}
 
 body{
-    margin:0;
-    background:#f6f0e5;
-    color:#191713;
-    font-family:Arial,sans-serif
+font-family:Arial,Helvetica,sans-serif;
+background:var(--bg);
+color:var(--text);
+line-height:1.5;
+min-height:100vh;
 }
 
-body.dark{
-    background:#111;
-    color:#eee
+a{
+text-decoration:none;
+color:inherit;
 }
 
-.top{
-    background:#171512;
-    color:#fff;
-    padding:16px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center
+button,
+input{
+font:inherit;
+}
+
+header{
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(9,11,16,.97);
+backdrop-filter:blur(12px);
+border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+max-width:1200px;
+margin:auto;
+padding:14px 20px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
 }
 
 .logo{
-    color:#d4aa43;
-    font-weight:900;
-    letter-spacing:2px;
-    text-decoration:none
+color:var(--gold);
+font-weight:900;
+letter-spacing:2px;
+font-size:19px;
+}
+
+.header-right{
+display:flex;
+align-items:center;
+gap:8px;
 }
 
 .btn{
-    padding:10px 14px;
-    border-radius:8px;
-    border:1px solid #d4aa43;
-    background:transparent;
-    color:inherit;
-    cursor:pointer
+padding:10px 14px;
+border-radius:8px;
+border:1px solid var(--border);
+background:var(--surface);
+color:white;
+cursor:pointer;
+font-weight:700;
+}
+
+.btn:hover{
+border-color:var(--gold);
+color:var(--gold);
 }
 
 .primary{
-    background:#d4aa43;
-    color:#171512;
-    border:0
+background:var(--gold);
+color:#111;
+border-color:var(--gold);
+}
+
+.primary:hover{
+background:var(--gold-light);
+color:#111;
 }
 
 .wrap{
-    max-width:1100px;
-    margin:auto;
-    padding:20px
+max-width:1000px;
+margin:auto;
+padding:35px 20px 70px;
 }
 
-.card,.hero{
-    background:#fffdf8;
-    border:1px solid #e4dccd;
-    border-radius:16px;
-    padding:22px;
-    margin-bottom:20px
+.story-header{
+background:
+radial-gradient(
+circle at 85% 20%,
+rgba(229,165,28,.13),
+transparent 30%
+),
+var(--surface);
+
+border:1px solid var(--border);
+border-radius:16px;
+padding:30px;
+margin-bottom:25px;
 }
 
-.dark .card,
-.dark .hero{
-    background:#1d1b18;
-    border-color:#38342d
+.back{
+display:inline-block;
+color:var(--gold);
+font-size:14px;
+font-weight:700;
+margin-bottom:20px;
 }
 
-.muted{
-    color:#777
+.story-header h1{
+font-size:clamp(28px,5vw,44px);
+margin-bottom:8px;
 }
 
-.dark .muted{
-    color:#aaa
+.author{
+color:var(--muted);
+margin-bottom:18px;
+}
+
+.story-description{
+color:#c4c9d3;
+max-width:760px;
+}
+
+.stats{
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+margin-top:20px;
+}
+
+.stat{
+padding:8px 13px;
+border:1px solid var(--border);
+border-radius:20px;
+font-size:13px;
+color:#c9ced8;
+}
+
+.section{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:16px;
+overflow:hidden;
+}
+
+.section-header{
+padding:20px 22px;
+border-bottom:1px solid var(--border);
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+.section-header h2{
+font-size:22px;
+}
+
+.chapter-count{
+font-size:13px;
+color:var(--muted);
+}
+
+.chapter-list{
+display:flex;
+flex-direction:column;
 }
 
 .chapter{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    padding:16px 0;
-    border-bottom:1px solid #ddd5c8
-}
-
-.dark .chapter{
-    border-color:#38342d
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+padding:18px 22px;
+border-bottom:1px solid var(--border);
+transition:.2s;
 }
 
 .chapter:last-child{
-    border-bottom:0
+border-bottom:0;
+}
+
+.chapter:hover{
+background:var(--surface-2);
 }
 
 .chapter-info{
-    flex:1
+display:flex;
+align-items:center;
+gap:15px;
+min-width:0;
+}
+
+.chapter-number{
+width:42px;
+height:42px;
+border-radius:9px;
+background:#20242d;
+display:flex;
+align-items:center;
+justify-content:center;
+color:var(--gold);
+font-weight:900;
+flex-shrink:0;
+}
+
+.chapter-details{
+min-width:0;
 }
 
 .chapter-title{
-    font-weight:bold;
-    margin-bottom:6px
+font-weight:800;
+margin-bottom:3px;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
 }
 
-.free{
-    color:#2d7d46;
-    font-weight:bold
+.chapter-meta{
+font-size:12px;
+color:var(--muted);
 }
 
-.locked{
-    color:#a33a3a;
-    font-weight:bold
+.chapter-action{
+flex-shrink:0;
 }
 
-.price{
-    color:#b48622;
-    font-weight:bold
-}
-
-.loading{
-    text-align:center;
-    padding:35px
+.loading,
+.empty,
+.error{
+padding:45px 20px;
+text-align:center;
+color:var(--muted);
 }
 
 .error{
-    text-align:center;
-    padding:35px;
-    color:#b00020
+color:#ff9c9c;
+}
+
+.retry{
+margin-top:15px;
 }
 
 .footer{
-    background:#171512;
-    color:#aaa;
-    text-align:center;
-    padding:30px
+background:#07090d;
+border-top:1px solid var(--border);
+padding:35px 20px;
+text-align:center;
+color:#777f8d;
+}
+
+.footer .logo{
+display:block;
+margin-bottom:8px;
 }
 
 @media(max-width:700px){
 
-    .wrap{
-        padding:12px
-    }
-
-    .chapter{
-        align-items:flex-start
-    }
-
-    .chapter .btn{
-        white-space:nowrap
-    }
-
-    .top{
-        padding:12px
-    }
+.header-inner{
+padding:12px 14px;
 }
+
+.wrap{
+padding:20px 12px 55px;
+}
+
+.story-header{
+padding:22px 18px;
+}
+
+.story-header h1{
+font-size:30px;
+}
+
+.section-header{
+padding:17px;
+}
+
+.chapter{
+padding:15px 17px;
+}
+
+.chapter-info{
+gap:11px;
+}
+
+.chapter-number{
+width:37px;
+height:37px;
+font-size:13px;
+}
+
+.chapter-title{
+font-size:14px;
+}
+
+.chapter-action .btn{
+padding:8px 10px;
+font-size:12px;
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
-<header class="top">
+<header>
 
-    <a class="logo" href="../public/index.html">
-        NET SIMULIZI
-    </a>
+<div class="header-inner">
 
-    <div>
+<a href="index.html" class="logo">
+NET SIMULIZI
+</a>
 
-        <button
-            class="btn"
-            onclick="toggleDark()"
-        >
-            ◐
-        </button>
+<div class="header-right">
 
-        <button
-            class="btn"
-            onclick="location.href='../public/land.html'"
-        >
-            EN/SW
-        </button>
+<button
+class="btn"
+onclick="toggleDark()"
+title="Dark mode"
+>
+◐
+</button>
 
-    </div>
+<a
+href="index.html"
+class="btn"
+>
+Home
+</a>
+
+</div>
+
+</div>
 
 </header>
 
 
 <main class="wrap">
 
-    <section
-        id="storyHeader"
-        class="hero"
-    >
+<section
+id="storyHeader"
+class="story-header"
+>
 
-        <div class="loading">
-            Inapakia hadithi...
-        </div>
+<div class="loading">
+Inapakia taarifa za hadithi...
+</div>
 
-    </section>
+</section>
 
 
-    <section class="card">
+<section class="section">
 
-        <h2>Chapters</h2>
+<div class="section-header">
 
-        <div id="chaptersContainer">
+<h2>
+Chapters
+</h2>
 
-            <div class="loading">
-                Inapakia chapters...
-            </div>
+<div
+id="chapterCount"
+class="chapter-count"
+>
+Inapakia...
+</div>
 
-        </div>
+</div>
 
-    </section>
+
+<div
+id="chapterList"
+class="chapter-list"
+>
+
+<div class="loading">
+Inapakia chapters...
+</div>
+
+</div>
+
+</section>
 
 </main>
 
 
 <footer class="footer">
 
-    <b class="logo">
-        NET SIMULIZI
-    </b>
+<span class="logo">
+NET SIMULIZI
+</span>
 
-    <p>
-        Digital Storytelling Platform
-    </p>
+<p>
+Soma, gundua na furahia simulizi zako.
+</p>
 
-    <p>
-        © 2026 Net Simulizi
-    </p>
+<p>
+© 2026 Net Simulizi. All rights reserved.
+</p>
 
 </footer>
 
@@ -241,349 +432,538 @@ body.dark{
 const API = "/api";
 
 
+/* =========================
+   DARK MODE
+========================= */
+
 function toggleDark(){
 
-    document.body.classList.toggle("dark");
+document.body.classList.toggle("dark");
 
-    localStorage.setItem(
-        "netsimulizi_dark",
-        document.body.classList.contains("dark")
-    );
+localStorage.setItem(
+"netsimulizi_dark",
+document.body.classList.contains("dark")
+);
 
 }
 
 
 function loadDarkMode(){
 
-    if(
-        localStorage.getItem(
-            "netsimulizi_dark"
-        ) === "true"
-    ){
+if(
+localStorage.getItem(
+"netsimulizi_dark"
+) === "true"
+){
 
-        document.body.classList.add("dark");
-
-    }
+document.body.classList.add("dark");
 
 }
 
+}
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHTML(value){
+
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   STORY ID
+========================= */
 
 function getStoryId(){
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
+const params =
+new URLSearchParams(
+window.location.search
+);
 
-    const id =
-        Number(params.get("id"));
+const id =
+Number(params.get("id"));
 
-    if(
-        !Number.isInteger(id) ||
-        id <= 0
-    ){
+if(
+!Number.isInteger(id) ||
+id <= 0
+){
 
-        return 1;
-
-    }
-
-    return id;
+return null;
 
 }
 
+return id;
+
+}
+
+
+/* =========================
+   FORMAT NUMBER
+========================= */
+
+function formatNumber(value){
+
+return Number(
+value || 0
+).toLocaleString();
+
+}
+
+
+/* =========================
+   LOAD STORY
+========================= */
 
 async function loadStory(){
 
-    const storyId =
-        getStoryId();
+const storyId =
+getStoryId();
 
-    const storyHeader =
-        document.getElementById(
-            "storyHeader"
-        );
+const container =
+document.getElementById(
+"storyHeader"
+);
 
-    try{
 
-        const response =
-            await fetch(
-                `${API}/stories/${storyId}`
-            );
+if(!storyId){
 
-        const data =
-            await response.json();
+container.innerHTML = `
 
-        if(
-            !response.ok ||
-            !data.success ||
-            !data.story
-        ){
+<div class="error">
 
-            throw new Error(
-                data.message ||
-                "Hadithi haijapatikana."
-            );
+Story ID haijapatikana.
 
-        }
+<br><br>
 
-        const story =
-            data.story;
+<a
+href="discover.html"
+class="btn primary"
+>
+Rudi Discover
+</a>
 
-        storyHeader.innerHTML = `
+</div>
 
-            <h1>
-                ${escapeHtml(story.title)}
-            </h1>
+`;
 
-            <p class="muted">
-
-                ${escapeHtml(
-                    story.author_name ||
-                    "Unknown Author"
-                )}
-
-                ·
-
-                ${Number(
-                    story.readers_count || 0
-                ).toLocaleString()}
-                readers
-
-            </p>
-
-        `;
-
-    }catch(error){
-
-        console.error(error);
-
-        storyHeader.innerHTML = `
-
-            <div class="error">
-
-                Imeshindikana kupakia hadithi.
-
-            </div>
-
-        `;
-
-    }
+return;
 
 }
 
+
+try{
+
+const response =
+await fetch(
+`${API}/stories/${storyId}`,
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
+}
+);
+
+
+const data =
+await response.json();
+
+
+if(
+!response.ok ||
+!data.success ||
+!data.story
+){
+
+throw new Error(
+data.message ||
+"Hadithi haijapatikana."
+);
+
+}
+
+
+const story =
+data.story;
+
+
+container.innerHTML = `
+
+<a
+href="story.html?id=${encodeURIComponent(story.id)}"
+class="back"
+>
+← Rudi kwenye hadithi
+</a>
+
+<h1>
+${escapeHTML(
+story.title ||
+"Untitled Story"
+)}
+</h1>
+
+<p class="author">
+${escapeHTML(
+story.author_name ||
+story.author ||
+"Net Simulizi"
+)}
+</p>
+
+<p class="story-description">
+${escapeHTML(
+story.description ||
+"Hakuna maelezo ya hadithi kwa sasa."
+)}
+</p>
+
+<div class="stats">
+
+<span class="stat">
+📚 ${escapeHTML(
+story.category_name ||
+story.category ||
+"Story"
+)}
+</span>
+
+<span class="stat">
+👁 ${formatNumber(
+story.readers_count
+)}
+ readers
+</span>
+
+<span class="stat">
+🌐 ${escapeHTML(
+story.language ||
+"sw"
+)}
+</span>
+
+</div>
+
+`;
+
+
+}catch(error){
+
+console.error(
+"Story error:",
+error
+);
+
+
+container.innerHTML = `
+
+<div class="error">
+
+Imeshindikana kupakia hadithi.
+
+<br><br>
+
+<button
+class="btn primary retry"
+onclick="loadStory()"
+>
+Jaribu Tena
+</button>
+
+</div>
+
+`;
+
+}
+
+}
+
+
+/* =========================
+   LOAD CHAPTERS
+========================= */
 
 async function loadChapters(){
 
-    const storyId =
-        getStoryId();
+const storyId =
+getStoryId();
 
-    const container =
-        document.getElementById(
-            "chaptersContainer"
-        );
+const list =
+document.getElementById(
+"chapterList"
+);
 
-    try{
-
-        const response =
-            await fetch(
-                `${API}/stories/${storyId}/episodes`
-            );
-
-        const data =
-            await response.json();
-
-        if(
-            !response.ok ||
-            !data.success
-        ){
-
-            throw new Error(
-                data.message ||
-                "Episodes hazijapatikana."
-            );
-
-        }
+const count =
+document.getElementById(
+"chapterCount"
+);
 
 
-        const episodes =
-            data.episodes || [];
+if(!storyId){
 
+list.innerHTML = `
 
-        if(episodes.length === 0){
+<div class="error">
 
-            container.innerHTML = `
+Story ID haijapatikana.
 
-                <div class="loading">
+</div>
 
-                    Hakuna chapters zilizowekwa
-                    kwa sasa.
+`;
 
-                </div>
+count.textContent =
+"0 chapters";
 
-            `;
-
-            return;
-
-        }
-
-
-        container.innerHTML =
-            episodes.map(
-                episode => {
-
-                    const isFree =
-                        Number(
-                            episode.is_free
-                        ) === 1;
-
-                    const price =
-                        Number(
-                            episode.price || 0
-                        );
-
-
-                    return `
-
-                        <div class="chapter">
-
-                            <div class="chapter-info">
-
-                                <div class="chapter-title">
-
-                                    Chapter
-                                    ${Number(
-                                        episode.episode_number
-                                    )}
-
-                                    — 
-
-                                    ${escapeHtml(
-                                        episode.title
-                                    )}
-
-                                </div>
-
-
-                                ${
-                                    isFree
-
-                                    ?
-
-                                    `<span class="free">
-                                        FREE
-                                    </span>`
-
-                                    :
-
-                                    `<span class="locked">
-                                        🔒 Locked
-                                    </span>
-
-                                    <span class="price">
-                                        · TSh ${price.toLocaleString()}
-                                    </span>`
-                                }
-
-                            </div>
-
-
-                            ${
-                                isFree
-
-                                ?
-
-                                `<button
-                                    class="btn primary"
-                                    onclick="readEpisode(${episode.id})"
-                                >
-                                    Soma
-                                </button>`
-
-                                :
-
-                                `<button
-                                    class="btn"
-                                    onclick="openPaidEpisode(${episode.id}, ${price})"
-                                >
-                                    Fungua
-                                </button>`
-                            }
-
-                        </div>
-
-                    `;
-
-                }
-            ).join("");
-
-
-    }catch(error){
-
-        console.error(error);
-
-        container.innerHTML = `
-
-            <div class="error">
-
-                Imeshindikana kupakia chapters.
-
-                <br><br>
-
-                <button
-                    class="btn"
-                    onclick="loadChapters()"
-                >
-                    Jaribu Tena
-                </button>
-
-            </div>
-
-        `;
-
-    }
+return;
 
 }
 
 
-function readEpisode(episodeId){
+try{
 
-    const storyId =
-        getStoryId();
-
-    location.href =
-        `reader.html?story=${storyId}&episode=${episodeId}`;
-
+const response =
+await fetch(
+`${API}/stories/${storyId}/chapters`,
+{
+method:"GET",
+headers:{
+"Accept":"application/json"
+},
+cache:"no-store"
 }
+);
 
 
-function openPaidEpisode(
-    episodeId,
-    price
+const data =
+await response.json();
+
+
+console.log(
+"Net Simulizi chapters:",
+data
+);
+
+
+if(
+!response.ok ||
+!data.success
 ){
 
-    alert(
-        `Chapter hii inahitaji malipo ya TSh ${Number(price).toLocaleString()}. Mfumo wa malipo utaunganishwa kwenye hatua inayofuata.`
-    );
+throw new Error(
+data.message ||
+"Chapters hazikupatikana."
+);
 
 }
 
 
-function escapeHtml(value){
+let chapters =
+Array.isArray(data.chapters)
+? data.chapters
+: [];
 
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+
+if(!chapters.length){
+
+list.innerHTML = `
+
+<div class="empty">
+
+Hakuna chapters zilizowekwa kwa hadithi hii bado.
+
+</div>
+
+`;
+
+count.textContent =
+"0 chapters";
+
+return;
 
 }
 
+
+/* SORT CHAPTERS */
+
+chapters.sort(
+function(a,b){
+
+return Number(
+a.chapter_number ??
+a.number ??
+a.chapter_no ??
+0
+)
+-
+Number(
+b.chapter_number ??
+b.number ??
+b.chapter_no ??
+0
+);
+
+});
+
+
+count.textContent =
+chapters.length +
+(chapters.length === 1
+? " chapter"
+: " chapters");
+
+
+const fragment =
+document.createDocumentFragment();
+
+
+chapters.forEach(
+function(chapter,index){
+
+const number =
+chapter.chapter_number ??
+chapter.number ??
+chapter.chapter_no ??
+(index + 1);
+
+
+const title =
+chapter.title ||
+`Chapter ${number}`;
+
+
+const words =
+chapter.word_count ??
+chapter.words ??
+0;
+
+
+const status =
+chapter.status ||
+"published";
+
+
+const item =
+document.createElement("div");
+
+item.className =
+"chapter";
+
+
+item.innerHTML = `
+
+<div class="chapter-info">
+
+<div class="chapter-number">
+${escapeHTML(number)}
+</div>
+
+<div class="chapter-details">
+
+<div class="chapter-title">
+${escapeHTML(title)}
+</div>
+
+<div class="chapter-meta">
+
+${words
+? formatNumber(words) + " words · "
+: ""
+}
+
+${escapeHTML(status)}
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="chapter-action">
+
+<a
+class="btn primary"
+href="reader.html?story_id=${encodeURIComponent(storyId)}&chapter_id=${encodeURIComponent(chapter.id)}"
+>
+Soma
+</a>
+
+</div>
+
+`;
+
+
+fragment.appendChild(item);
+
+});
+
+
+list.innerHTML = "";
+
+list.appendChild(fragment);
+
+
+}catch(error){
+
+console.error(
+"Chapters error:",
+error
+);
+
+
+list.innerHTML = `
+
+<div class="error">
+
+Imeshindikana kupakia chapters.
+
+<br><br>
+
+<button
+class="btn primary"
+onclick="loadChapters()"
+>
+Jaribu Tena
+</button>
+
+</div>
+
+`;
+
+count.textContent =
+"Error";
+
+}
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+window.addEventListener(
+"DOMContentLoaded",
+function(){
 
 loadDarkMode();
 
 loadStory();
 
 loadChapters();
+
+});
 
 </script>
 
