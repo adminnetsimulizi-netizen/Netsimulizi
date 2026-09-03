@@ -1,1 +1,591 @@
-<!doctype html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chapters — Net Simulizi</title><style>*{box-sizing:border-box}body{margin:0;background:#f6f0e5;color:#191713;font-family:Arial,sans-serif}body.dark{background:#111;color:#eee}.top{background:#171512;color:#fff;padding:16px;display:flex;justify-content:space-between}.logo{color:#d4aa43;font-weight:900;letter-spacing:2px}.btn{padding:10px 14px;border-radius:8px;border:1px solid #d4aa43;background:transparent;color:inherit;cursor:pointer}.primary{background:#d4aa43;color:#171512;border:0}.wrap{max-width:1100px;margin:auto;padding:20px}.card,.hero{background:#fffdf8;border:1px solid #e4dccd;border-radius:16px;padding:22px;margin-bottom:20px}.dark .card,.dark .hero{background:#1d1b18;border-color:#38342d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.cover{aspect-ratio:2/3;border-radius:10px;background:linear-gradient(145deg,#211d17,#a47b28);color:#fff;padding:12px;display:flex;align-items:end;font-weight:900}.muted{color:#777}.form{max-width:550px;margin:auto}.form input,.form textarea,.form select{width:100%;padding:12px;margin:6px 0 14px;border:1px solid #ddd;border-radius:8px;background:transparent;color:inherit}.footer{background:#171512;color:#aaa;text-align:center;padding:30px}.tag{display:inline-block;padding:8px 12px;border:1px solid #ddd;border-radius:20px;margin:4px}@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><header class="top"><a class="logo" href="../public/index.html">NET SIMULIZI</a><div><button class="btn" onclick="document.body.classList.toggle('dark')">◐</button><button class="btn" onclick="location.href='../public/land.html'">EN/SW</button></div></header><main class="wrap"><section class="hero"><h1>FADHAA</h1><p class="muted">HASSAN MAMBOSASA · 45 Chapters</p></section><section class="card"><h2>Chapters</h2><p><b>Chapter 1 — Mwanzo</b> · Free <button class="btn primary" onclick="location.href='reader.html?story=1&chapter=1'">Soma</button></p><hr><p><b>Chapter 2 — Siri</b> · Locked <button class="btn" onclick="alert('Chapter imefungwa.')">Fungua</button></p><hr><p><b>Chapter 3 — Kivuli</b> · Locked <button class="btn" onclick="alert('Chapter imefungwa.')">Fungua</button></p></section></main><footer class="footer"><b class="logo">NET SIMULIZI</b><p>Digital Storytelling Platform</p><p>© 2026 Net Simulizi</p></footer><script></script></body></html>
+<!doctype html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chapters — Net Simulizi</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    background:#f6f0e5;
+    color:#191713;
+    font-family:Arial,sans-serif
+}
+
+body.dark{
+    background:#111;
+    color:#eee
+}
+
+.top{
+    background:#171512;
+    color:#fff;
+    padding:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center
+}
+
+.logo{
+    color:#d4aa43;
+    font-weight:900;
+    letter-spacing:2px;
+    text-decoration:none
+}
+
+.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #d4aa43;
+    background:transparent;
+    color:inherit;
+    cursor:pointer
+}
+
+.primary{
+    background:#d4aa43;
+    color:#171512;
+    border:0
+}
+
+.wrap{
+    max-width:1100px;
+    margin:auto;
+    padding:20px
+}
+
+.card,.hero{
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:20px
+}
+
+.dark .card,
+.dark .hero{
+    background:#1d1b18;
+    border-color:#38342d
+}
+
+.muted{
+    color:#777
+}
+
+.dark .muted{
+    color:#aaa
+}
+
+.chapter{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:16px 0;
+    border-bottom:1px solid #ddd5c8
+}
+
+.dark .chapter{
+    border-color:#38342d
+}
+
+.chapter:last-child{
+    border-bottom:0
+}
+
+.chapter-info{
+    flex:1
+}
+
+.chapter-title{
+    font-weight:bold;
+    margin-bottom:6px
+}
+
+.free{
+    color:#2d7d46;
+    font-weight:bold
+}
+
+.locked{
+    color:#a33a3a;
+    font-weight:bold
+}
+
+.price{
+    color:#b48622;
+    font-weight:bold
+}
+
+.loading{
+    text-align:center;
+    padding:35px
+}
+
+.error{
+    text-align:center;
+    padding:35px;
+    color:#b00020
+}
+
+.footer{
+    background:#171512;
+    color:#aaa;
+    text-align:center;
+    padding:30px
+}
+
+@media(max-width:700px){
+
+    .wrap{
+        padding:12px
+    }
+
+    .chapter{
+        align-items:flex-start
+    }
+
+    .chapter .btn{
+        white-space:nowrap
+    }
+
+    .top{
+        padding:12px
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+
+    <a class="logo" href="../public/index.html">
+        NET SIMULIZI
+    </a>
+
+    <div>
+
+        <button
+            class="btn"
+            onclick="toggleDark()"
+        >
+            ◐
+        </button>
+
+        <button
+            class="btn"
+            onclick="location.href='../public/land.html'"
+        >
+            EN/SW
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="wrap">
+
+    <section
+        id="storyHeader"
+        class="hero"
+    >
+
+        <div class="loading">
+            Inapakia hadithi...
+        </div>
+
+    </section>
+
+
+    <section class="card">
+
+        <h2>Chapters</h2>
+
+        <div id="chaptersContainer">
+
+            <div class="loading">
+                Inapakia chapters...
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<footer class="footer">
+
+    <b class="logo">
+        NET SIMULIZI
+    </b>
+
+    <p>
+        Digital Storytelling Platform
+    </p>
+
+    <p>
+        © 2026 Net Simulizi
+    </p>
+
+</footer>
+
+
+<script>
+
+const API = "/api";
+
+
+function toggleDark(){
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "netsimulizi_dark",
+        document.body.classList.contains("dark")
+    );
+
+}
+
+
+function loadDarkMode(){
+
+    if(
+        localStorage.getItem(
+            "netsimulizi_dark"
+        ) === "true"
+    ){
+
+        document.body.classList.add("dark");
+
+    }
+
+}
+
+
+function getStoryId(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const id =
+        Number(params.get("id"));
+
+    if(
+        !Number.isInteger(id) ||
+        id <= 0
+    ){
+
+        return 1;
+
+    }
+
+    return id;
+
+}
+
+
+async function loadStory(){
+
+    const storyId =
+        getStoryId();
+
+    const storyHeader =
+        document.getElementById(
+            "storyHeader"
+        );
+
+    try{
+
+        const response =
+            await fetch(
+                `${API}/stories/${storyId}`
+            );
+
+        const data =
+            await response.json();
+
+        if(
+            !response.ok ||
+            !data.success ||
+            !data.story
+        ){
+
+            throw new Error(
+                data.message ||
+                "Hadithi haijapatikana."
+            );
+
+        }
+
+        const story =
+            data.story;
+
+        storyHeader.innerHTML = `
+
+            <h1>
+                ${escapeHtml(story.title)}
+            </h1>
+
+            <p class="muted">
+
+                ${escapeHtml(
+                    story.author_name ||
+                    "Unknown Author"
+                )}
+
+                ·
+
+                ${Number(
+                    story.readers_count || 0
+                ).toLocaleString()}
+                readers
+
+            </p>
+
+        `;
+
+    }catch(error){
+
+        console.error(error);
+
+        storyHeader.innerHTML = `
+
+            <div class="error">
+
+                Imeshindikana kupakia hadithi.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+async function loadChapters(){
+
+    const storyId =
+        getStoryId();
+
+    const container =
+        document.getElementById(
+            "chaptersContainer"
+        );
+
+    try{
+
+        const response =
+            await fetch(
+                `${API}/stories/${storyId}/episodes`
+            );
+
+        const data =
+            await response.json();
+
+        if(
+            !response.ok ||
+            !data.success
+        ){
+
+            throw new Error(
+                data.message ||
+                "Episodes hazijapatikana."
+            );
+
+        }
+
+
+        const episodes =
+            data.episodes || [];
+
+
+        if(episodes.length === 0){
+
+            container.innerHTML = `
+
+                <div class="loading">
+
+                    Hakuna chapters zilizowekwa
+                    kwa sasa.
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            episodes.map(
+                episode => {
+
+                    const isFree =
+                        Number(
+                            episode.is_free
+                        ) === 1;
+
+                    const price =
+                        Number(
+                            episode.price || 0
+                        );
+
+
+                    return `
+
+                        <div class="chapter">
+
+                            <div class="chapter-info">
+
+                                <div class="chapter-title">
+
+                                    Chapter
+                                    ${Number(
+                                        episode.episode_number
+                                    )}
+
+                                    — 
+
+                                    ${escapeHtml(
+                                        episode.title
+                                    )}
+
+                                </div>
+
+
+                                ${
+                                    isFree
+
+                                    ?
+
+                                    `<span class="free">
+                                        FREE
+                                    </span>`
+
+                                    :
+
+                                    `<span class="locked">
+                                        🔒 Locked
+                                    </span>
+
+                                    <span class="price">
+                                        · TSh ${price.toLocaleString()}
+                                    </span>`
+                                }
+
+                            </div>
+
+
+                            ${
+                                isFree
+
+                                ?
+
+                                `<button
+                                    class="btn primary"
+                                    onclick="readEpisode(${episode.id})"
+                                >
+                                    Soma
+                                </button>`
+
+                                :
+
+                                `<button
+                                    class="btn"
+                                    onclick="openPaidEpisode(${episode.id}, ${price})"
+                                >
+                                    Fungua
+                                </button>`
+                            }
+
+                        </div>
+
+                    `;
+
+                }
+            ).join("");
+
+
+    }catch(error){
+
+        console.error(error);
+
+        container.innerHTML = `
+
+            <div class="error">
+
+                Imeshindikana kupakia chapters.
+
+                <br><br>
+
+                <button
+                    class="btn"
+                    onclick="loadChapters()"
+                >
+                    Jaribu Tena
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+function readEpisode(episodeId){
+
+    const storyId =
+        getStoryId();
+
+    location.href =
+        `reader.html?story=${storyId}&episode=${episodeId}`;
+
+}
+
+
+function openPaidEpisode(
+    episodeId,
+    price
+){
+
+    alert(
+        `Chapter hii inahitaji malipo ya TSh ${Number(price).toLocaleString()}. Mfumo wa malipo utaunganishwa kwenye hatua inayofuata.`
+    );
+
+}
+
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+loadDarkMode();
+
+loadStory();
+
+loadChapters();
+
+</script>
+
+</body>
+</html>
