@@ -752,3 +752,43 @@ if (path === "/register") {
         405
     );
 }
+
+// GET /api/profile/:id
+if (path.startsWith("/profile/")) {
+    const userId = path.split("/")[2];
+
+    if (!userId) {
+        return json({
+            success: false,
+            message: "User ID is required"
+        }, 400);
+    }
+
+    const user = await env.D1.prepare(`
+        SELECT
+            id,
+            username,
+            email,
+            role,
+            status,
+            created_at,
+            updated_at
+        FROM users
+        WHERE id = ?
+        LIMIT 1
+    `)
+    .bind(userId)
+    .first();
+
+    if (!user) {
+        return json({
+            success: false,
+            message: "User not found"
+        }, 404);
+    }
+
+    return json({
+        success: true,
+        user
+    });
+}
