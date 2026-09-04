@@ -3,382 +3,366 @@
 <html lang="sw">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <title>Author Login — Net Simulizi</title>
+<title>Author Login — Net Simulizi</title>
 
-  <style>
-    *{
-      box-sizing:border-box
-    }
+<style>
 
-    body{
-      margin:0;
-      background:#f6f0e5;
-      color:#191713;
-      font-family:Arial,sans-serif;
-      transition:.2s
-    }
+*{
+    box-sizing:border-box
+}
 
-    body.dark{
-      background:#111;
-      color:#eee
-    }
+body{
+    margin:0;
+    background:#f6f0e5;
+    color:#191713;
+    font-family:Arial,sans-serif;
+    transition:.2s
+}
+
+body.dark{
+    background:#111;
+    color:#eee
+}
+
+.top{
+    background:#171512;
+    color:#fff;
+    padding:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center
+}
+
+.logo{
+    color:#d4aa43;
+    font-weight:900;
+    letter-spacing:2px;
+    text-decoration:none
+}
+
+.btn{
+    padding:10px 14px;
+    border-radius:8px;
+    border:1px solid #d4aa43;
+    background:transparent;
+    color:inherit;
+    cursor:pointer
+}
+
+.btn:hover{
+    opacity:.85
+}
+
+.primary{
+    background:#d4aa43;
+    color:#171512;
+    border:0;
+    font-weight:700
+}
+
+.wrap{
+    max-width:1100px;
+    margin:auto;
+    padding:20px;
+    min-height:calc(100vh - 150px);
+    display:flex;
+    align-items:center;
+    justify-content:center
+}
+
+.card{
+    width:100%;
+    max-width:550px;
+    background:#fffdf8;
+    border:1px solid #e4dccd;
+    border-radius:16px;
+    padding:22px
+}
+
+.dark .card{
+    background:#1d1b18;
+    border-color:#38342d
+}
+
+h1{
+    margin-top:0;
+    margin-bottom:8px
+}
+
+.muted{
+    color:#777
+}
+
+.dark .muted{
+    color:#aaa
+}
+
+.form input{
+    width:100%;
+    padding:12px;
+    margin:6px 0 14px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:transparent;
+    color:inherit;
+    outline:none
+}
+
+.dark .form input{
+    border-color:#444
+}
+
+.form input:focus{
+    border-color:#d4aa43
+}
+
+.password-box{
+    position:relative
+}
+
+.password-box input{
+    padding-right:50px
+}
+
+.show-password{
+    position:absolute;
+    right:10px;
+    top:9px;
+    border:0;
+    background:transparent;
+    color:inherit;
+    cursor:pointer;
+    font-size:18px
+}
+
+.login-btn{
+    width:100%;
+    padding:13px;
+    border-radius:8px;
+    cursor:pointer
+}
+
+.login-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed
+}
+
+.message{
+    display:none;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:15px;
+    line-height:1.5;
+    font-size:14px
+}
+
+.message.error{
+    display:block;
+    background:#ffe5e5;
+    border:1px solid #e5aaaa;
+    color:#9b2222
+}
+
+.message.success{
+    display:block;
+    background:#e5f8eb;
+    border:1px solid #a7d9b5;
+    color:#176b32
+}
+
+.dark .message.error{
+    background:#351b1b;
+    color:#ffaaaa;
+    border-color:#653333
+}
+
+.dark .message.success{
+    background:#193221;
+    color:#9be0ad;
+    border-color:#315f3d
+}
+
+.notice{
+    margin-top:18px;
+    padding:14px;
+    border-radius:10px;
+    background:#f4ecdc;
+    border:1px solid #e4d5b9;
+    font-size:13px;
+    line-height:1.6
+}
+
+.dark .notice{
+    background:#25221d;
+    border-color:#484136
+}
+
+.notice strong{
+    color:#a17a21
+}
+
+.dark .notice strong{
+    color:#d4aa43
+}
+
+.links{
+    margin-top:18px;
+    text-align:center;
+    font-size:14px
+}
+
+.links a{
+    color:#a17a21;
+    text-decoration:none;
+    font-weight:700
+}
+
+.dark .links a{
+    color:#d4aa43
+}
+
+.footer{
+    background:#171512;
+    color:#aaa;
+    text-align:center;
+    padding:30px
+}
+
+.footer p{
+    margin:8px 0
+}
+
+@media(max-width:700px){
 
     .top{
-      background:#171512;
-      color:#fff;
-      padding:16px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center
+        padding:13px
     }
 
-    .logo{
-      color:#d4aa43;
-      font-weight:900;
-      letter-spacing:2px;
-      text-decoration:none
-    }
-
-    .btn{
-      padding:10px 14px;
-      border-radius:8px;
-      border:1px solid #d4aa43;
-      background:transparent;
-      color:inherit;
-      cursor:pointer
-    }
-
-    .btn:hover{
-      opacity:.85
-    }
-
-    .primary{
-      background:#d4aa43;
-      color:#171512;
-      border:0;
-      font-weight:700
+    .top .btn{
+        padding:8px 10px
     }
 
     .wrap{
-      max-width:1100px;
-      margin:auto;
-      padding:20px;
-      min-height:calc(100vh - 150px);
-      display:flex;
-      align-items:center;
-      justify-content:center
+        padding:15px
     }
 
-    .card,
-    .hero{
-      background:#fffdf8;
-      border:1px solid #e4dccd;
-      border-radius:16px;
-      padding:22px;
-      margin-bottom:20px
-    }
-
-    .dark .card,
-    .dark .hero{
-      background:#1d1b18;
-      border-color:#38342d
-    }
-
-    .form{
-      width:100%;
-      max-width:550px;
-      margin:auto
+    .card{
+        padding:18px
     }
 
     h1{
-      margin-top:0;
-      margin-bottom:8px
-    }
-
-    .muted{
-      color:#777
-    }
-
-    .dark .muted{
-      color:#aaa
-    }
-
-    .form input,
-    .form textarea,
-    .form select{
-      width:100%;
-      padding:12px;
-      margin:6px 0 14px;
-      border:1px solid #ddd;
-      border-radius:8px;
-      background:transparent;
-      color:inherit;
-      outline:none
-    }
-
-    .dark .form input{
-      border-color:#444
-    }
-
-    .form input:focus{
-      border-color:#d4aa43
-    }
-
-    .password-box{
-      position:relative
-    }
-
-    .password-box input{
-      padding-right:50px
-    }
-
-    .show-password{
-      position:absolute;
-      right:10px;
-      top:9px;
-      border:0;
-      background:transparent;
-      color:inherit;
-      cursor:pointer;
-      font-size:18px
-    }
-
-    .login-btn{
-      width:100%;
-      padding:13px;
-      border-radius:8px;
-      cursor:pointer
-    }
-
-    .login-btn:disabled{
-      opacity:.6;
-      cursor:not-allowed
-    }
-
-    .message{
-      display:none;
-      padding:12px;
-      border-radius:8px;
-      margin-bottom:15px;
-      line-height:1.5;
-      font-size:14px
-    }
-
-    .message.error{
-      display:block;
-      background:#ffe5e5;
-      border:1px solid #e5aaaa;
-      color:#9b2222
-    }
-
-    .message.success{
-      display:block;
-      background:#e5f8eb;
-      border:1px solid #a7d9b5;
-      color:#176b32
-    }
-
-    .dark .message.error{
-      background:#351b1b;
-      color:#ffaaaa;
-      border-color:#653333
-    }
-
-    .dark .message.success{
-      background:#193221;
-      color:#9be0ad;
-      border-color:#315f3d
-    }
-
-    .notice{
-      margin-top:18px;
-      padding:14px;
-      border-radius:10px;
-      background:#f4ecdc;
-      border:1px solid #e4d5b9;
-      font-size:13px;
-      line-height:1.6
-    }
-
-    .dark .notice{
-      background:#25221d;
-      border-color:#484136
-    }
-
-    .notice strong{
-      color:#a17a21
-    }
-
-    .dark .notice strong{
-      color:#d4aa43
-    }
-
-    .links{
-      margin-top:18px;
-      text-align:center;
-      font-size:14px
-    }
-
-    .links a{
-      color:#a17a21;
-      text-decoration:none;
-      font-weight:700
-    }
-
-    .dark .links a{
-      color:#d4aa43
-    }
-
-    .footer{
-      background:#171512;
-      color:#aaa;
-      text-align:center;
-      padding:30px
-    }
-
-    .footer p{
-      margin:8px 0
-    }
-
-    @media(max-width:700px){
-
-      .top{
-        padding:13px
-      }
-
-      .top .btn{
-        padding:8px 10px
-      }
-
-      .wrap{
-        padding:15px
-      }
-
-      .card{
-        padding:18px
-      }
-
-      h1{
         font-size:25px
-      }
     }
-  </style>
+
+}
+
+</style>
 </head>
 
 
 <body>
 
-  <!-- HEADER -->
-
-  <header class="top">
+<header class="top">
 
     <a class="logo" href="index.html">
-      NET SIMULIZI
+        NET SIMULIZI
     </a>
 
     <div>
 
-      <button
-        class="btn"
-        id="darkBtn"
-        type="button"
-      >
-        ◐
-      </button>
+        <button
+            class="btn"
+            id="darkBtn"
+            type="button"
+        >
+            ◐
+        </button>
 
-      <button
-        class="btn"
-        type="button"
-        onclick="location.href='index.html'"
-      >
-        EN/SW
-      </button>
+        <button
+            class="btn"
+            type="button"
+            onclick="location.href='index.html'"
+        >
+            EN/SW
+        </button>
 
     </div>
 
-  </header>
+</header>
 
 
-  <!-- MAIN -->
+<main class="wrap">
 
-  <main class="wrap">
+<section class="card">
 
-    <section class="card form">
+    <h1>Author Login</h1>
 
-      <h1>Author Login</h1>
-
-      <p class="muted">
+    <p class="muted">
         Private author portal.
-      </p>
+    </p>
 
 
-      <!-- MESSAGE -->
-
-      <div
+    <div
         id="message"
         class="message"
-      ></div>
+    ></div>
 
 
-      <!-- LOGIN FORM -->
-
-      <form id="authorLoginForm">
+    <form id="authorLoginForm">
 
         <label for="identifier">
-          Email / Username
+            Email / Username
         </label>
 
         <input
-          id="identifier"
-          type="text"
-          placeholder="Email au Username"
-          autocomplete="username"
-          required
+            id="identifier"
+            type="text"
+            placeholder="Email au Username"
+            autocomplete="username"
+            required
         >
 
 
         <label for="password">
-          Password
+            Password
         </label>
 
         <div class="password-box">
 
-          <input
-            id="password"
-            type="password"
-            placeholder="Password"
-            autocomplete="current-password"
-            required
-          >
+            <input
+                id="password"
+                type="password"
+                placeholder="Password"
+                autocomplete="current-password"
+                required
+            >
 
-          <button
-            type="button"
-            class="show-password"
-            id="showPassword"
-          >
-            👁
-          </button>
+            <button
+                type="button"
+                class="show-password"
+                id="showPassword"
+            >
+                👁
+            </button>
 
         </div>
 
 
         <button
-          class="btn primary login-btn"
-          id="loginBtn"
-          type="submit"
+            class="btn primary login-btn"
+            id="loginBtn"
+            type="submit"
         >
-          Login
+            Login
         </button>
 
-      </form>
+    </form>
 
 
-      <!-- AUTHOR NOTICE -->
-
-      <div class="notice">
+    <div class="notice">
 
         <strong>Author Portal</strong><br>
 
@@ -386,351 +370,366 @@
         Net Simulizi Admin. Huwezi kujisajili kama
         mwandishi kupitia ukurasa huu.
 
-      </div>
+    </div>
 
 
-      <div class="links">
+    <div class="links">
 
         <a href="login.html">
-          ← Rudi kwenye Reader Login
+            ← Rudi kwenye Reader Login
         </a>
 
-      </div>
+    </div>
 
-    </section>
+</section>
 
-  </main>
+</main>
 
 
-  <!-- FOOTER -->
-
-  <footer class="footer">
+<footer class="footer">
 
     <b class="logo">
-      NET SIMULIZI
+        NET SIMULIZI
     </b>
 
     <p>
-      Digital Storytelling Platform
+        Digital Storytelling Platform
     </p>
 
     <p>
-      © 2026 Net Simulizi
+        © 2026 Net Simulizi
     </p>
 
-  </footer>
+</footer>
 
 
-  <script>
+<script>
 
-    /* =========================
-       DARK MODE
-    ========================= */
-
-    const darkBtn =
-      document.getElementById("darkBtn");
-
-    if(localStorage.getItem("netsimulizi_dark") === "1"){
-      document.body.classList.add("dark");
-    }
-
-    darkBtn.addEventListener("click", function(){
-
-      document.body.classList.toggle("dark");
-
-      localStorage.setItem(
-        "netsimulizi_dark",
-        document.body.classList.contains("dark") ? "1" : "0"
-      );
-
-    });
+const API =
+    "https://netsimulizi.pages.dev/api";
 
 
-    /* =========================
-       SHOW PASSWORD
-    ========================= */
+/* =========================
+   DARK MODE
+========================= */
 
-    const passwordInput =
-      document.getElementById("password");
-
-    const showPassword =
-      document.getElementById("showPassword");
-
-    showPassword.addEventListener("click", function(){
-
-      if(passwordInput.type === "password"){
-
-        passwordInput.type = "text";
-        showPassword.textContent = "🙈";
-
-      }else{
-
-        passwordInput.type = "password";
-        showPassword.textContent = "👁";
-
-      }
-
-    });
+const darkBtn =
+    document.getElementById("darkBtn");
 
 
-    /* =========================
-       MESSAGE
-    ========================= */
+if(
+    localStorage.getItem(
+        "netsimulizi_dark"
+    ) === "1"
+){
 
-    const message =
-      document.getElementById("message");
+    document.body.classList.add("dark");
 
-
-    function showMessage(text,type){
-
-      message.textContent = text;
-
-      message.className =
-        "message " + type;
-
-    }
+}
 
 
-    /* =========================
-       AUTHOR LOGIN
-    ========================= */
+darkBtn.addEventListener(
+    "click",
+    function(){
 
-    const form =
-      document.getElementById("authorLoginForm");
-
-    const loginBtn =
-      document.getElementById("loginBtn");
-
-
-    form.addEventListener("submit", async function(event){
-
-      event.preventDefault();
-
-
-      const identifier =
-        document
-          .getElementById("identifier")
-          .value
-          .trim();
-
-      const password =
-        passwordInput.value;
-
-
-      if(!identifier || !password){
-
-        showMessage(
-          "Tafadhali jaza Email/Username na Password.",
-          "error"
+        document.body.classList.toggle(
+            "dark"
         );
 
-        return;
+        localStorage.setItem(
+            "netsimulizi_dark",
+            document.body.classList.contains(
+                "dark"
+            )
+                ? "1"
+                : "0"
+        );
 
-      }
-
-
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Logging in...";
-
-      message.className = "message";
-
-
-      try{
-
-        /*
-         * Tumia API yetu iliyopo
-         */
-
-        const response =
-          await fetch("/api/login",{
-
-            method:"POST",
-
-            headers:{
-              "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify({
-
-              email:identifier,
-              username:identifier,
-              password:password
-
-            })
-
-          });
+    }
+);
 
 
-        let data = {};
+/* =========================
+   SHOW PASSWORD
+========================= */
 
-        try{
+const passwordInput =
+    document.getElementById(
+        "password"
+    );
 
-          data = await response.json();
-
-        }catch(error){
-
-          data = {};
-
-        }
+const showPassword =
+    document.getElementById(
+        "showPassword"
+    );
 
 
-        /*
-         * API error
-         */
+showPassword.addEventListener(
+    "click",
+    function(){
 
-        if(!response.ok){
+        if(
+            passwordInput.type ===
+            "password"
+        ){
 
-          throw new Error(
-            data.error ||
-            data.message ||
-            "Login imeshindikana. Hakikisha taarifa zako ni sahihi."
-          );
+            passwordInput.type =
+                "text";
+
+            showPassword.textContent =
+                "🙈";
+
+        }else{
+
+            passwordInput.type =
+                "password";
+
+            showPassword.textContent =
+                "👁";
 
         }
 
-
-        /*
-         * User information
-         */
-
-        const user =
-          data.user || null;
+    }
+);
 
 
-        if(!user){
+/* =========================
+   MESSAGE
+========================= */
 
-          throw new Error(
-            "Login imefanikiwa lakini taarifa za user hazijapatikana."
-          );
-
-        }
-
-
-        /*
-         * Check author role
-         */
-
-        const role =
-          String(user.role || "")
-            .trim()
-            .toLowerCase();
+const message =
+    document.getElementById(
+        "message"
+    );
 
 
-        if(role !== "author" && role !== "admin"){
+function showMessage(
+    text,
+    type
+){
 
-          localStorage.removeItem(
-            "netsimulizi_user"
-          );
+    message.textContent =
+        text;
 
-          throw new Error(
-            "Akaunti hii haina ruhusa ya kuingia kwenye Author Portal."
-          );
+    message.className =
+        "message " + type;
 
-        }
+}
 
 
-        /*
-         * Check account status
-         */
+/* =========================
+   AUTHOR LOGIN
+========================= */
 
-        const status =
-          String(user.status || "active")
-            .trim()
-            .toLowerCase();
+const form =
+    document.getElementById(
+        "authorLoginForm"
+    );
+
+const loginBtn =
+    document.getElementById(
+        "loginBtn"
+    );
+
+
+form.addEventListener(
+    "submit",
+    async function(event){
+
+        event.preventDefault();
+
+
+        const identifier =
+            document
+                .getElementById(
+                    "identifier"
+                )
+                .value
+                .trim();
+
+
+        const password =
+            passwordInput.value;
 
 
         if(
-          status === "blocked" ||
-          status === "suspended" ||
-          status === "inactive"
+            !identifier ||
+            !password
         ){
 
-          throw new Error(
-            "Akaunti yako ya mwandishi haijawezeshwa kwa sasa."
-          );
+            showMessage(
+                "Tafadhali jaza Email/Username na Password.",
+                "error"
+            );
+
+            return;
 
         }
 
 
-        /*
-         * Save logged-in user
-         */
-
-        localStorage.setItem(
-          "netsimulizi_user",
-          JSON.stringify(user)
-        );
-
-
-        /*
-         * Success
-         */
-
-        showMessage(
-          "Login imefanikiwa. Tunakupeleka kwenye Author Dashboard...",
-          "success"
-        );
-
+        loginBtn.disabled =
+            true;
 
         loginBtn.textContent =
-          "Login successful";
+            "Logging in...";
+
+        message.className =
+            "message";
 
 
-        /*
-         * Redirect
-         */
+        try{
 
-        setTimeout(function(){
+            const response =
+                await fetch(
+                    `${API}/author/login`,
+                    {
+                        method:"POST",
 
-          window.location.href =
-            "author-dashboard.html";
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
 
-        },800);
-
-
-      }catch(error){
-
-        console.error(
-          "Author Login Error:",
-          error
-        );
-
-
-        showMessage(
-          error.message ||
-          "Kuna tatizo wakati wa login. Jaribu tena.",
-          "error"
-        );
+                        body:
+                            JSON.stringify({
+                                login:
+                                    identifier,
+                                password:
+                                    password
+                            })
+                    }
+                );
 
 
-        loginBtn.disabled = false;
-
-        loginBtn.textContent =
-          "Login";
-
-      }
-
-    });
+            let data = {};
 
 
-    /* =========================
-       ENTER KEY
-    ========================= */
+            try{
 
-    passwordInput.addEventListener(
-      "keydown",
-      function(event){
+                data =
+                    await response.json();
 
-        if(event.key === "Enter"){
+            }catch(error){
 
-          form.requestSubmit();
+                data = {};
+
+            }
+
+
+            if(
+                !response.ok ||
+                !data.success
+            ){
+
+                throw new Error(
+                    data.message ||
+                    "Login ya Author imeshindikana."
+                );
+
+            }
+
+
+            const author =
+                data.author;
+
+
+            if(
+                !author ||
+                !author.id
+            ){
+
+                throw new Error(
+                    "Author profile haikupatikana."
+                );
+
+            }
+
+
+            /* CLEAR READER SESSION */
+
+            localStorage.removeItem(
+                "netsimulizi_user"
+            );
+
+
+            /* SAVE AUTHOR SESSION */
+
+            localStorage.setItem(
+                "netsimulizi_author",
+                JSON.stringify(
+                    author
+                )
+            );
+
+
+            showMessage(
+                "Login imefanikiwa. Tunakupeleka kwenye Author Dashboard...",
+                "success"
+            );
+
+
+            loginBtn.textContent =
+                "Login successful";
+
+
+            setTimeout(
+                function(){
+
+                    window.location.href =
+                        "author-dashboard.html";
+
+                },
+                800
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "Author Login Error:",
+                error
+            );
+
+
+            showMessage(
+                error.message ||
+                "Kuna tatizo wakati wa login. Jaribu tena.",
+                "error"
+            );
+
+
+            loginBtn.disabled =
+                false;
+
+            loginBtn.textContent =
+                "Login";
 
         }
 
-      }
-    );
+    }
+);
 
-  </script>
+
+/* =========================
+   ENTER KEY
+========================= */
+
+passwordInput.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key === "Enter"
+        ){
+
+            form.requestSubmit();
+
+        }
+
+    }
+);
+
+</script>
 
 </body>
 </html>
