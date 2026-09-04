@@ -459,7 +459,28 @@ export async function onRequest(context) {
                 );
             }
         }
+     if (path === "/stories-test") {
+    try {
+        const result = await db
+            .prepare("SELECT * FROM stories LIMIT 5")
+            .all();
 
+        return json({
+            success: true,
+            count: (result.results || []).length,
+            stories: result.results || []
+        });
+
+    } catch (error) {
+        return errorResponse(
+            "Stories database test failed",
+            500,
+            {
+                error: error?.message || String(error)
+            }
+        );
+    }
+}
 
         // -------------------------------------------------
         // CATEGORIES / GENRES
