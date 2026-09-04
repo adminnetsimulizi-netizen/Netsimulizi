@@ -317,7 +317,18 @@ const getAdmin = async (db, adminId) => {
     }
 };
 
+const requireAdmin = async (db, adminId) => {
 
+    const admin = await getAdmin(db, adminId);
+
+    if (!admin) {
+        return {
+            ok: false,
+            response: errorResponse(
+                "Admin account not found",
+                404
+            )
+        };
     }
 
     if (
@@ -338,23 +349,6 @@ const getAdmin = async (db, adminId) => {
         admin
     };
 };
-
-const requireAdmin = async (db, adminId) => {
-
-    // ... code yako ya requireAdmin ...
-
-    return {
-        ok: true,
-        admin
-    };
-};
-
-
-// BLOCK MPYA YA /admin/authors/create
-if (path === "/admin/authors/create") {
-
-    // code hapa
-}
 
 // =====================================================
 // MAIN
