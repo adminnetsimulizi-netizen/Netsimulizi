@@ -3735,6 +3735,23 @@ if (path === "/admin/authors/create") {
         );
     }
 }
+
+    // =====================================================
+// ADMIN APPROVE AUTHOR
+// POST /api/admin/authors/approve
+// =====================================================
+
+if (path === "/admin/authors/approve") {
+
+    const adminId =
+        positiveInt(body.admin_id);
+
+    const authorId =
+        positiveInt(body.author_id);
+
+    // ...endelea na code yote ya Approve Author...
+}
+
         
               // -------------------------------------------------
         // ADMIN APPROVE WITHDRAWAL
