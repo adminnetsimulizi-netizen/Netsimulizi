@@ -333,7 +333,7 @@ body.dark{
 
 <script>
 
-const API = "/api";
+const API = "https://netsimulizi.pages.dev/api";
 
 let currentStoryId = 1;
 let currentEpisodeId = 1;
@@ -457,15 +457,15 @@ function getParameters(){
         );
 
 
-    const storyParam =
-        params.get("story") ||
-        params.get("id");
+const storyParam =
+    params.get("story_id") ||
+    params.get("story") ||
+    params.get("id");
 
-
-    const episodeParam =
-        params.get("episode") ||
-        params.get("chapter");
-
+const episodeParam =
+    params.get("chapter_id") ||
+    params.get("episode") ||
+    params.get("chapter");
 
     const story =
         Number(storyParam);
