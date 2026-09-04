@@ -934,12 +934,10 @@ function showLockedEpisode(
             "readerContainer"
         );
 
-
     const price =
         Number(
             episode.price || 0
         );
-
 
     container.innerHTML = `
 
@@ -949,15 +947,11 @@ function showLockedEpisode(
                 🔒
             </div>
 
-
             <h1>
-
                 ${escapeHtml(
                     episode.title
                 )}
-
             </h1>
-
 
             <p class="meta">
 
@@ -965,7 +959,7 @@ function showLockedEpisode(
                     story.title
                 )}
 
-                · CHAPTER
+                · EPISODE
 
                 ${Number(
                     episode.episode_number
@@ -973,11 +967,9 @@ function showLockedEpisode(
 
             </p>
 
-
             <p>
-                Chapter hii inalipiwa.
+                Episode hii inalipiwa ili uweze kuendelea kusoma.
             </p>
-
 
             <p>
 
@@ -989,23 +981,20 @@ function showLockedEpisode(
 
             </p>
 
-
             <br>
-
 
             <button
                 class="btn"
                 onclick="goToChapters()"
             >
-                ← Rudi Chapters
+                ← Rudi Episodes
             </button>
-
 
             <button
                 class="btn primary"
                 onclick="paymentComingSoon()"
             >
-                Fungua Chapter
+                Fungua Episode
             </button>
 
         </div>
