@@ -1791,155 +1791,158 @@ export async function onRequest(context) {
 // AUTHOR LOGIN
 // -------------------------------------------------
 
-if (path === "/author/login") {
+        if (path === "/author/login") {
 
-    const login =
-        cleanString(body.login, 200);
+            const login =
+                cleanString(body.login, 200);
 
-    const password =
-        String(body.password || "");
+            const password =
+                String(body.password || "");
 
-    if (!login) {
-        return errorResponse(
-            "Username or email is required",
-            400
-        );
-    }
-
-    if (!password) {
-        return errorResponse(
-            "Password is required",
-            400
-        );
-    }
-
-    try {
-
-        /*
-         * IMPORTANT:
-         *
-         * Author identity = authors.id
-         *
-         * Current database still uses:
-         * authors.user_id -> users.id
-         *
-         * Hii ni compatibility ya database yetu
-         * ya sasa. Haitabadilisha Reader structure.
-         */
-
-        const author =
-            await db
-                .prepare(`
-                    SELECT
-                        authors.id,
-                        authors.user_id,
-                        authors.display_name,
-                        authors.bio,
-                        authors.avatar_url,
-                        authors.status AS author_status,
-
-                        users.username,
-                        users.email,
-                        users.password_hash,
-                        users.status AS user_status
-
-                    FROM authors
-
-                    INNER JOIN users
-                        ON authors.user_id = users.id
-
-                    WHERE
-                        users.username = ?
-                        OR users.email = ?
-
-                    LIMIT 1
-                `)
-                .bind(
-                    login,
-                    login.toLowerCase()
-                )
-                .first();
-
-        if (!author) {
-            return errorResponse(
-                "Invalid author username/email or password",
-                401
-            );
-        }
-
-        if (
-            author.user_status &&
-            String(author.user_status).toLowerCase() !== "active"
-        ) {
-            return errorResponse(
-                "Author account is not active",
-                403
-            );
-        }
-
-        if (
-            author.author_status &&
-            String(author.author_status).toLowerCase() !== "active"
-        ) {
-            return errorResponse(
-                "Author account is not active",
-                403
-            );
-        }
-
-        const validPassword =
-            await verifyPassword(
-                password,
-                author.password_hash
-            );
-
-        if (!validPassword) {
-            return errorResponse(
-                "Invalid author username/email or password",
-                401
-            );
-        }
-
-        return json({
-            success: true,
-
-            message:
-                "Author login successful",
-
-            author: {
-                id: author.id,
-                user_id: author.user_id,
-                username: author.username,
-                email: author.email,
-                display_name: author.display_name,
-                bio: author.bio,
-                avatar_url: author.avatar_url,
-                status:
-                    author.author_status ||
-                    author.user_status ||
-                    "active"
+            if (!login) {
+                return errorResponse(
+                    "Username or email is required",
+                    400
+                );
             }
-        });
 
-    } catch (error) {
-
-        console.error(
-            "Author login error:",
-            error
-        );
-
-        return errorResponse(
-            "Author login failed",
-            500,
-            {
-                error:
-                    error?.message ||
-                    String(error)
+            if (!password) {
+                return errorResponse(
+                    "Password is required",
+                    400
+                );
             }
-        );
-    }
-}
 
+            try {
+
+                /*
+                 * Author identity = authors.id
+                 *
+                 * Current database:
+                 * authors.user_id -> users.id
+                 */
+
+                const author =
+                    await db
+                        .prepare(`
+                            SELECT
+                                authors.id,
+                                authors.user_id,
+                                authors.display_name,
+                                authors.bio,
+                                authors.avatar_url,
+                                authors.approval_status,
+
+                                users.username,
+                                users.email,
+                                users.password_hash,
+                                users.status AS user_status
+
+                            FROM authors
+
+                            INNER JOIN users
+                                ON authors.user_id = users.id
+
+                            WHERE
+                                users.username = ?
+                                OR users.email = ?
+
+                            LIMIT 1
+                        `)
+                        .bind(
+                            login,
+                            login.toLowerCase()
+                        )
+                        .first();
+
+                if (!author) {
+                    return errorResponse(
+                        "Invalid author username/email or password",
+                        401
+                    );
+                }
+
+                if (
+                    author.user_status &&
+                    String(author.user_status).toLowerCase() !== "active"
+                ) {
+                    return errorResponse(
+                        "Author account is not active",
+                        403
+                    );
+                }
+
+                /*
+                 * Author must be approved before login.
+                 *
+                 * Test Author currently has:
+                 * approval_status = pending
+                 *
+                 * Therefore it will correctly return
+                 * the pending message until approved.
+                 */
+
+                if (
+                    author.approval_status &&
+                    String(author.approval_status).toLowerCase() !== "approved"
+                ) {
+                    return errorResponse(
+                        "Author account is pending approval",
+                        403
+                    );
+                }
+
+                const validPassword =
+                    await verifyPassword(
+                        password,
+                        author.password_hash
+                    );
+
+                if (!validPassword) {
+                    return errorResponse(
+                        "Invalid author username/email or password",
+                        401
+                    );
+                }
+
+                return json({
+                    success: true,
+
+                    message:
+                        "Author login successful",
+
+                    author: {
+                        id: author.id,
+                        user_id: author.user_id,
+                        username: author.username,
+                        email: author.email,
+                        display_name: author.display_name,
+                        bio: author.bio,
+                        avatar_url: author.avatar_url,
+                        approval_status:
+                            author.approval_status ||
+                            "approved"
+                    }
+                });
+
+            } catch (error) {
+
+                console.error(
+                    "Author login error:",
+                    error
+                );
+
+                return errorResponse(
+                    "Author login failed",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
         // -------------------------------------------------
         // READER REGISTER
         // -------------------------------------------------
