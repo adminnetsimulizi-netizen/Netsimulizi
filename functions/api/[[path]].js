@@ -1933,7 +1933,8 @@ export async function onRequest(context) {
                 );
 
                 return errorResponse(
-                    "Author login failed",
+                    error?.message ||
+                    String(error),
                     500,
                     {
                         error:
