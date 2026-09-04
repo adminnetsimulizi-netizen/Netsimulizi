@@ -1806,20 +1806,20 @@ this.value
 
 }
 
-function startReading(storyId){
+ffunction startReading(storyId){
 
-if(!storyId){
+    if(!storyId){
 
-return;
+        return;
+
+    }
+
+    location.href =
+        "reader.html?story_id=" +
+        encodeURIComponent(storyId) +
+        "&chapter_id=1";
 
 }
-
-location.href =
-"chapters.html?id=" +
-encodeURIComponent(storyId);
-
-}
-
 async function saveBookmark(storyId){
 
 const rawUser =
