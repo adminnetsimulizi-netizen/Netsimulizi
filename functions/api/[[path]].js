@@ -1787,6 +1787,158 @@ export async function onRequest(context) {
             );
         }
 
+     // -------------------------------------------------
+// AUTHOR LOGIN
+// -------------------------------------------------
+
+if (path === "/author/login") {
+
+    const login =
+        cleanString(body.login, 200);
+
+    const password =
+        String(body.password || "");
+
+    if (!login) {
+        return errorResponse(
+            "Username or email is required",
+            400
+        );
+    }
+
+    if (!password) {
+        return errorResponse(
+            "Password is required",
+            400
+        );
+    }
+
+    try {
+
+        /*
+         * IMPORTANT:
+         *
+         * Author identity = authors.id
+         *
+         * Current database still uses:
+         * authors.user_id -> users.id
+         *
+         * Hii ni compatibility ya database yetu
+         * ya sasa. Haitabadilisha Reader structure.
+         */
+
+        const author =
+            await db
+                .prepare(`
+                    SELECT
+                        authors.id,
+                        authors.user_id,
+                        authors.display_name,
+                        authors.bio,
+                        authors.avatar_url,
+                        authors.status AS author_status,
+
+                        users.username,
+                        users.email,
+                        users.password_hash,
+                        users.status AS user_status
+
+                    FROM authors
+
+                    INNER JOIN users
+                        ON authors.user_id = users.id
+
+                    WHERE
+                        users.username = ?
+                        OR users.email = ?
+
+                    LIMIT 1
+                `)
+                .bind(
+                    login,
+                    login.toLowerCase()
+                )
+                .first();
+
+        if (!author) {
+            return errorResponse(
+                "Invalid author username/email or password",
+                401
+            );
+        }
+
+        if (
+            author.user_status &&
+            String(author.user_status).toLowerCase() !== "active"
+        ) {
+            return errorResponse(
+                "Author account is not active",
+                403
+            );
+        }
+
+        if (
+            author.author_status &&
+            String(author.author_status).toLowerCase() !== "active"
+        ) {
+            return errorResponse(
+                "Author account is not active",
+                403
+            );
+        }
+
+        const validPassword =
+            await verifyPassword(
+                password,
+                author.password_hash
+            );
+
+        if (!validPassword) {
+            return errorResponse(
+                "Invalid author username/email or password",
+                401
+            );
+        }
+
+        return json({
+            success: true,
+
+            message:
+                "Author login successful",
+
+            author: {
+                id: author.id,
+                user_id: author.user_id,
+                username: author.username,
+                email: author.email,
+                display_name: author.display_name,
+                bio: author.bio,
+                avatar_url: author.avatar_url,
+                status:
+                    author.author_status ||
+                    author.user_status ||
+                    "active"
+            }
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Author login error:",
+            error
+        );
+
+        return errorResponse(
+            "Author login failed",
+            500,
+            {
+                error:
+                    error?.message ||
+                    String(error)
+            }
+        );
+    }
+}
 
         // -------------------------------------------------
         // READER REGISTER
@@ -2977,145 +3129,7 @@ export async function onRequest(context) {
         // AUTHOR WITHDRAWAL
         // -------------------------------------------------
 
-        if (path === "/withdrawals") {
-
-            const authorId =
-                positiveInt(
-                    body.author_id ||
-                    body.user_id
-                );
-
-            const amount =
-                Number(body.amount);
-
-            const methodName =
-                cleanString(body.method, 100);
-
-            const accountName =
-                cleanString(
-                    body.account_name,
-                    200
-                );
-
-            const accountNumber =
-                cleanString(
-                    body.account_number,
-                    200
-                );
-
-            if (!authorId) {
-                return errorResponse(
-                    "Author ID is required",
-                    400
-                );
-            }
-
-            if (
-                !Number.isFinite(amount) ||
-                amount <= 0
-            ) {
-                return errorResponse(
-                    "Invalid withdrawal amount",
-                    400
-                );
-            }
-
-            if (amount < 50000) {
-                return errorResponse(
-                    "Minimum withdrawal is TSh 50,000",
-                    400
-                );
-            }
-
-            const author =
-                await getAuthor(db, authorId);
-
-            if (!author) {
-                return errorResponse(
-                    "Author profile not found",
-                    404
-                );
-            }
-
-            try {
-
-                const balance =
-                    await db
-                        .prepare(`
-                            SELECT
-                                COALESCE(
-                                    SUM(author_amount),
-                                    0
-                                ) AS balance
-                            FROM author_earnings
-                            WHERE author_id = ?
-                            AND status = 'available'
-                        `)
-                        .bind(author.id)
-                        .first();
-
-                const available =
-                    Number(
-                        balance?.balance || 0
-                    );
-
-                if (available < amount) {
-                    return errorResponse(
-                        "Insufficient available balance",
-                        400,
-                        {
-                            available_balance:
-                                available
-                        }
-                    );
-                }
-
-                const result =
-                    await db
-                        .prepare(`
-                            INSERT INTO withdrawals (
-                                author_id,
-                                amount,
-                                method,
-                                account_name,
-                                account_number,
-                                status
-                            )
-                            VALUES (
-                                ?, ?, ?, ?, ?, 'pending'
-                            )
-                        `)
-                        .bind(
-                            author.id,
-                            amount,
-                            methodName,
-                            accountName,
-                            accountNumber
-                        )
-                        .run();
-
-                return json({
-                    success: true,
-                    message:
-                        "Withdrawal request submitted",
-                    withdrawal_id:
-                        result.meta.last_row_id,
-                    amount,
-                    status: "pending"
-                }, 201);
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Failed to submit withdrawal",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
-        }
-
-
-        // -------------------------------------------------
+             // -------------------------------------------------
         // ADMIN APPROVE WITHDRAWAL
         // -------------------------------------------------
 
@@ -3164,7 +3178,7 @@ export async function onRequest(context) {
                 }
 
                 if (
-                    withdrawal.status !==
+                    String(withdrawal.status).toLowerCase() !==
                     "pending"
                 ) {
                     return errorResponse(
@@ -3173,26 +3187,109 @@ export async function onRequest(context) {
                     );
                 }
 
-                let remaining =
-                    Number(
-                        withdrawal.amount || 0
+                const withdrawalAmount =
+                    Number(withdrawal.amount || 0);
+
+                if (
+                    !Number.isFinite(withdrawalAmount) ||
+                    withdrawalAmount <= 0
+                ) {
+                    return errorResponse(
+                        "Invalid withdrawal amount",
+                        400
                     );
+                }
+
+
+                // -------------------------------------------------
+                // GET AVAILABLE EARNINGS FIRST
+                // IMPORTANT:
+                // Hakuna earning itabadilishwa kabla ya
+                // kuhakikisha balance inatosha.
+                // -------------------------------------------------
+
+                const balance =
+                    await db
+                        .prepare(`
+                            SELECT
+                                COALESCE(
+                                    SUM(author_amount),
+                                    0
+                                ) AS available
+                            FROM author_earnings
+                            WHERE author_id = ?
+                            AND status = 'available'
+                        `)
+                        .bind(withdrawal.author_id)
+                        .first();
+
+                const available =
+                    Number(balance?.available || 0);
+
+
+                if (available < withdrawalAmount) {
+
+                    return errorResponse(
+                        "Insufficient available earnings",
+                        400,
+                        {
+                            available_balance: available,
+                            withdrawal_amount:
+                                withdrawalAmount
+                        }
+                    );
+                }
+
+
+                // -------------------------------------------------
+                // GET AVAILABLE EARNINGS
+                // Oldest earnings are consumed first.
+                // -------------------------------------------------
 
                 const earnings =
                     await db
                         .prepare(`
                             SELECT
                                 id,
-                                author_amount
+                                author_id,
+                                story_id,
+                                episode_id,
+                                source_type,
+                                gross_amount,
+                                author_amount,
+                                platform_amount
                             FROM author_earnings
                             WHERE author_id = ?
                             AND status = 'available'
-                            ORDER BY created_at ASC
+                            AND author_amount > 0
+                            ORDER BY created_at ASC, id ASC
                         `)
-                        .bind(
-                            withdrawal.author_id
-                        )
+                        .bind(withdrawal.author_id)
                         .all();
+
+
+                let remaining =
+                    withdrawalAmount;
+
+                const statements = [];
+
+
+                // -------------------------------------------------
+                // CONSUME EARNINGS
+                //
+                // Kama earning moja ni kubwa kuliko kiasi
+                // kinachohitajika, tunaigawa.
+                //
+                // Mfano:
+                // earning = 100,000
+                // withdrawal = 50,000
+                //
+                // earning iliyopo:
+                // 50,000 available
+                //
+                // earning mpya:
+                // 50,000 paid
+                // -------------------------------------------------
 
                 for (
                     const earning
@@ -3208,51 +3305,219 @@ export async function onRequest(context) {
                             earning.author_amount || 0
                         );
 
-                    if (earningAmount <= 0) {
+                    if (
+                        !Number.isFinite(earningAmount) ||
+                        earningAmount <= 0
+                    ) {
                         continue;
                     }
 
-                    /*
-                     * Preserve the existing earning model.
-                     *
-                     * An earning is marked paid once used
-                     * for an approved withdrawal.
-                     */
 
-                    await db
-                        .prepare(`
-                            UPDATE author_earnings
-                            SET status = 'paid'
-                            WHERE id = ?
-                        `)
-                        .bind(earning.id)
-                        .run();
+                    const consume =
+                        Math.min(
+                            remaining,
+                            earningAmount
+                        );
 
-                    remaining -= earningAmount;
+
+                    // ---------------------------------------------
+                    // EARNING INATUMIKA YOTE
+                    // ---------------------------------------------
+
+                    if (
+                        consume >= earningAmount
+                    ) {
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    UPDATE author_earnings
+                                    SET status = 'paid'
+                                    WHERE id = ?
+                                    AND status = 'available'
+                                `)
+                                .bind(earning.id)
+                        );
+
+                    }
+
+                    // ---------------------------------------------
+                    // EARNING INATUMIKA SEHEMU TU
+                    // ---------------------------------------------
+
+                    else {
+
+                        const ratio =
+                            consume /
+                            earningAmount;
+
+
+                        const grossAmount =
+                            Number(
+                                earning.gross_amount || 0
+                            );
+
+                        const platformAmount =
+                            Number(
+                                earning.platform_amount || 0
+                            );
+
+
+                        const paidGross =
+                            Math.round(
+                                grossAmount *
+                                ratio *
+                                100
+                            ) / 100;
+
+                        const paidPlatform =
+                            Math.round(
+                                platformAmount *
+                                ratio *
+                                100
+                            ) / 100;
+
+
+                        const remainingGross =
+                            Math.round(
+                                (
+                                    grossAmount -
+                                    paidGross
+                                ) *
+                                100
+                            ) / 100;
+
+                        const remainingPlatform =
+                            Math.round(
+                                (
+                                    platformAmount -
+                                    paidPlatform
+                                ) *
+                                100
+                            ) / 100;
+
+                        const remainingAuthor =
+                            Math.round(
+                                (
+                                    earningAmount -
+                                    consume
+                                ) *
+                                100
+                            ) / 100;
+
+
+                        // Keep the unused balance on the
+                        // original earning row.
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    UPDATE author_earnings
+                                    SET
+                                        gross_amount = ?,
+                                        author_amount = ?,
+                                        platform_amount = ?
+                                    WHERE id = ?
+                                    AND status = 'available'
+                                `)
+                                .bind(
+                                    remainingGross,
+                                    remainingAuthor,
+                                    remainingPlatform,
+                                    earning.id
+                                )
+                        );
+
+
+                        // Create the consumed part
+                        // as a separate paid earning.
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    INSERT INTO author_earnings (
+                                        author_id,
+                                        story_id,
+                                        episode_id,
+                                        source_type,
+                                        gross_amount,
+                                        author_amount,
+                                        platform_amount,
+                                        status
+                                    )
+                                    VALUES (
+                                        ?, ?, ?, ?, ?, ?, ?, 'paid'
+                                    )
+                                `)
+                                .bind(
+                                    earning.author_id,
+                                    earning.story_id,
+                                    earning.episode_id,
+                                    earning.source_type,
+                                    paidGross,
+                                    consume,
+                                    paidPlatform
+                                )
+                        );
+                    }
+
+
+                    remaining =
+                        Math.round(
+                            (
+                                remaining -
+                                consume
+                            ) *
+                            100
+                        ) / 100;
                 }
+
+
+                // Safety check.
+                // Hii haipaswi kutokea kwa sababu
+                // tulishafanya balance check juu.
 
                 if (remaining > 0) {
                     return errorResponse(
-                        "Insufficient available earnings",
-                        400
+                        "Unable to allocate earnings for this withdrawal",
+                        400,
+                        {
+                            remaining_amount:
+                                remaining
+                        }
                     );
                 }
 
-                await db
-                    .prepare(`
-                        UPDATE withdrawals
-                        SET
-                            status = 'approved',
-                            processed_by = ?,
-                            processed_at = CURRENT_TIMESTAMP,
-                            updated_at = CURRENT_TIMESTAMP
-                        WHERE id = ?
-                    `)
-                    .bind(
-                        adminId,
-                        withdrawalId
-                    )
-                    .run();
+
+                // -------------------------------------------------
+                // APPROVE WITHDRAWAL
+                // -------------------------------------------------
+
+                statements.push(
+                    db
+                        .prepare(`
+                            UPDATE withdrawals
+                            SET
+                                status = 'approved',
+                                processed_by = ?,
+                                processed_at = CURRENT_TIMESTAMP,
+                                updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                            AND status = 'pending'
+                        `)
+                        .bind(
+                            adminId,
+                            withdrawalId
+                        )
+                );
+
+
+                // -------------------------------------------------
+                // EXECUTE ALL ACCOUNTING CHANGES TOGETHER
+                // -------------------------------------------------
+
+                await db.batch(statements);
+
 
                 return json({
                     success: true,
@@ -3260,19 +3525,451 @@ export async function onRequest(context) {
                         "Withdrawal approved",
                     withdrawal_id:
                         withdrawalId,
-                    status: "approved"
+                    amount:
+                        withdrawalAmount,
+                    status:
+                        "approved"
                 });
 
             } catch (error) {
 
+                console.error(
+                    "Approve withdrawal error:",
+                    error
+                );
+
                 return errorResponse(
                     "Failed to approve withdrawal",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
+              // -------------------------------------------------
+        // ADMIN APPROVE WITHDRAWAL
+        // -------------------------------------------------
+
+        if (
+            path === "/admin/withdrawals/approve"
+        ) {
+
+            const adminId =
+                positiveInt(body.admin_id);
+
+            const withdrawalId =
+                positiveInt(body.withdrawal_id);
+
+            const auth =
+                await requireAdmin(db, adminId);
+
+            if (!auth.ok) {
+                return auth.response;
+            }
+
+            if (!withdrawalId) {
+                return errorResponse(
+                    "Invalid withdrawal ID",
+                    400
+                );
+            }
+
+            try {
+
+                const withdrawal =
+                    await db
+                        .prepare(`
+                            SELECT *
+                            FROM withdrawals
+                            WHERE id = ?
+                            LIMIT 1
+                        `)
+                        .bind(withdrawalId)
+                        .first();
+
+                if (!withdrawal) {
+                    return errorResponse(
+                        "Withdrawal not found",
+                        404
+                    );
+                }
+
+                if (
+                    String(withdrawal.status).toLowerCase() !==
+                    "pending"
+                ) {
+                    return errorResponse(
+                        "Withdrawal is not pending",
+                        409
+                    );
+                }
+
+                const withdrawalAmount =
+                    Number(withdrawal.amount || 0);
+
+                if (
+                    !Number.isFinite(withdrawalAmount) ||
+                    withdrawalAmount <= 0
+                ) {
+                    return errorResponse(
+                        "Invalid withdrawal amount",
+                        400
+                    );
+                }
+
+
+                // -------------------------------------------------
+                // GET AVAILABLE EARNINGS FIRST
+                // IMPORTANT:
+                // Hakuna earning itabadilishwa kabla ya
+                // kuhakikisha balance inatosha.
+                // -------------------------------------------------
+
+                const balance =
+                    await db
+                        .prepare(`
+                            SELECT
+                                COALESCE(
+                                    SUM(author_amount),
+                                    0
+                                ) AS available
+                            FROM author_earnings
+                            WHERE author_id = ?
+                            AND status = 'available'
+                        `)
+                        .bind(withdrawal.author_id)
+                        .first();
+
+                const available =
+                    Number(balance?.available || 0);
+
+
+                if (available < withdrawalAmount) {
+
+                    return errorResponse(
+                        "Insufficient available earnings",
+                        400,
+                        {
+                            available_balance: available,
+                            withdrawal_amount:
+                                withdrawalAmount
+                        }
+                    );
+                }
+
+
+                // -------------------------------------------------
+                // GET AVAILABLE EARNINGS
+                // Oldest earnings are consumed first.
+                // -------------------------------------------------
+
+                const earnings =
+                    await db
+                        .prepare(`
+                            SELECT
+                                id,
+                                author_id,
+                                story_id,
+                                episode_id,
+                                source_type,
+                                gross_amount,
+                                author_amount,
+                                platform_amount
+                            FROM author_earnings
+                            WHERE author_id = ?
+                            AND status = 'available'
+                            AND author_amount > 0
+                            ORDER BY created_at ASC, id ASC
+                        `)
+                        .bind(withdrawal.author_id)
+                        .all();
+
+
+                let remaining =
+                    withdrawalAmount;
+
+                const statements = [];
+
+
+                // -------------------------------------------------
+                // CONSUME EARNINGS
+                //
+                // Kama earning moja ni kubwa kuliko kiasi
+                // kinachohitajika, tunaigawa.
+                //
+                // Mfano:
+                // earning = 100,000
+                // withdrawal = 50,000
+                //
+                // earning iliyopo:
+                // 50,000 available
+                //
+                // earning mpya:
+                // 50,000 paid
+                // -------------------------------------------------
+
+                for (
+                    const earning
+                    of (earnings.results || [])
+                ) {
+
+                    if (remaining <= 0) {
+                        break;
+                    }
+
+                    const earningAmount =
+                        Number(
+                            earning.author_amount || 0
+                        );
+
+                    if (
+                        !Number.isFinite(earningAmount) ||
+                        earningAmount <= 0
+                    ) {
+                        continue;
+                    }
+
+
+                    const consume =
+                        Math.min(
+                            remaining,
+                            earningAmount
+                        );
+
+
+                    // ---------------------------------------------
+                    // EARNING INATUMIKA YOTE
+                    // ---------------------------------------------
+
+                    if (
+                        consume >= earningAmount
+                    ) {
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    UPDATE author_earnings
+                                    SET status = 'paid'
+                                    WHERE id = ?
+                                    AND status = 'available'
+                                `)
+                                .bind(earning.id)
+                        );
+
+                    }
+
+                    // ---------------------------------------------
+                    // EARNING INATUMIKA SEHEMU TU
+                    // ---------------------------------------------
+
+                    else {
+
+                        const ratio =
+                            consume /
+                            earningAmount;
+
+
+                        const grossAmount =
+                            Number(
+                                earning.gross_amount || 0
+                            );
+
+                        const platformAmount =
+                            Number(
+                                earning.platform_amount || 0
+                            );
+
+
+                        const paidGross =
+                            Math.round(
+                                grossAmount *
+                                ratio *
+                                100
+                            ) / 100;
+
+                        const paidPlatform =
+                            Math.round(
+                                platformAmount *
+                                ratio *
+                                100
+                            ) / 100;
+
+
+                        const remainingGross =
+                            Math.round(
+                                (
+                                    grossAmount -
+                                    paidGross
+                                ) *
+                                100
+                            ) / 100;
+
+                        const remainingPlatform =
+                            Math.round(
+                                (
+                                    platformAmount -
+                                    paidPlatform
+                                ) *
+                                100
+                            ) / 100;
+
+                        const remainingAuthor =
+                            Math.round(
+                                (
+                                    earningAmount -
+                                    consume
+                                ) *
+                                100
+                            ) / 100;
+
+
+                        // Keep the unused balance on the
+                        // original earning row.
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    UPDATE author_earnings
+                                    SET
+                                        gross_amount = ?,
+                                        author_amount = ?,
+                                        platform_amount = ?
+                                    WHERE id = ?
+                                    AND status = 'available'
+                                `)
+                                .bind(
+                                    remainingGross,
+                                    remainingAuthor,
+                                    remainingPlatform,
+                                    earning.id
+                                )
+                        );
+
+
+                        // Create the consumed part
+                        // as a separate paid earning.
+
+                        statements.push(
+                            db
+                                .prepare(`
+                                    INSERT INTO author_earnings (
+                                        author_id,
+                                        story_id,
+                                        episode_id,
+                                        source_type,
+                                        gross_amount,
+                                        author_amount,
+                                        platform_amount,
+                                        status
+                                    )
+                                    VALUES (
+                                        ?, ?, ?, ?, ?, ?, ?, 'paid'
+                                    )
+                                `)
+                                .bind(
+                                    earning.author_id,
+                                    earning.story_id,
+                                    earning.episode_id,
+                                    earning.source_type,
+                                    paidGross,
+                                    consume,
+                                    paidPlatform
+                                )
+                        );
+                    }
+
+
+                    remaining =
+                        Math.round(
+                            (
+                                remaining -
+                                consume
+                            ) *
+                            100
+                        ) / 100;
+                }
+
+
+                // Safety check.
+                // Hii haipaswi kutokea kwa sababu
+                // tulishafanya balance check juu.
+
+                if (remaining > 0) {
+                    return errorResponse(
+                        "Unable to allocate earnings for this withdrawal",
+                        400,
+                        {
+                            remaining_amount:
+                                remaining
+                        }
+                    );
+                }
+
+
+                // -------------------------------------------------
+                // APPROVE WITHDRAWAL
+                // -------------------------------------------------
+
+                statements.push(
+                    db
+                        .prepare(`
+                            UPDATE withdrawals
+                            SET
+                                status = 'approved',
+                                processed_by = ?,
+                                processed_at = CURRENT_TIMESTAMP,
+                                updated_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                            AND status = 'pending'
+                        `)
+                        .bind(
+                            adminId,
+                            withdrawalId
+                        )
+                );
+
+
+                // -------------------------------------------------
+                // EXECUTE ALL ACCOUNTING CHANGES TOGETHER
+                // -------------------------------------------------
+
+                await db.batch(statements);
+
+
+                return json({
+                    success: true,
+                    message:
+                        "Withdrawal approved",
+                    withdrawal_id:
+                        withdrawalId,
+                    amount:
+                        withdrawalAmount,
+                    status:
+                        "approved"
+                });
+
+            } catch (error) {
+
+                console.error(
+                    "Approve withdrawal error:",
+                    error
+                );
+
+                return errorResponse(
+                    "Failed to approve withdrawal",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
 
         // -------------------------------------------------
         // ADMIN REJECT WITHDRAWAL
