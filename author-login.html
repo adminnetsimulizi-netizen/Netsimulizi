@@ -10,21 +10,52 @@
 
 <style>
 
+```css
 *{
-    box-sizing:border-box
+    box-sizing:border-box;
+}
+
+html{
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
 }
 
 body{
     margin:0;
     background:#f6f0e5;
     color:#191713;
-    font-family:Arial,sans-serif;
-    transition:.2s
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size:16px;
+    line-height:1.5;
+
+    transition:.2s;
+}
+
+/* Make all form controls use the same font */
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+    font-size:inherit;
+}
+
+button{
+    -webkit-font-smoothing:antialiased;
 }
 
 body.dark{
     background:#111;
-    color:#eee
+    color:#eee;
 }
 
 .top{
@@ -33,14 +64,18 @@ body.dark{
     padding:16px;
     display:flex;
     justify-content:space-between;
-    align-items:center
+    align-items:center;
 }
 
 .logo{
     color:#d4aa43;
-    font-weight:900;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    font-weight:700;
     letter-spacing:2px;
-    text-decoration:none
+    text-decoration:none;
 }
 
 .btn{
@@ -49,18 +84,20 @@ body.dark{
     border:1px solid #d4aa43;
     background:transparent;
     color:inherit;
-    cursor:pointer
+    cursor:pointer;
+    font-family:inherit;
+    font-weight:600;
 }
 
 .btn:hover{
-    opacity:.85
+    opacity:.85;
 }
 
 .primary{
     background:#d4aa43;
     color:#171512;
     border:0;
-    font-weight:700
+    font-weight:700;
 }
 
 .wrap{
@@ -70,7 +107,7 @@ body.dark{
     min-height:calc(100vh - 150px);
     display:flex;
     align-items:center;
-    justify-content:center
+    justify-content:center;
 }
 
 .card{
@@ -79,28 +116,38 @@ body.dark{
     background:#fffdf8;
     border:1px solid #e4dccd;
     border-radius:16px;
-    padding:22px
+    padding:22px;
 }
 
 .dark .card{
     background:#1d1b18;
-    border-color:#38342d
+    border-color:#38342d;
 }
 
 h1{
     margin-top:0;
-    margin-bottom:8px
+    margin-bottom:8px;
+    font-family:inherit;
+    font-weight:700;
+    line-height:1.2;
 }
 
 .muted{
-    color:#777
+    color:#777;
 }
 
 .dark .muted{
-    color:#aaa
+    color:#aaa;
 }
 
-.form input{
+form label{
+    display:block;
+    margin-bottom:4px;
+    font-weight:600;
+}
+
+.form input,
+input{
     width:100%;
     padding:12px;
     margin:6px 0 14px;
@@ -108,46 +155,60 @@ h1{
     border-radius:8px;
     background:transparent;
     color:inherit;
-    outline:none
+    outline:none;
+    font-family:inherit;
 }
 
-.dark .form input{
-    border-color:#444
+.dark .form input,
+.dark input{
+    border-color:#444;
 }
 
-.form input:focus{
-    border-color:#d4aa43
+.form input:focus,
+input:focus{
+    border-color:#d4aa43;
 }
 
 .password-box{
-    position:relative
+    position:relative;
 }
 
 .password-box input{
-    padding-right:50px
+    padding-right:50px;
 }
 
 .show-password{
     position:absolute;
     right:10px;
     top:9px;
+    width:34px;
+    height:34px;
+    padding:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
     border:0;
     background:transparent;
     color:inherit;
     cursor:pointer;
-    font-size:18px
+
+    font-family:Arial,sans-serif;
+    font-size:18px;
+    line-height:1;
 }
 
 .login-btn{
     width:100%;
     padding:13px;
     border-radius:8px;
-    cursor:pointer
+    cursor:pointer;
 }
 
 .login-btn:disabled{
     opacity:.6;
-    cursor:not-allowed
+    cursor:not-allowed;
 }
 
 .message{
@@ -156,33 +217,33 @@ h1{
     border-radius:8px;
     margin-bottom:15px;
     line-height:1.5;
-    font-size:14px
+    font-size:14px;
 }
 
 .message.error{
     display:block;
     background:#ffe5e5;
     border:1px solid #e5aaaa;
-    color:#9b2222
+    color:#9b2222;
 }
 
 .message.success{
     display:block;
     background:#e5f8eb;
     border:1px solid #a7d9b5;
-    color:#176b32
+    color:#176b32;
 }
 
 .dark .message.error{
     background:#351b1b;
     color:#ffaaaa;
-    border-color:#653333
+    border-color:#653333;
 }
 
 .dark .message.success{
     background:#193221;
     color:#9be0ad;
-    border-color:#315f3d
+    border-color:#315f3d;
 }
 
 .notice{
@@ -192,72 +253,73 @@ h1{
     background:#f4ecdc;
     border:1px solid #e4d5b9;
     font-size:13px;
-    line-height:1.6
+    line-height:1.6;
 }
 
 .dark .notice{
     background:#25221d;
-    border-color:#484136
+    border-color:#484136;
 }
 
 .notice strong{
-    color:#a17a21
+    color:#a17a21;
 }
 
 .dark .notice strong{
-    color:#d4aa43
+    color:#d4aa43;
 }
 
 .links{
     margin-top:18px;
     text-align:center;
-    font-size:14px
+    font-size:14px;
 }
 
 .links a{
     color:#a17a21;
     text-decoration:none;
-    font-weight:700
+    font-weight:700;
 }
 
 .dark .links a{
-    color:#d4aa43
+    color:#d4aa43;
 }
 
 .footer{
     background:#171512;
     color:#aaa;
     text-align:center;
-    padding:30px
+    padding:30px;
 }
 
 .footer p{
-    margin:8px 0
+    margin:8px 0;
 }
 
 @media(max-width:700px){
 
     .top{
-        padding:13px
+        padding:13px;
     }
 
     .top .btn{
-        padding:8px 10px
+        padding:8px 10px;
     }
 
     .wrap{
-        padding:15px
+        padding:15px;
     }
 
     .card{
-        padding:18px
+        padding:18px;
     }
 
     h1{
-        font-size:25px
+        font-size:25px;
     }
 
 }
+```
 
 </style>
 </head>
