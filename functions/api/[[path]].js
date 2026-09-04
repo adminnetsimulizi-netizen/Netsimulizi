@@ -317,18 +317,7 @@ const getAdmin = async (db, adminId) => {
     }
 };
 
-const requireAdmin = async (db, adminId) => {
 
-    const admin = await getAdmin(db, adminId);
-
-    if (!admin) {
-        return {
-            ok: false,
-            response: errorResponse(
-                "Admin account not found",
-                404
-            )
-        };
     }
 
     if (
