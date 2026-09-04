@@ -1,1283 +1,710 @@
-```html
-<!doctype html>
+<!DOCTYPE html>
 <html lang="sw">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>My Stories — Net Simulizi</title>
+<title>Author Dashboard - Net Simulizi</title>
 
 <style>
-
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
 body{
-  margin:0;
-  background:#f6f0e5;
-  color:#191713;
-  font-family:Arial,sans-serif;
-  transition:.2s;
+    font-family:Arial,sans-serif;
+    background:#f7f1e5;
+    color:#2d241b;
+    min-height:100vh;
 }
 
 body.dark{
-  background:#111;
-  color:#eee;
+    background:#17130f;
+    color:#f5ead8;
 }
 
-.top{
-  background:#171512;
-  color:#fff;
-  padding:16px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  position:sticky;
-  top:0;
-  z-index:100;
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:1000;
+    width:100%;
+    background:#fffaf0;
+    border-bottom:1px solid #e5d7c0;
+    padding:14px 5%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.dark .topbar{
+    background:#211b16;
+    border-color:#3b3025;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:20px;
+    font-weight:700;
 }
 
 .logo{
-  color:#d4aa43;
-  font-weight:900;
-  letter-spacing:2px;
-  text-decoration:none;
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    background:#8b5e34;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:700;
 }
 
-.top-right{
-  display:flex;
-  gap:8px;
-  align-items:center;
+.top-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
 .btn{
-  padding:10px 14px;
-  border-radius:8px;
-  border:1px solid #d4aa43;
-  background:transparent;
-  color:inherit;
-  cursor:pointer;
-  text-decoration:none;
-  display:inline-block;
+    border:0;
+    border-radius:9px;
+    padding:10px 15px;
+    cursor:pointer;
+    font-size:14px;
+    font-weight:600;
 }
 
-.primary{
-  background:#d4aa43;
-  color:#171512;
-  border:0;
-  font-weight:700;
+.btn-light{
+    background:#eadcc7;
+    color:#35291d;
 }
 
-.wrap{
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
+.dark .btn-light{
+    background:#382d23;
+    color:#f5ead8;
+}
+
+.btn-primary{
+    background:#8b5e34;
+    color:#fff;
+}
+
+.container{
+    width:min(1150px,92%);
+    margin:0 auto;
 }
 
 .hero{
-  background:#fffdf8;
-  border:1px solid #e4dccd;
-  border-radius:16px;
-  padding:25px;
-  margin-bottom:20px;
+    margin:35px 0 25px;
+    padding:30px;
+    border-radius:18px;
+    background:#fffaf0;
+    border:1px solid #eadcc7;
 }
 
 .dark .hero{
-  background:#1d1b18;
-  border-color:#38342d;
+    background:#211b16;
+    border-color:#3b3025;
 }
 
 .hero h1{
-  margin:0 0 8px;
+    font-size:30px;
+    margin-bottom:8px;
 }
 
-.muted{
-  color:#777;
+.hero p{
+    color:#786653;
+    line-height:1.6;
 }
 
-.dark .muted{
-  color:#aaa;
-}
-
-.toolbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
-  flex-wrap:wrap;
-}
-
-.search{
-  flex:1;
-  min-width:220px;
-}
-
-.search input{
-  width:100%;
-  padding:12px 14px;
-  border:1px solid #ddd;
-  border-radius:9px;
-  background:#fffdf8;
-  color:#191713;
-  outline:none;
-}
-
-.dark .search input{
-  background:#1d1b18;
-  color:#eee;
-  border-color:#403b33;
-}
-
-.story-list{
-  display:grid;
-  gap:16px;
-}
-
-.story-card{
-  background:#fffdf8;
-  border:1px solid #e4dccd;
-  border-radius:14px;
-  padding:18px;
-  display:grid;
-  grid-template-columns:90px 1fr auto;
-  gap:18px;
-  align-items:center;
-}
-
-.dark .story-card{
-  background:#1d1b18;
-  border-color:#38342d;
-}
-
-.cover{
-  width:90px;
-  height:125px;
-  border-radius:9px;
-  overflow:hidden;
-  background:linear-gradient(145deg,#211d17,#a47b28);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  color:#fff;
-  font-weight:900;
-  font-size:13px;
-  padding:8px;
-}
-
-.cover img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-
-.story-title{
-  margin:0 0 7px;
-  font-size:19px;
-}
-
-.description{
-  font-size:13px;
-  color:#777;
-  line-height:1.5;
-  margin:0 0 10px;
-}
-
-.dark .description{
-  color:#aaa;
-}
-
-.meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:7px;
-}
-
-.badge{
-  display:inline-block;
-  padding:5px 8px;
-  border-radius:20px;
-  background:#eee5d4;
-  color:#665020;
-  font-size:11px;
-  font-weight:700;
-}
-
-.dark .badge{
-  background:#302b22;
-  color:#d8b866;
-}
-
-.status{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:20px;
-  font-size:11px;
-  font-weight:700;
-}
-
-.status.approved{
-  background:#dff3e4;
-  color:#216b35;
-}
-
-.status.pending{
-  background:#fff0c9;
-  color:#765500;
-}
-
-.status.rejected{
-  background:#ffe0e0;
-  color:#922c2c;
-}
-
-.status.ongoing{
-  background:#e2edf9;
-  color:#285b89;
-}
-
-.status.completed{
-  background:#e5e5e5;
-  color:#444;
-}
-
-.dark .status.approved{
-  background:#193523;
-  color:#9be0ad;
-}
-
-.dark .status.pending{
-  background:#3a3018;
-  color:#e5c66d;
-}
-
-.dark .status.rejected{
-  background:#3b1d1d;
-  color:#ffaaaa;
-}
-
-.dark .status.ongoing{
-  background:#1c2c3d;
-  color:#9ec9ee;
-}
-
-.dark .status.completed{
-  background:#333;
-  color:#ccc;
-}
-
-.actions{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  min-width:120px;
-}
-
-.actions .btn{
-  text-align:center;
-  font-size:13px;
-  padding:9px 10px;
-}
-
-.empty{
-  background:#fffdf8;
-  border:1px dashed #d6cbb8;
-  border-radius:14px;
-  padding:50px 20px;
-  text-align:center;
-}
-
-.dark .empty{
-  background:#1d1b18;
-  border-color:#4a4439;
-}
-
-.empty h2{
-  margin:0 0 8px;
+.dark .hero p{
+    color:#c8b9a6;
 }
 
 .stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:12px;
-  margin-bottom:20px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
 }
 
 .stat{
-  background:#fffdf8;
-  border:1px solid #e4dccd;
-  border-radius:12px;
-  padding:16px;
+    background:#fffaf0;
+    border:1px solid #eadcc7;
+    border-radius:14px;
+    padding:20px;
 }
 
 .dark .stat{
-  background:#1d1b18;
-  border-color:#38342d;
+    background:#211b16;
+    border-color:#3b3025;
 }
 
-.stat-number{
-  font-size:24px;
-  font-weight:900;
-  color:#a17a21;
+.stat span{
+    display:block;
+    font-size:13px;
+    color:#806d59;
+    margin-bottom:8px;
 }
 
-.dark .stat-number{
-  color:#d4aa43;
+.dark .stat span{
+    color:#bcae9c;
 }
 
-.stat-label{
-  font-size:12px;
-  color:#777;
-  margin-top:4px;
+.stat strong{
+    font-size:27px;
 }
 
-.dark .stat-label{
-  color:#aaa;
+.toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:20px;
 }
 
-.footer{
-  background:#171512;
-  color:#aaa;
-  text-align:center;
-  padding:30px;
-  margin-top:30px;
+.search{
+    flex:1;
 }
 
-.footer p{
-  margin:8px 0;
+.search input{
+    width:100%;
+    padding:13px 15px;
+    border-radius:10px;
+    border:1px solid #ddcdb7;
+    background:#fffaf0;
+    color:#2d241b;
+    outline:none;
+}
+
+.dark .search input{
+    background:#211b16;
+    border-color:#3b3025;
+    color:#fff;
+}
+
+.stories{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+    margin-bottom:40px;
+}
+
+.story-card{
+    background:#fffaf0;
+    border:1px solid #eadcc7;
+    border-radius:16px;
+    padding:20px;
+}
+
+.dark .story-card{
+    background:#211b16;
+    border-color:#3b3025;
+}
+
+.story-card h3{
+    font-size:20px;
+    margin-bottom:8px;
+}
+
+.story-card p{
+    color:#786653;
+    line-height:1.5;
+    margin-bottom:12px;
+}
+
+.dark .story-card p{
+    color:#c8b9a6;
+}
+
+.story-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:15px;
+}
+
+.badge{
+    display:inline-block;
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:12px;
+    background:#eadcc7;
+}
+
+.dark .badge{
+    background:#382d23;
+}
+
+.status-approved{
+    background:#dcefdc;
+    color:#245b29;
+}
+
+.status-pending{
+    background:#f5e7bd;
+    color:#76570a;
+}
+
+.status-completed{
+    background:#dce7f4;
+    color:#254d75;
+}
+
+.status-other{
+    background:#eadcc7;
+}
+
+.story-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.empty{
+    grid-column:1/-1;
+    text-align:center;
+    padding:50px 20px;
+    background:#fffaf0;
+    border:1px dashed #d8c6ad;
+    border-radius:16px;
+    color:#806d59;
+}
+
+.dark .empty{
+    background:#211b16;
+    border-color:#4b3d30;
+    color:#bcae9c;
 }
 
 .loading{
-  text-align:center;
-  padding:35px;
-  color:#777;
+    grid-column:1/-1;
+    text-align:center;
+    padding:40px;
 }
 
-.error{
-  background:#ffe7e7;
-  border:1px solid #e2aaaa;
-  color:#9b2222;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:20px;
+footer{
+    border-top:1px solid #e5d7c0;
+    padding:25px 5%;
+    text-align:center;
+    color:#806d59;
+    margin-top:20px;
 }
 
-.dark .error{
-  background:#351b1b;
-  border-color:#653333;
-  color:#ffaaaa;
+.dark footer{
+    border-color:#3b3025;
+    color:#bcae9c;
 }
 
 @media(max-width:800px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
 
-  .story-card{
-    grid-template-columns:70px 1fr;
-  }
+    .stories{
+        grid-template-columns:1fr;
+    }
 
-  .cover{
-    width:70px;
-    height:100px;
-  }
-
-  .actions{
-    grid-column:1 / -1;
-    flex-direction:row;
-    flex-wrap:wrap;
-  }
-
-  .actions .btn{
-    flex:1;
-  }
-
-  .stats{
-    grid-template-columns:repeat(2,1fr);
-  }
-
+    .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
 }
 
 @media(max-width:500px){
+    .topbar{
+        padding:12px 4%;
+    }
 
-  .wrap{
-    padding:15px;
-  }
+    .brand{
+        font-size:17px;
+    }
 
-  .hero{
-    padding:18px;
-  }
+    .logo{
+        width:34px;
+        height:34px;
+    }
 
-  .top{
-    padding:13px;
-  }
+    .hero{
+        padding:22px;
+    }
 
-  .top-right .btn{
-    padding:8px 10px;
-  }
+    .hero h1{
+        font-size:25px;
+    }
 
-  .story-card{
-    padding:14px;
-    gap:12px;
-  }
+    .stats{
+        gap:10px;
+    }
 
-  .stats{
-    gap:8px;
-  }
+    .stat{
+        padding:15px;
+    }
 
+    .stat strong{
+        font-size:23px;
+    }
+
+    .top-actions .btn{
+        padding:8px 10px;
+        font-size:12px;
+    }
 }
-
 </style>
-
 </head>
-
 
 <body>
 
-
-<header class="top">
-
-  <a
-    href="author-dashboard.html"
-    class="logo"
-  >
-    NET SIMULIZI
-  </a>
-
-  <div class="top-right">
-
-    <button
-      class="btn"
-      id="darkBtn"
-      type="button"
-    >
-      ◐
-    </button>
-
-    <a
-      href="author-dashboard.html"
-      class="btn"
-    >
-      Dashboard
+<header class="topbar">
+    <a href="author-dashboard.html" class="brand">
+        <div class="logo">NS</div>
+        <span>Net Simulizi</span>
     </a>
 
-  </div>
-
+    <div class="top-actions">
+        <button class="btn btn-light" id="themeBtn">🌙</button>
+        <a href="author-dashboard.html" class="btn btn-light">Dashboard</a>
+        <button class="btn btn-light" id="logoutBtn">Logout</button>
+    </div>
 </header>
 
+<main class="container">
 
-<main class="wrap">
+    <section class="hero">
+        <h1>My Stories</h1>
+        <p>
+            Karibu kwenye Author Dashboard. Hapa unaweza kuona na kusimamia
+            hadithi zako kwenye Net Simulizi.
+        </p>
+    </section>
 
+    <section class="stats">
+        <div class="stat">
+            <span>Total Stories</span>
+            <strong id="totalStories">0</strong>
+        </div>
 
-  <section class="hero">
+        <div class="stat">
+            <span>Approved</span>
+            <strong id="approvedStories">0</strong>
+        </div>
 
-    <h1>
-      My Stories
-    </h1>
+        <div class="stat">
+            <span>Pending</span>
+            <strong id="pendingStories">0</strong>
+        </div>
 
-    <p class="muted">
-      Simamia hadithi zako, angalia status zake
-      na endelea kuongeza episodes.
-    </p>
+        <div class="stat">
+            <span>Completed</span>
+            <strong id="completedStories">0</strong>
+        </div>
+    </section>
 
-  </section>
+    <section class="toolbar">
+        <div class="search">
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search your stories..."
+            >
+        </div>
 
+        <a href="author-submit.html" class="btn btn-primary">
+            + Submit Story
+        </a>
+    </section>
 
-  <section class="stats">
-
-    <div class="stat">
-      <div
-        class="stat-number"
-        id="totalStories"
-      >
-        0
-      </div>
-
-      <div class="stat-label">
-        Jumla ya Stories
-      </div>
-    </div>
-
-
-    <div class="stat">
-      <div
-        class="stat-number"
-        id="approvedStories"
-      >
-        0
-      </div>
-
-      <div class="stat-label">
-        Approved
-      </div>
-    </div>
-
-
-    <div class="stat">
-      <div
-        class="stat-number"
-        id="pendingStories"
-      >
-        0
-      </div>
-
-      <div class="stat-label">
-        Pending
-      </div>
-    </div>
-
-
-    <div class="stat">
-      <div
-        class="stat-number"
-        id="completedStories"
-      >
-        0
-      </div>
-
-      <div class="stat-label">
-        Completed
-      </div>
-    </div>
-
-  </section>
-
-
-  <div class="toolbar">
-
-    <div class="search">
-
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Tafuta story yako..."
-      >
-
-    </div>
-
-    <a
-      href="submit-story.html"
-      class="btn primary"
-    >
-      + Submit Story
-    </a>
-
-  </div>
-
-
-  <div
-    id="errorBox"
-    style="display:none"
-  ></div>
-
-
-  <section
-    id="storyList"
-    class="story-list"
-  >
-
-    <div class="loading">
-      Inapakia stories...
-    </div>
-
-  </section>
-
+    <section class="stories" id="storiesList">
+        <div class="loading">Loading stories...</div>
+    </section>
 
 </main>
 
-
-<footer class="footer">
-
-  <b class="logo">
-    NET SIMULIZI
-  </b>
-
-  <p>
-    Author Publishing Portal
-  </p>
-
-  <p>
-    © 2026 Net Simulizi
-  </p>
-
+<footer>
+    © 2026 Net Simulizi. All rights reserved.
 </footer>
 
-
 <script>
+const API = "https://netsimulizi.pages.dev/api";
 
-
-/* =========================
-   DARK MODE
-========================= */
-
-const darkBtn =
-  document.getElementById("darkBtn");
-
-
-if(
-  localStorage.getItem("netsimulizi_dark") === "1"
-){
-
-  document.body.classList.add("dark");
-
-}
-
-
-darkBtn.addEventListener(
-  "click",
-  function(){
-
-    document.body.classList.toggle("dark");
-
-    localStorage.setItem(
-      "netsimulizi_dark",
-      document.body.classList.contains("dark")
-        ? "1"
-        : "0"
-    );
-
-  }
+const author = JSON.parse(
+    localStorage.getItem("netsimulizi_author") || "null"
 );
 
-
-/* =========================
-   USER
-========================= */
-
-let user = null;
-
-
-try{
-
-  user =
-    JSON.parse(
-      localStorage.getItem("netsimulizi_user")
-    );
-
-}catch(error){
-
-  user = null;
-
+if (!author || !author.id) {
+    window.location.href = "author-login.html";
 }
-
-
-if(!user){
-
-  window.location.href =
-    "author-login.html";
-
-}
-
-
-const role =
-  String(user?.role || "")
-    .trim()
-    .toLowerCase();
-
-
-if(
-  user &&
-  role !== "author" &&
-  role !== "admin"
-){
-
-  localStorage.removeItem(
-    "netsimulizi_user"
-  );
-
-  window.location.href =
-    "author-login.html";
-
-}
-
-
-/* =========================
-   ELEMENTS
-========================= */
-
-const storyList =
-  document.getElementById("storyList");
-
-const searchInput =
-  document.getElementById("searchInput");
-
-const errorBox =
-  document.getElementById("errorBox");
 
 let allStories = [];
 
-
-/* =========================
-   ESCAPE HTML
-========================= */
-
 function escapeHTML(value){
-
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 }
 
+function getStatusClass(status){
+    const value = String(status || "").toLowerCase();
 
-/* =========================
-   STATUS
-========================= */
+    if(value === "approved" || value === "published"){
+        return "status-approved";
+    }
 
-function getStatus(story){
+    if(value === "pending"){
+        return "status-pending";
+    }
 
-  const status =
-    String(
-      story.status ||
-      story.approval_status ||
-      story.publish_status ||
-      ""
-    ).toLowerCase();
+    if(value === "completed"){
+        return "status-completed";
+    }
 
-  if(
-    status === "approved" ||
-    status === "published"
-  ){
-
-    return {
-      text:"Approved",
-      className:"approved"
-    };
-
-  }
-
-  if(
-    status === "rejected"
-  ){
-
-    return {
-      text:"Rejected",
-      className:"rejected"
-    };
-
-  }
-
-  if(
-    status === "completed"
-  ){
-
-    return {
-      text:"Completed",
-      className:"completed"
-    };
-
-  }
-
-  if(
-    status === "ongoing"
-  ){
-
-    return {
-      text:"Ongoing",
-      className:"ongoing"
-    };
-
-  }
-
-  return {
-    text:"Pending",
-    className:"pending"
-  };
-
+    return "status-other";
 }
 
+function getStatusLabel(status){
+    const value = String(status || "").toLowerCase();
 
-/* =========================
-   COVER
-========================= */
+    if(value === "published"){
+        return "Approved";
+    }
 
-function getCover(story){
+    if(value === "approved"){
+        return "Approved";
+    }
 
-  const cover =
-    story.cover_url ||
-    story.cover ||
-    story.image ||
-    story.cover_image ||
-    "";
+    if(value === "pending"){
+        return "Pending";
+    }
 
-  if(cover){
+    if(value === "completed"){
+        return "Completed";
+    }
 
-    return `
-      <img
-        src="${escapeHTML(cover)}"
-        alt="${escapeHTML(story.title || "Story")}"
-        onerror="this.remove()"
-      >
-    `;
-
-  }
-
-  return `
-    <span>
-      ${escapeHTML(story.title || "STORY")}
-    </span>
-  `;
-
+    return status || "Unknown";
 }
-
-
-/* =========================
-   FILTER AUTHOR STORIES
-========================= */
 
 function belongsToAuthor(story){
-
-  if(role === "admin"){
-
-    return true;
-
-  }
-
-
-  const authorId =
-    story.author_id ??
-    story.authorId ??
-    story.user_id ??
-    story.userId;
-
-
-  const currentId =
-    user.id ??
-    user.user_id;
-
-
-  if(
-    authorId !== undefined &&
-    authorId !== null &&
-    currentId !== undefined &&
-    currentId !== null
-  ){
-
-    return String(authorId) ===
-      String(currentId);
-
-  }
-
-
-  const authorName =
-    String(
-      story.author_name ||
-      story.author ||
-      story.author_username ||
-      ""
-    ).trim().toLowerCase();
-
-
-  const currentName =
-    String(
-      user.name ||
-      user.username ||
-      ""
-    ).trim().toLowerCase();
-
-
-  if(
-    authorName &&
-    currentName
-  ){
-
-    return authorName === currentName;
-
-  }
-
-
-  /*
-   * Kwa sasa API ya /api/stories inaweza
-   * kurudisha stories ambazo hazina author_id.
-   *
-   * Kwa admin tunaonyesha zote.
-   * Kwa author tunatumia jina la author ikiwa lipo.
-   */
-
-  return false;
-
+    return Number(story.author_id) === Number(author.id);
 }
 
+function updateStats(stories){
 
-/* =========================
-   RENDER
-========================= */
+    const total = stories.length;
 
-function renderStories(list){
+    const approved = stories.filter(story => {
+        const status = String(story.status || "").toLowerCase();
+        return status === "approved" || status === "published";
+    }).length;
 
-  if(!list.length){
+    const pending = stories.filter(story => {
+        return String(story.status || "").toLowerCase() === "pending";
+    }).length;
 
-    storyList.innerHTML = `
+    const completed = stories.filter(story => {
+        return String(story.status || "").toLowerCase() === "completed";
+    }).length;
 
-      <div class="empty">
+    document.getElementById("totalStories").textContent = total;
+    document.getElementById("approvedStories").textContent = approved;
+    document.getElementById("pendingStories").textContent = pending;
+    document.getElementById("completedStories").textContent = completed;
+}
 
-        <h2>
-          Hakuna stories
-        </h2>
+function renderStories(stories){
 
-        <p class="muted">
-          Bado huna hadithi zilizopatikana
-          kwenye account yako.
-        </p>
+    const list = document.getElementById("storiesList");
 
-        <a
-          href="submit-story.html"
-          class="btn primary"
-        >
-          + Submit Story
-        </a>
+    updateStats(stories);
 
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  storyList.innerHTML =
-    list.map(function(story){
-
-      const status =
-        getStatus(story);
-
-      const title =
-        story.title ||
-        "Untitled Story";
-
-      const description =
-        story.description ||
-        story.summary ||
-        "Hakuna maelezo ya hadithi.";
-
-      const language =
-        story.language ||
-        "—";
-
-      const category =
-        story.category ||
-        "—";
-
-      const id =
-        story.id ||
-        story.story_id;
-
-
-      return `
-
-        <article class="story-card">
-
-
-          <div class="cover">
-
-            ${getCover(story)}
-
-          </div>
-
-
-          <div>
-
-            <h2 class="story-title">
-              ${escapeHTML(title)}
-            </h2>
-
-
-            <p class="description">
-              ${escapeHTML(description)}
-            </p>
-
-
-            <div class="meta">
-
-              <span class="badge">
-                ${escapeHTML(category)}
-              </span>
-
-              <span class="badge">
-                ${escapeHTML(language)}
-              </span>
-
-              <span class="status ${status.className}">
-                ${status.text}
-              </span>
-
+    if(!stories.length){
+        list.innerHTML = `
+            <div class="empty">
+                <h3>No stories found</h3>
+                <p>You have not submitted any stories yet.</p>
             </div>
+        `;
+        return;
+    }
 
-          </div>
+    list.innerHTML = stories.map(story => {
 
+        const title = escapeHTML(
+            story.title || "Untitled Story"
+        );
 
-          <div class="actions">
+        const description = escapeHTML(
+            story.description || "No description available."
+        );
 
-            ${
-              id
-              ?
-              `
-              <a
-                href="story.html?id=${encodeURIComponent(id)}"
-                class="btn"
-              >
-                View Story
-              </a>
+        const category = escapeHTML(
+            story.category_name ||
+            story.category ||
+            story.category_slug ||
+            "Uncategorized"
+        );
 
-              <a
-                href="chapters.html?id=${encodeURIComponent(id)}"
-                class="btn primary"
-              >
-                Episodes
-              </a>
-              `
-              :
-              `
-              <span class="btn">
-                No ID
-              </span>
-              `
-            }
+        const status = getStatusLabel(story.status);
+        const statusClass = getStatusClass(story.status);
 
-          </div>
+        return `
+            <article class="story-card">
 
+                <h3>${title}</h3>
 
-        </article>
+                <p>${description}</p>
 
-      `;
+                <div class="story-meta">
+                    <span class="badge">${category}</span>
+                    <span class="badge ${statusClass}">
+                        ${escapeHTML(status)}
+                    </span>
+                </div>
+
+                <div class="story-actions">
+                    <a
+                        href="story.html?id=${encodeURIComponent(story.id)}"
+                        class="btn btn-light"
+                    >
+                        View
+                    </a>
+
+                    <a
+                        href="author-story.html?id=${encodeURIComponent(story.id)}"
+                        class="btn btn-primary"
+                    >
+                        Manage
+                    </a>
+                </div>
+
+            </article>
+        `;
 
     }).join("");
-
 }
-
-
-/* =========================
-   STATS
-========================= */
-
-function updateStats(list){
-
-  document.getElementById(
-    "totalStories"
-  ).textContent =
-    list.length;
-
-
-  document.getElementById(
-    "approvedStories"
-  ).textContent =
-    list.filter(function(story){
-
-      const status =
-        String(
-          story.status ||
-          story.approval_status ||
-          story.publish_status ||
-          ""
-        ).toLowerCase();
-
-      return (
-        status === "approved" ||
-        status === "published"
-      );
-
-    }).length;
-
-
-  document.getElementById(
-    "pendingStories"
-  ).textContent =
-    list.filter(function(story){
-
-      const status =
-        String(
-          story.status ||
-          story.approval_status ||
-          story.publish_status ||
-          ""
-        ).toLowerCase();
-
-      return (
-        !status ||
-        status === "pending"
-      );
-
-    }).length;
-
-
-  document.getElementById(
-    "completedStories"
-  ).textContent =
-    list.filter(function(story){
-
-      return String(
-        story.status || ""
-      ).toLowerCase() === "completed";
-
-    }).length;
-
-}
-
-
-/* =========================
-   LOAD STORIES
-========================= */
 
 async function loadStories(){
 
-  try{
+    const list = document.getElementById("storiesList");
 
-    errorBox.style.display =
-      "none";
+    try{
 
+        const response = await fetch(`${API}/stories`);
 
-    const response =
-      await fetch("/api/stories");
+        const data = await response.json();
 
+        if(!response.ok || !data.success){
+            throw new Error(
+                data.message || "Failed to load stories"
+            );
+        }
 
-    if(!response.ok){
+        const stories = Array.isArray(data.stories)
+            ? data.stories
+            : [];
 
-      throw new Error(
-        "Imeshindikana kupata stories."
-      );
+        allStories = stories.filter(belongsToAuthor);
 
+        renderStories(allStories);
+
+    }catch(error){
+
+        console.error("Author stories error:", error);
+
+        list.innerHTML = `
+            <div class="empty">
+                <h3>Unable to load stories</h3>
+                <p>Please try again.</p>
+            </div>
+        `;
     }
+}
 
+document.getElementById("searchInput")
+    .addEventListener("input", function(){
 
-    const data =
-      await response.json();
-
-
-    if(Array.isArray(data)){
-
-      allStories = data;
-
-    }else if(
-      Array.isArray(data.stories)
-    ){
-
-      allStories =
-        data.stories;
-
-    }else{
-
-      allStories = [];
-
-    }
-
-
-    /*
-     * Kwa admin tunaonyesha stories zote.
-     *
-     * Kwa author tunajaribu kuchuja
-     * kwa author_id au author name.
-     */
-
-    let authorStories =
-      allStories.filter(
-        belongsToAuthor
-      );
-
-
-    /*
-     * Kama API ya sasa haina author
-     * information kabisa, hakuna story
-     * inayoweza kuthibitishwa kuwa ni ya
-     * author huyu.
-     */
-
-    updateStats(
-      authorStories
-    );
-
-    renderStories(
-      authorStories
-    );
-
-
-    searchInput.addEventListener(
-      "input",
-      function(){
-
-        const term =
-          this.value
+        const query = this.value
             .trim()
             .toLowerCase();
 
+        if(!query){
+            renderStories(allStories);
+            return;
+        }
 
-        const filtered =
-          authorStories.filter(
-            function(story){
+        const filtered = allStories.filter(story => {
 
-              const title =
-                String(
-                  story.title || ""
-                ).toLowerCase();
+            const title = String(
+                story.title || ""
+            ).toLowerCase();
 
-              const description =
-                String(
-                  story.description ||
-                  story.summary ||
-                  ""
-                ).toLowerCase();
+            const description = String(
+                story.description || ""
+            ).toLowerCase();
 
-              const category =
-                String(
-                  story.category || ""
-                ).toLowerCase();
+            const category = String(
+                story.category_name ||
+                story.category ||
+                story.category_slug ||
+                ""
+            ).toLowerCase();
 
+            return (
+                title.includes(query) ||
+                description.includes(query) ||
+                category.includes(query)
+            );
+        });
 
-              return (
-                title.includes(term) ||
-                description.includes(term) ||
-                category.includes(term)
-              );
+        renderStories(filtered);
+    });
 
-            }
-          );
+document.getElementById("logoutBtn")
+    .addEventListener("click", function(){
 
+        localStorage.removeItem("netsimulizi_author");
 
-        renderStories(
-          filtered
-        );
+        window.location.href = "author-login.html";
+    });
 
-      }
-    );
+const themeBtn = document.getElementById("themeBtn");
 
+const savedTheme =
+    localStorage.getItem("netsimulizi_author_theme");
 
-  }catch(error){
-
-    console.error(
-      "My Stories error:",
-      error
-    );
-
-
-    storyList.innerHTML =
-      "";
-
-
-    errorBox.style.display =
-      "block";
-
-    errorBox.className =
-      "error";
-
-    errorBox.textContent =
-      error.message ||
-      "Imeshindikana kupakia stories.";
-
-  }
-
+if(savedTheme === "dark"){
+    document.body.classList.add("dark");
+    themeBtn.textContent = "☀️";
 }
 
+themeBtn.addEventListener("click", function(){
+
+    document.body.classList.toggle("dark");
+
+    const dark =
+        document.body.classList.contains("dark");
+
+    localStorage.setItem(
+        "netsimulizi_author_theme",
+        dark ? "dark" : "light"
+    );
+
+    themeBtn.textContent = dark ? "☀️" : "🌙";
+});
 
 loadStories();
-
-
 </script>
 
 </body>
-
 </html>
-```
