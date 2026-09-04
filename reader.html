@@ -482,10 +482,10 @@ const episodeParam =
 
 
     currentEpisodeId =
-        Number.isInteger(episode) &&
-        episode > 0
-            ? episode
-            null
+    Number.isInteger(episode) &&
+    episode > 0
+        ? episode
+        : null;
 
 }
 
@@ -776,16 +776,15 @@ function renderReader(
 
 
     const previous =
-        currentIndex > 0
-            ? episodes[currentIndex - 1]
-            : ;
+    currentIndex > 0
+        ? episodes[currentIndex - 1]
+        : null;
 
-
-    const next =
-        currentIndex <
-        episodes.length - 1
-            ? episodes[currentIndex + 1]
-            : ;
+   const next =
+    currentIndex <
+    episodes.length - 1
+        ? episodes[currentIndex + 1]
+        : null;
 
 
     container.innerHTML = `
@@ -1038,7 +1037,7 @@ function goToEpisode(
 ){
 
     location.href =
-        `reader.html?story=${currentStoryId}&episode=${episodeId}`;
+        `reader.html?story_id=${currentStoryId}&chapter_id=${episodeId}`;
 
 }
 
