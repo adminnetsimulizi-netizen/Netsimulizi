@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Chapters - Net Simulizi</title>
+<title>Episodes - Net Simulizi</title>
 
 <style>
 
@@ -180,17 +180,17 @@ gap:15px;
 font-size:22px;
 }
 
-.chapter-count{
+.episode-count{
 font-size:13px;
 color:var(--muted);
 }
 
-.chapter-list{
+.episode-list{
 display:flex;
 flex-direction:column;
 }
 
-.chapter{
+.episode{
 display:flex;
 align-items:center;
 justify-content:space-between;
@@ -200,22 +200,22 @@ border-bottom:1px solid var(--border);
 transition:.2s;
 }
 
-.chapter:last-child{
+.episode:last-child{
 border-bottom:0;
 }
 
-.chapter:hover{
+.episode:hover{
 background:var(--surface-2);
 }
 
-.chapter-info{
+.episode-info{
 display:flex;
 align-items:center;
 gap:15px;
 min-width:0;
 }
 
-.chapter-number{
+.episode-number{
 width:42px;
 height:42px;
 border-radius:9px;
@@ -228,11 +228,11 @@ font-weight:900;
 flex-shrink:0;
 }
 
-.chapter-details{
+.episode-details{
 min-width:0;
 }
 
-.chapter-title{
+.episode-title{
 font-weight:800;
 margin-bottom:3px;
 white-space:nowrap;
@@ -240,12 +240,12 @@ overflow:hidden;
 text-overflow:ellipsis;
 }
 
-.chapter-meta{
+.episode-meta{
 font-size:12px;
 color:var(--muted);
 }
 
-.chapter-action{
+.episode-action{
 flex-shrink:0;
 }
 
@@ -300,25 +300,25 @@ font-size:30px;
 padding:17px;
 }
 
-.chapter{
+.episode{
 padding:15px 17px;
 }
 
-.chapter-info{
+.episode-info{
 gap:11px;
 }
 
-.chapter-number{
+.episode-number{
 width:37px;
 height:37px;
 font-size:13px;
 }
 
-.chapter-title{
+.episode-title{
 font-size:14px;
 }
 
-.chapter-action .btn{
+.episode-action .btn{
 padding:8px 10px;
 font-size:12px;
 }
@@ -361,7 +361,6 @@ Home
 
 </header>
 
-
 <main class="wrap">
 
 <section
@@ -375,32 +374,30 @@ Inapakia taarifa za hadithi...
 
 </section>
 
-
 <section class="section">
 
 <div class="section-header">
 
 <h2>
-Chapters
+Episodes
 </h2>
 
 <div
-id="chapterCount"
-class="chapter-count"
+id="episodeCount"
+class="episode-count"
 >
 Inapakia...
 </div>
 
 </div>
 
-
 <div
-id="chapterList"
-class="chapter-list"
+id="episodeList"
+class="episode-list"
 >
 
 <div class="loading">
-Inapakia chapters...
+Inapakia episodes...
 </div>
 
 </div>
@@ -408,7 +405,6 @@ Inapakia chapters...
 </section>
 
 </main>
-
 
 <footer class="footer">
 
@@ -426,10 +422,9 @@ Soma, gundua na furahia simulizi zako.
 
 </footer>
 
-
 <script>
 
-const API = "/api";
+const API = "https://netsimulizi.pages.dev/api";
 
 
 /* =========================
@@ -534,7 +529,6 @@ document.getElementById(
 "storyHeader"
 );
 
-
 if(!storyId){
 
 container.innerHTML = `
@@ -560,7 +554,6 @@ return;
 
 }
 
-
 try{
 
 const response =
@@ -575,10 +568,8 @@ cache:"no-store"
 }
 );
 
-
 const data =
 await response.json();
-
 
 if(
 !response.ok ||
@@ -593,10 +584,8 @@ data.message ||
 
 }
 
-
 const story =
 data.story;
-
 
 container.innerHTML = `
 
@@ -657,14 +646,12 @@ story.language ||
 
 `;
 
-
 }catch(error){
 
 console.error(
 "Story error:",
 error
 );
-
 
 container.innerHTML = `
 
@@ -691,24 +678,23 @@ Jaribu Tena
 
 
 /* =========================
-   LOAD CHAPTERS
+   LOAD EPISODES
 ========================= */
 
-async function loadChapters(){
+async function loadEpisodes(){
 
 const storyId =
 getStoryId();
 
 const list =
 document.getElementById(
-"chapterList"
+"episodeList"
 );
 
 const count =
 document.getElementById(
-"chapterCount"
+"episodeCount"
 );
-
 
 if(!storyId){
 
@@ -723,18 +709,17 @@ Story ID haijapatikana.
 `;
 
 count.textContent =
-"0 chapters";
+"0 episodes";
 
 return;
 
 }
 
-
 try{
 
 const response =
 await fetch(
-`${API}/stories/${storyId}/chapters`,
+`${API}/stories/${storyId}/episodes`,
 {
 method:"GET",
 headers:{
@@ -744,16 +729,13 @@ cache:"no-store"
 }
 );
 
-
 const data =
 await response.json();
 
-
 console.log(
-"Net Simulizi chapters:",
+"Net Simulizi episodes:",
 data
 );
-
 
 if(
 !response.ok ||
@@ -762,124 +744,118 @@ if(
 
 throw new Error(
 data.message ||
-"Chapters hazikupatikana."
+"Episodes hazikupatikana."
 );
 
 }
 
-
-let chapters =
-Array.isArray(data.chapters)
-? data.chapters
+let episodes =
+Array.isArray(data.episodes)
+? data.episodes
 : [];
 
-
-if(!chapters.length){
+if(!episodes.length){
 
 list.innerHTML = `
 
 <div class="empty">
 
-Hakuna chapters zilizowekwa kwa hadithi hii bado.
+Hakuna episodes zilizowekwa kwa hadithi hii bado.
 
 </div>
 
 `;
 
 count.textContent =
-"0 chapters";
+"0 episodes";
 
 return;
 
 }
 
 
-/* SORT CHAPTERS */
+/* SORT EPISODES */
 
-chapters.sort(
+episodes.sort(
 function(a,b){
 
 return Number(
-a.chapter_number ??
-a.number ??
-a.chapter_no ??
-0
+a.episode_number || 0
 )
 -
 Number(
-b.chapter_number ??
-b.number ??
-b.chapter_no ??
-0
+b.episode_number || 0
 );
 
 });
 
 
 count.textContent =
-chapters.length +
-(chapters.length === 1
-? " chapter"
-: " chapters");
+episodes.length +
+(
+episodes.length === 1
+? " episode"
+: " episodes"
+);
 
 
 const fragment =
 document.createDocumentFragment();
 
 
-chapters.forEach(
-function(chapter,index){
+episodes.forEach(
+function(episode,index){
 
 const number =
-chapter.chapter_number ??
-chapter.number ??
-chapter.chapter_no ??
+episode.episode_number ||
 (index + 1);
 
-
 const title =
-chapter.title ||
-`Chapter ${number}`;
-
-
-const words =
-chapter.word_count ??
-chapter.words ??
-0;
-
+episode.title ||
+`Episode ${number}`;
 
 const status =
-chapter.status ||
+episode.status ||
 "published";
+
+const isFree =
+Number(episode.is_free) === 1;
+
+const price =
+Number(episode.price || 0);
 
 
 const item =
 document.createElement("div");
 
 item.className =
-"chapter";
+"episode";
 
 
 item.innerHTML = `
 
-<div class="chapter-info">
+<div class="episode-info">
 
-<div class="chapter-number">
+<div class="episode-number">
 ${escapeHTML(number)}
 </div>
 
-<div class="chapter-details">
+<div class="episode-details">
 
-<div class="chapter-title">
+<div class="episode-title">
 ${escapeHTML(title)}
 </div>
 
-<div class="chapter-meta">
+<div class="episode-meta">
 
-${words
-? formatNumber(words) + " words · "
-: ""
+${isFree
+? "Free"
+: price > 0
+? "TSh " + formatNumber(price)
+: "Paid"
 }
+
+·
 
 ${escapeHTML(status)}
 
@@ -890,11 +866,11 @@ ${escapeHTML(status)}
 </div>
 
 
-<div class="chapter-action">
+<div class="episode-action">
 
 <a
 class="btn primary"
-href="reader.html?story_id=${encodeURIComponent(storyId)}&chapter_id=${encodeURIComponent(chapter.id)}"
+href="reader.html?story_id=${encodeURIComponent(storyId)}&chapter_id=${encodeURIComponent(episode.id)}"
 >
 Soma
 </a>
@@ -917,22 +893,21 @@ list.appendChild(fragment);
 }catch(error){
 
 console.error(
-"Chapters error:",
+"Episodes error:",
 error
 );
-
 
 list.innerHTML = `
 
 <div class="error">
 
-Imeshindikana kupakia chapters.
+Imeshindikana kupakia episodes.
 
 <br><br>
 
 <button
-class="btn primary"
-onclick="loadChapters()"
+class="btn primary retry"
+onclick="loadEpisodes()"
 >
 Jaribu Tena
 </button>
@@ -961,7 +936,7 @@ loadDarkMode();
 
 loadStory();
 
-loadChapters();
+loadEpisodes();
 
 });
 
