@@ -350,6 +350,22 @@ const requireAdmin = async (db, adminId) => {
     };
 };
 
+const requireAdmin = async (db, adminId) => {
+
+    // ... code yako ya requireAdmin ...
+
+    return {
+        ok: true,
+        admin
+    };
+};
+
+
+// BLOCK MPYA YA /admin/authors/create
+if (path === "/admin/authors/create") {
+
+    // code hapa
+}
 
 // =====================================================
 // MAIN
