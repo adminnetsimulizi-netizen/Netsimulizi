@@ -335,12 +335,11 @@ body.dark{
 
 const API = "https://netsimulizi.pages.dev/api";
 
-let currentStoryId = 1;
-let currentEpisodeId = 1;
+let currentStoryId = null;
+let currentEpisodeId = null;
 let currentEpisodes = [];
 let fontSize = 19;
 let progressTimer = null;
-
 
 /* =========================
    DARK MODE
@@ -479,14 +478,14 @@ const episodeParam =
         Number.isInteger(story) &&
         story > 0
             ? story
-            : 1;
+            : null;
 
 
     currentEpisodeId =
         Number.isInteger(episode) &&
         episode > 0
             ? episode
-            : 1;
+            null
 
 }
 
@@ -779,14 +778,14 @@ function renderReader(
     const previous =
         currentIndex > 0
             ? episodes[currentIndex - 1]
-            : null;
+            : ;
 
 
     const next =
         currentIndex <
         episodes.length - 1
             ? episodes[currentIndex + 1]
-            : null;
+            : ;
 
 
     container.innerHTML = `
@@ -1068,7 +1067,7 @@ function getCurrentUser(){
 
         if(!stored){
 
-            return null;
+            return ;
 
         }
 
@@ -1079,7 +1078,7 @@ function getCurrentUser(){
 
         if(!user || !user.id){
 
-            return null;
+            return ;
 
         }
 
@@ -1088,7 +1087,7 @@ function getCurrentUser(){
 
     }catch(error){
 
-        return null;
+        return ;
 
     }
 
