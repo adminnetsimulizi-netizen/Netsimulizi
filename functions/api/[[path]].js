@@ -1830,7 +1830,7 @@ export async function onRequest(context) {
                                 authors.user_id,
                                 authors.display_name,
                                 authors.bio,
-                                authors.avatar_url,
+                                
                                 authors.approval_status,
 
                                 users.username,
