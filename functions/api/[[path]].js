@@ -529,168 +529,169 @@ export async function onRequest(context) {
         // STORIES
         // -------------------------------------------------
 
-        if (path === "/stories") {
+     if (path === "/stories") {
 
-            try {
+    try {
 
-                const genre =
-                    cleanString(
-                        url.searchParams.get("genre"),
-                        100
-                    );
+        const language =
+            cleanString(
+                url.searchParams.get("language"),
+                20
+            );
 
-                const category =
-                    cleanString(
-                        url.searchParams.get("category"),
-                        100
-                    );
+        const search =
+            cleanString(
+                url.searchParams.get("search"),
+                200
+            );
 
-                const language =
-                    cleanString(
-                        url.searchParams.get("language"),
-                        20
-                    );
+        const authorId =
+            positiveInt(
+                url.searchParams.get("author_id")
+            );
 
-                const search =
-                    cleanString(
-                        url.searchParams.get("search"),
-                        200
-                    );
+        let limit =
+            Number(
+                url.searchParams.get("limit") || 50
+            );
 
-                const authorId =
-                    positiveInt(
-                        url.searchParams.get("author_id")
-                    );
+        let offset =
+            Number(
+                url.searchParams.get("offset") || 0
+            );
 
-                let limit =
-                    Number(
-                        url.searchParams.get("limit") || 50
-                    );
-
-                let offset =
-                    Number(
-                        url.searchParams.get("offset") || 0
-                    );
-
-                if (!Number.isInteger(limit)) limit = 50;
-                if (!Number.isInteger(offset)) offset = 0;
-
-                limit = Math.min(Math.max(limit, 1), 100);
-                offset = Math.max(offset, 0);
-
-                let sql = `
-                    SELECT
-                        stories.*,
-                        authors.id AS author_id,
-                        authors.display_name AS author_name,
-                        categories.id AS category_id,
-                        categories.name AS category_name,
-                        categories.slug AS category_slug
-                    FROM stories
-                    LEFT JOIN authors
-                        ON stories.author_id = authors.id
-                    LEFT JOIN categories
-                        ON stories.category_id = categories.id
-                    WHERE stories.status = 'published'
-                    AND (
-                        stories.visibility = 'public'
-                        OR stories.visibility IS NULL
-                        OR stories.visibility = ''
-                    )
-                `;
-
-                const params = [];
-
-                if (genre) {
-                    sql += `
-                        AND (
-                            LOWER(categories.name) = LOWER(?)
-                            OR LOWER(categories.slug) = LOWER(?)
-                        )
-                    `;
-
-                    params.push(genre, genre);
-                }
-
-                if (category) {
-                    sql += `
-                        AND (
-                            LOWER(categories.name) = LOWER(?)
-                            OR LOWER(categories.slug) = LOWER(?)
-                            OR categories.id = ?
-                        )
-                    `;
-
-                    params.push(
-                        category,
-                        category,
-                        Number(category) || -1
-                    );
-                }
-
-                if (language) {
-                    sql += `
-                        AND stories.language = ?
-                    `;
-
-                    params.push(language);
-                }
-
-                if (authorId) {
-                    sql += `
-                        AND stories.author_id = ?
-                    `;
-
-                    params.push(authorId);
-                }
-
-                if (search) {
-                    sql += `
-                        AND (
-                            LOWER(stories.title)
-                                LIKE LOWER(?)
-                            OR LOWER(stories.description)
-                                LIKE LOWER(?)
-                        )
-                    `;
-
-                    const term = `%${search}%`;
-
-                    params.push(term, term);
-                }
-
-                sql += `
-                    ORDER BY stories.created_at DESC
-                    LIMIT ? OFFSET ?
-                `;
-
-                params.push(limit, offset);
-
-                const result =
-                    await db
-                        .prepare(sql)
-                        .bind(...params)
-                        .all();
-
-                return json({
-                    success: true,
-                    stories: result.results || [],
-                    pagination: {
-                        limit,
-                        offset,
-                        count: (result.results || []).length
-                    }
-                });
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Failed to load stories",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
+        if (!Number.isInteger(limit)) {
+            limit = 50;
         }
+
+        if (!Number.isInteger(offset)) {
+            offset = 0;
+        }
+
+        limit = Math.min(
+            Math.max(limit, 1),
+            100
+        );
+
+        offset = Math.max(offset, 0);
+
+        let sql = `
+            SELECT
+                stories.*,
+                authors.id AS author_id,
+                authors.display_name AS author_name
+            FROM stories
+            LEFT JOIN authors
+                ON stories.author_id = authors.id
+            WHERE 1 = 1
+        `;
+
+        const params = [];
+
+        /*
+         * Published stories.
+         * NULL/empty status allowed temporarily
+         * for existing database records.
+         */
+        sql += `
+            AND (
+                stories.status = 'published'
+                OR stories.status IS NULL
+                OR stories.status = ''
+            )
+        `;
+
+        if (language) {
+
+            sql += `
+                AND stories.language = ?
+            `;
+
+            params.push(language);
+        }
+
+        if (authorId) {
+
+            sql += `
+                AND stories.author_id = ?
+            `;
+
+            params.push(authorId);
+        }
+
+        if (search) {
+
+            sql += `
+                AND (
+                    LOWER(stories.title)
+                    LIKE LOWER(?)
+
+                    OR LOWER(
+                        COALESCE(
+                            stories.description,
+                            ''
+                        )
+                    )
+                    LIKE LOWER(?)
+                )
+            `;
+
+            const term = `%${search}%`;
+
+            params.push(
+                term,
+                term
+            );
+        }
+
+        sql += `
+            ORDER BY stories.id DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        params.push(
+            limit,
+            offset
+        );
+
+        const result =
+            await db
+                .prepare(sql)
+                .bind(...params)
+                .all();
+
+        return json({
+
+            success: true,
+
+            stories:
+                result.results || [],
+
+            pagination: {
+
+                limit,
+
+                offset,
+
+                count:
+                    (result.results || []).length
+            }
+
+        });
+
+    } catch (error) {
+
+        return errorResponse(
+            "Failed to load stories",
+            500,
+            {
+                error:
+                    error?.message ||
+                    String(error)
+            }
+        );
+    }
+}
 
 
         // -------------------------------------------------
