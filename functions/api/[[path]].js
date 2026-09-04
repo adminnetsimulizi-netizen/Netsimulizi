@@ -3553,6 +3553,189 @@ export async function onRequest(context) {
             }
         }
 
+         
+        // =====================================================
+// ADMIN CREATE AUTHOR
+// POST /api/admin/authors/create
+// =====================================================
+
+if (path === "/admin/authors/create") {
+
+    const adminId =
+        positiveInt(body.admin_id);
+
+    const username =
+        cleanString(body.username, 100);
+
+    const email =
+        cleanString(body.email, 200).toLowerCase();
+
+    const password =
+        String(body.password || "");
+
+    const displayName =
+        cleanString(body.display_name, 200);
+
+    const bio =
+        cleanString(body.bio, 5000);
+
+    const auth =
+        await requireAdmin(db, adminId);
+
+    if (!auth.ok) {
+        return auth.response;
+    }
+
+    if (
+        !username ||
+        !email ||
+        !password ||
+        !displayName
+    ) {
+        return errorResponse(
+            "username, email, password and display_name are required",
+            400
+        );
+    }
+
+    if (password.length < 8) {
+        return errorResponse(
+            "Password must be at least 8 characters",
+            400
+        );
+    }
+
+    try {
+
+        const existingUser =
+            await db
+                .prepare(`
+                    SELECT id
+                    FROM users
+                    WHERE username = ?
+                       OR email = ?
+                    LIMIT 1
+                `)
+                .bind(username, email)
+                .first();
+
+        if (existingUser) {
+            return errorResponse(
+                "Username or email already exists",
+                409
+            );
+        }
+
+        const passwordHash =
+            await hashPassword(password);
+
+        const userResult =
+            await db
+                .prepare(`
+                    INSERT INTO users (
+                        username,
+                        email,
+                        password_hash,
+                        role,
+                        status
+                    )
+                    VALUES (?, ?, ?, 'author', 'active')
+                `)
+                .bind(
+                    username,
+                    email,
+                    passwordHash
+                )
+                .run();
+
+        const userId =
+            userResult.meta.last_row_id;
+
+        if (!userId) {
+            return errorResponse(
+                "Failed to create author user account",
+                500
+            );
+        }
+
+        try {
+
+            const authorResult =
+                await db
+                    .prepare(`
+                        INSERT INTO authors (
+                            user_id,
+                            display_name,
+                            bio,
+                            approval_status
+                        )
+                        VALUES (?, ?, ?, 'pending')
+                    `)
+                    .bind(
+                        userId,
+                        displayName,
+                        bio || null
+                    )
+                    .run();
+
+            const authorId =
+                authorResult.meta.last_row_id;
+
+            if (!authorId) {
+
+                await db
+                    .prepare(`
+                        DELETE FROM users
+                        WHERE id = ?
+                    `)
+                    .bind(userId)
+                    .run();
+
+                return errorResponse(
+                    "Failed to create author profile",
+                    500
+                );
+            }
+
+            return json({
+                success: true,
+                message:
+                    "Author created successfully and is pending approval",
+                author: {
+                    id: authorId,
+                    user_id: userId,
+                    username,
+                    email,
+                    display_name: displayName,
+                    approval_status: "pending"
+                }
+            }, 201);
+
+        } catch (authorError) {
+
+            try {
+                await db
+                    .prepare(`
+                        DELETE FROM users
+                        WHERE id = ?
+                    `)
+                    .bind(userId)
+                    .run();
+            } catch {}
+
+            throw authorError;
+        }
+
+    } catch (error) {
+
+        return errorResponse(
+            error?.message ||
+            "Failed to create author",
+            500
+        );
+    }
+}
+        
               // -------------------------------------------------
         // ADMIN APPROVE WITHDRAWAL
         // -------------------------------------------------
