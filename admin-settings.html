@@ -1112,427 +1112,349 @@ Futa Local Testing Data </button>
 
 <script>
 
+const API = "/api";
+
 /* ADMIN CHECK */
 
-function checkAdmin(){
+function checkAdmin() {
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("netsimulizi_user") || "null");
+  } catch (e) {
+    user = null;
+  }
 
-const user =
-JSON.parse(
-localStorage.getItem("netsimulizi_user") || "null"
-);
+  if (!user) {
+    window.location.href = "admin-login.html";
+    return null;
+  }
 
-if(!user){
+  if (String(user.role || "").toLowerCase() !== "admin") {
+    alert("Huna ruhusa ya kufungua Admin Panel.");
+    window.location.href = "index.html";
+    return null;
+  }
 
-window.location.href =
-"admin-login.html";
+  document.getElementById("adminName").textContent =
+    user.username || user.email || "Administrator";
 
-return null;
-
+  return user;
 }
 
-if(user.role !== "admin"){
+let currentUser = null;
+let ADMIN_ID = null;
 
-alert(
-"Huna ruhusa ya kufungua Admin Panel."
-);
+/* API HELPER */
 
-window.location.href =
-"index.html";
-
-return null;
-
+async function api(path, options = {}) {
+  const opts = {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  };
+  if (opts.body && typeof opts.body === "object") {
+    opts.body = JSON.stringify(opts.body);
+  }
+  try {
+    const res = await fetch(API + path, opts);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: "Network error: " + err.message };
+  }
 }
 
-document.getElementById("adminName").textContent =
-user.username ||
-user.email ||
-"Administrator";
+/* TOAST */
 
-return user;
-
+function toast(message, type = "success") {
+  const el = document.createElement("div");
+  el.style.cssText = `
+    position:fixed;bottom:24px;right:24px;padding:14px 24px;
+    border-radius:8px;font-size:14px;z-index:9999;
+    animation:slideIn .3s ease;max-width:400px;
+    background:${type === "error" ? "#ef4444" : "#22c55e"};
+    color:#fff;
+  `;
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
 }
 
-/* LOAD SETTINGS */
+/* SUCCESS BANNER + TOAST */
 
-function loadSettings(){
-
-const settings =
-JSON.parse(
-localStorage.getItem(
-"netsimulizi_admin_settings"
-) || "{}"
-);
-
-if(settings.platformName)
-document.getElementById("platformName").value =
-settings.platformName;
-
-if(settings.ownerName)
-document.getElementById("ownerName").value =
-settings.ownerName;
-
-if(settings.defaultLanguage)
-document.getElementById("defaultLanguage").value =
-settings.defaultLanguage;
-
-if(settings.currency)
-document.getElementById("currency").value =
-settings.currency;
-
-if(settings.minimumWithdrawal !== undefined)
-document.getElementById("minimumWithdrawal").value =
-settings.minimumWithdrawal;
-
-if(settings.recommendationAuthor !== undefined)
-document.getElementById("recommendationAuthor").value =
-settings.recommendationAuthor;
-
-const features =
-settings.features || {};
-
-if(features.userRegistration !== undefined)
-document.getElementById("userRegistration").checked =
-features.userRegistration;
-
-if(features.authorSubmissions !== undefined)
-document.getElementById("authorSubmissions").checked =
-features.authorSubmissions;
-
-if(features.paidStories !== undefined)
-document.getElementById("paidStories").checked =
-features.paidStories;
-
-if(features.authorWithdrawals !== undefined)
-document.getElementById("authorWithdrawals").checked =
-features.authorWithdrawals;
-
-if(features.maintenanceMode !== undefined)
-document.getElementById("maintenanceMode").checked =
-features.maintenanceMode;
-
-const reading =
-settings.reading || {};
-
-if(reading.antiCopy !== undefined)
-document.getElementById("antiCopy").checked =
-reading.antiCopy;
-
-if(reading.readerDark !== undefined)
-document.getElementById("readerDark").checked =
-reading.readerDark;
-
-if(reading.readingProgress !== undefined)
-document.getElementById("readingProgress").checked =
-reading.readingProgress;
-
-if(settings.sessionDuration)
-document.getElementById("sessionDuration").value =
-settings.sessionDuration;
-
+function showSuccess(id) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.style.display = "block";
+    setTimeout(() => { element.style.display = "none"; }, 2500);
+  }
 }
 
-/* SAVE PLATFORM */
+/* LOAD SETTINGS — GET /api/admin/settings */
 
-function savePlatformSettings(){
+async function loadSettings() {
+  // Try API first
+  const result = await api("/admin/settings?admin_id=" + ADMIN_ID);
 
-const settings =
-getSettings();
+  let settings = {};
 
-settings.platformName =
-document.getElementById("platformName").value.trim();
+  if (result.success && result.settings) {
+    settings = result.settings;
+  } else {
+    // Fallback to localStorage
+    try {
+      settings = JSON.parse(localStorage.getItem("netsimulizi_admin_settings") || "{}");
+    } catch (e) {
+      settings = {};
+    }
+  }
 
-settings.ownerName =
-document.getElementById("ownerName").value.trim();
+  // Platform
+  if (settings.platformName)
+    document.getElementById("platformName").value = settings.platformName;
+  if (settings.ownerName)
+    document.getElementById("ownerName").value = settings.ownerName;
+  if (settings.defaultLanguage)
+    document.getElementById("defaultLanguage").value = settings.defaultLanguage;
+  if (settings.currency)
+    document.getElementById("currency").value = settings.currency;
 
-settings.defaultLanguage =
-document.getElementById("defaultLanguage").value;
+  // Revenue
+  if (settings.minimumWithdrawal !== undefined)
+    document.getElementById("minimumWithdrawal").value = settings.minimumWithdrawal;
+  if (settings.recommendationAuthor !== undefined)
+    document.getElementById("recommendationAuthor").value = settings.recommendationAuthor;
 
-settings.currency =
-document.getElementById("currency").value;
+  // Features
+  const features = settings.features || {};
+  if (features.userRegistration !== undefined)
+    document.getElementById("userRegistration").checked = features.userRegistration;
+  if (features.authorSubmissions !== undefined)
+    document.getElementById("authorSubmissions").checked = features.authorSubmissions;
+  if (features.paidStories !== undefined)
+    document.getElementById("paidStories").checked = features.paidStories;
+  if (features.authorWithdrawals !== undefined)
+    document.getElementById("authorWithdrawals").checked = features.authorWithdrawals;
+  if (features.maintenanceMode !== undefined)
+    document.getElementById("maintenanceMode").checked = features.maintenanceMode;
 
-saveSettings(settings);
+  // Reading
+  const reading = settings.reading || {};
+  if (reading.antiCopy !== undefined)
+    document.getElementById("antiCopy").checked = reading.antiCopy;
+  if (reading.readerDark !== undefined)
+    document.getElementById("readerDark").checked = reading.readerDark;
+  if (reading.readingProgress !== undefined)
+    document.getElementById("readingProgress").checked = reading.readingProgress;
 
-showSuccess("platformSuccess");
-
+  // Security
+  if (settings.sessionDuration)
+    document.getElementById("sessionDuration").value = settings.sessionDuration;
 }
 
-/* SAVE REVENUE */
+/* GET CURRENT SETTINGS FROM FORM */
 
-function saveRevenueSettings(){
-
-const settings =
-getSettings();
-
-settings.minimumWithdrawal =
-Number(
-document.getElementById(
-"minimumWithdrawal"
-).value || 50000
-);
-
-settings.recommendationAuthor =
-Number(
-document.getElementById(
-"recommendationAuthor"
-).value || 50
-);
-
-saveSettings(settings);
-
-showSuccess("revenueSuccess");
-
+function getFormSettings() {
+  return {
+    platformName: document.getElementById("platformName").value.trim(),
+    ownerName: document.getElementById("ownerName").value.trim(),
+    defaultLanguage: document.getElementById("defaultLanguage").value,
+    currency: document.getElementById("currency").value,
+    minimumWithdrawal: Number(document.getElementById("minimumWithdrawal").value || 50000),
+    recommendationAuthor: Number(document.getElementById("recommendationAuthor").value || 50),
+    features: {
+      userRegistration: document.getElementById("userRegistration").checked,
+      authorSubmissions: document.getElementById("authorSubmissions").checked,
+      paidStories: document.getElementById("paidStories").checked,
+      authorWithdrawals: document.getElementById("authorWithdrawals").checked,
+      maintenanceMode: document.getElementById("maintenanceMode").checked
+    },
+    reading: {
+      antiCopy: document.getElementById("antiCopy").checked,
+      readerDark: document.getElementById("readerDark").checked,
+      readingProgress: document.getElementById("readingProgress").checked
+    },
+    sessionDuration: document.getElementById("sessionDuration").value
+  };
 }
 
-/* SAVE FEATURES */
+/* SAVE TO LOCAL (fallback) */
 
-function saveFeatureSettings(){
-
-const settings =
-getSettings();
-
-settings.features = {
-
-userRegistration:
-document.getElementById(
-"userRegistration"
-).checked,
-
-authorSubmissions:
-document.getElementById(
-"authorSubmissions"
-).checked,
-
-paidStories:
-document.getElementById(
-"paidStories"
-).checked,
-
-authorWithdrawals:
-document.getElementById(
-"authorWithdrawals"
-).checked,
-
-maintenanceMode:
-document.getElementById(
-"maintenanceMode"
-).checked
-
-};
-
-saveSettings(settings);
-
-showSuccess("featureSuccess");
-
+function saveLocal(settings) {
+  localStorage.setItem("netsimulizi_admin_settings", JSON.stringify(settings));
 }
 
-/* SAVE READING */
+/* SAVE PLATFORM — PUT /api/admin/settings */
 
-function saveReadingSettings(){
+async function savePlatformSettings() {
+  const all = getFormSettings();
+  const payload = {
+    admin_id: ADMIN_ID,
+    section: "platform",
+    platformName: all.platformName,
+    ownerName: all.ownerName,
+    defaultLanguage: all.defaultLanguage,
+    currency: all.currency
+  };
 
-const settings =
-getSettings();
+  const result = await api("/admin/settings", { method: "PUT", body: payload });
 
-settings.reading = {
-
-antiCopy:
-document.getElementById(
-"antiCopy"
-).checked,
-
-readerDark:
-document.getElementById(
-"readerDark"
-).checked,
-
-readingProgress:
-document.getElementById(
-"readingProgress"
-).checked
-
-};
-
-saveSettings(settings);
-
-showSuccess("readingSuccess");
-
+  if (result.success) {
+    saveLocal(getFormSettings());
+    showSuccess("platformSuccess");
+    toast("Platform settings zimehifadhiwa!");
+  } else {
+    saveLocal(getFormSettings());
+    showSuccess("platformSuccess");
+    toast("Settings zimehifadhiwa (offline mode).", "success");
+  }
 }
 
-/* SAVE SECURITY */
+/* SAVE REVENUE — PUT /api/admin/settings */
 
-function saveSecuritySettings(){
+async function saveRevenueSettings() {
+  const all = getFormSettings();
+  const payload = {
+    admin_id: ADMIN_ID,
+    section: "revenue",
+    minimumWithdrawal: all.minimumWithdrawal,
+    recommendationAuthor: all.recommendationAuthor
+  };
 
-const settings =
-getSettings();
+  const result = await api("/admin/settings", { method: "PUT", body: payload });
 
-settings.sessionDuration =
-document.getElementById(
-"sessionDuration"
-).value;
-
-saveSettings(settings);
-
-showSuccess("securitySuccess");
-
+  if (result.success) {
+    saveLocal(getFormSettings());
+    showSuccess("revenueSuccess");
+    toast("Revenue settings zimehifadhiwa!");
+  } else {
+    saveLocal(getFormSettings());
+    showSuccess("revenueSuccess");
+    toast("Revenue settings zimehifadhiwa (offline mode).");
+  }
 }
 
-/* GET SETTINGS */
+/* SAVE FEATURES — PUT /api/admin/settings */
 
-function getSettings(){
+async function saveFeatureSettings() {
+  const all = getFormSettings();
+  const payload = {
+    admin_id: ADMIN_ID,
+    section: "features",
+    features: all.features
+  };
 
-try{
+  const result = await api("/admin/settings", { method: "PUT", body: payload });
 
-return JSON.parse(
-localStorage.getItem(
-"netsimulizi_admin_settings"
-) || "{}"
-);
-
-}catch(error){
-
-return {};
-
+  if (result.success) {
+    saveLocal(getFormSettings());
+    showSuccess("featureSuccess");
+    toast("Feature settings zimehifadhiwa!");
+  } else {
+    saveLocal(getFormSettings());
+    showSuccess("featureSuccess");
+    toast("Feature settings zimehifadhiwa (offline mode).");
+  }
 }
 
+/* SAVE READING — PUT /api/admin/settings */
+
+async function saveReadingSettings() {
+  const all = getFormSettings();
+  const payload = {
+    admin_id: ADMIN_ID,
+    section: "reading",
+    reading: all.reading
+  };
+
+  const result = await api("/admin/settings", { method: "PUT", body: payload });
+
+  if (result.success) {
+    saveLocal(getFormSettings());
+    showSuccess("readingSuccess");
+    toast("Reading settings zimehifadhiwa!");
+  } else {
+    saveLocal(getFormSettings());
+    showSuccess("readingSuccess");
+    toast("Reading settings zimehifadhiwa (offline mode).");
+  }
 }
 
-/* SAVE */
+/* SAVE SECURITY — PUT /api/admin/settings */
 
-function saveSettings(settings){
+async function saveSecuritySettings() {
+  const all = getFormSettings();
+  const payload = {
+    admin_id: ADMIN_ID,
+    section: "security",
+    sessionDuration: all.sessionDuration
+  };
 
-localStorage.setItem(
-"netsimulizi_admin_settings",
-JSON.stringify(settings)
-);
+  const result = await api("/admin/settings", { method: "PUT", body: payload });
 
-}
-
-/* SUCCESS */
-
-function showSuccess(id){
-
-const element =
-document.getElementById(id);
-
-element.style.display =
-"block";
-
-setTimeout(
-() => {
-element.style.display =
-"none";
-},
-2500
-);
-
+  if (result.success) {
+    saveLocal(getFormSettings());
+    showSuccess("securitySuccess");
+    toast("Security settings zimehifadhiwa!");
+  } else {
+    saveLocal(getFormSettings());
+    showSuccess("securitySuccess");
+    toast("Security settings zimehifadhiwa (offline mode).");
+  }
 }
 
 /* CLEAR TESTING DATA */
 
-function clearLocalData(){
+function clearLocalData() {
+  if (!confirm("Una uhakika? Hii itafuta data za testing zilizohifadhiwa kwenye browser.")) return;
 
-const confirmed =
-confirm(
-"Una uhakika? Hii itafuta data za testing zilizohifadhiwa kwenye browser."
-);
+  const admin = localStorage.getItem("netsimulizi_user");
 
-if(!confirmed){
-return;
-}
+  const keysToRemove = [
+    "netsimulizi_withdrawals",
+    "netsimulizi_admin_settings",
+    "netsimulizi_notifications",
+    "netsimulizi_contact_messages",
+    "netsimulizi_font_size",
+    "netsimulizi_dark"
+  ];
 
-/*
-Hatufuti login ya admin ili
-mtumiaji asiwe logged out bila sababu.
-*/
+  keysToRemove.forEach(key => localStorage.removeItem(key));
 
-const admin =
-localStorage.getItem(
-"netsimulizi_user"
-);
+  if (admin) localStorage.setItem("netsimulizi_user", admin);
 
-const keysToRemove = [
-
-"netsimulizi_withdrawals",
-"netsimulizi_admin_settings",
-"netsimulizi_notifications",
-"netsimulizi_contact_messages",
-"netsimulizi_font_size",
-"netsimulizi_dark"
-
-];
-
-keysToRemove.forEach(
-key => localStorage.removeItem(key)
-);
-
-if(admin){
-localStorage.setItem(
-"netsimulizi_user",
-admin
-);
-}
-
-alert(
-"Testing data imefutwa."
-);
-
-loadSettings();
-
+  toast("Testing data imefutwa.");
+  loadSettings();
 }
 
 /* MOBILE MENU */
 
-function openMenu(){
-
-document
-.getElementById("sidebar")
-.classList.add("open");
-
-document
-.getElementById("overlay")
-.classList.add("show");
-
+function openMenu() {
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
 }
 
-function closeMenu(){
-
-document
-.getElementById("sidebar")
-.classList.remove("open");
-
-document
-.getElementById("overlay")
-.classList.remove("show");
-
+function closeMenu() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
 }
 
 /* LOGOUT */
 
-function logout(){
-
-localStorage.removeItem(
-"netsimulizi_user"
-);
-
-window.location.href =
-"admin-login.html";
-
+function logout() {
+  if (!confirm("Unataka kutoka kwenye Admin Panel?")) return;
+  localStorage.removeItem("netsimulizi_user");
+  window.location.href = "admin-login.html";
 }
 
 /* START */
 
-document.addEventListener(
-"DOMContentLoaded",
-function(){
-
-const admin =
-checkAdmin();
-
-if(admin){
-loadSettings();
-}
-
-}
-);
+document.addEventListener("DOMContentLoaded", function () {
+  currentUser = checkAdmin();
+  if (currentUser) {
+    ADMIN_ID = currentUser.admin_id || currentUser.id;
+    loadSettings();
+  }
+});
 
 </script>
 
