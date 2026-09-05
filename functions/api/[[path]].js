@@ -3553,6 +3553,76 @@ export async function onRequest(context) {
             }
         }
 
+
+// =====================================================
+// TEMP ADMIN PASSWORD RESET
+// POST /api/admin/reset-password
+// =====================================================
+
+if (path === "/admin/reset-password") {
+
+    const username =
+        cleanString(body.username, 100);
+
+    const newPassword =
+        String(body.password || "");
+
+    if (!username || !newPassword) {
+        return errorResponse(
+            "username and password are required",
+            400
+        );
+    }
+
+    if (newPassword.length < 8) {
+        return errorResponse(
+            "Password must be at least 8 characters",
+            400
+        );
+    }
+
+    try {
+
+        const passwordHash =
+            await hashPassword(newPassword);
+
+        const result =
+            await db
+                .prepare(`
+                    UPDATE users
+                    SET
+                        password_hash = ?,
+                        status = 'active',
+                        role = 'admin',
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE username = 'admin'
+                `)
+                .bind(passwordHash)
+                .run();
+
+        if (!result.meta.changes) {
+            return errorResponse(
+                "Admin account not found",
+                404
+            );
+        }
+
+        return json({
+            success: true,
+            message: "Admin password reset successfully"
+        });
+
+    } catch (error) {
+
+        return errorResponse(
+            error?.message ||
+            "Failed to reset admin password",
+            500
+        );
+    }
+}
+        
+        
          
         // =====================================================
 // ADMIN CREATE AUTHOR
