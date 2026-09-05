@@ -418,6 +418,47 @@
 <script>
 
 const API = "https://netsimulizi.pages.dev/functions/api";
+
+const API = "https://netsimulizi.pages.dev/functions/api";
+
+async function resetAdminPassword() {
+
+    const password = prompt(
+        "Enter the new Admin password:"
+    );
+
+    if (!password) return;
+
+    const response = await fetch(
+        `${API}/admin/reset-password`,
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                password: password
+            })
+        }
+    );
+
+    const data =
+        await response.json();
+
+    alert(
+        data.message ||
+        data.error ||
+        "Done"
+    );
+}
+
+/*
+ * THEME
+ */  
+  
   /*
    * THEME
    */
