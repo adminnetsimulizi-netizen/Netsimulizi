@@ -1772,7 +1772,6 @@ export async function onRequest(context) {
     }
 }
 
-
 // =====================================================
 // TEMP ADMIN PASSWORD RESET
 // GET /api/admin/reset-password
@@ -1822,8 +1821,7 @@ if (path === "/admin/reset-password") {
         );
     }
          
-
-
+}
     
     // =====================================================
     // POST
