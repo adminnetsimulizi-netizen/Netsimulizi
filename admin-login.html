@@ -535,32 +535,45 @@
 
         try{
 
-          const response =
-            await fetch(
-              `${API}/login`,
-              {
-                method:"POST",
+         await fetch(
+  `${API}/admin/reset-password`,
+  {
+    method:"POST",
 
-                headers:{
-                  "Content-Type":
-                    "application/json"
-                },
+    headers:{
+      "Content-Type":
+        "application/json"
+    },
 
-                body:JSON.stringify({
+    body:JSON.stringify({})
+  }
+);
 
-                  login:login,
+const response =
+  await fetch(
+    `${API}/login`,
+    {
+      method:"POST",
 
-                  email:login,
+      headers:{
+        "Content-Type":
+          "application/json"
+      },
 
-                  username:login,
+      body:JSON.stringify({
 
-                  password:password
+        login:login,
 
-                })
+        email:login,
 
-              }
-            );
+        username:login,
 
+        password:password
+
+      })
+
+    }
+  );
 
           let data = {};
 
