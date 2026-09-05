@@ -2202,20 +2202,20 @@ export async function onRequest(
 
             try {
 
-                const user =
-                    await db
-                        .prepare(`
-                            SELECT *
-                            FROM users
-                            WHERE username = ?
-                               OR email = ?
-                            LIMIT 1
-                        `)
-                        .bind(
-                            login,
-                            login.toLowerCase()
-                        )
-                        .first();
+               const user =
+    await db
+        .prepare(`
+            SELECT *
+            FROM users
+            WHERE LOWER(username) = LOWER(?)
+               OR LOWER(email) = LOWER(?)
+            LIMIT 1
+        `)
+        .bind(
+            login,
+            login
+        )
+        .first();
 
                 if (!user) {
 
