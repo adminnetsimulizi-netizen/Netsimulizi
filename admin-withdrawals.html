@@ -955,898 +955,404 @@ Inapakia withdrawal requests...
 
 <script>
 
+const API = "/api";
+
 let withdrawals = [];
+let ADMIN_ID = null;
 
 /* ADMIN CHECK */
 
-function checkAdmin(){
+function checkAdmin() {
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("netsimulizi_user") || "null");
+  } catch (e) {
+    user = null;
+  }
 
-const user =
-JSON.parse(
-localStorage.getItem("netsimulizi_user") || "null"
-);
+  if (!user) {
+    window.location.href = "admin-login.html";
+    return null;
+  }
 
-if(!user){
+  if (String(user.role || "").toLowerCase() !== "admin") {
+    alert("Huna ruhusa ya kufungua Admin Panel.");
+    window.location.href = "index.html";
+    return null;
+  }
 
-window.location.href =
-"admin-login.html";
+  ADMIN_ID = user.admin_id || user.id;
 
-return null;
+  document.getElementById("adminName").textContent =
+    user.username || user.email || "Administrator";
 
+  return user;
 }
 
-if(user.role !== "admin"){
+/* API HELPER */
 
-alert("Huna ruhusa ya kufungua Admin Panel.");
-
-window.location.href =
-"index.html";
-
-return null;
-
+async function api(path, options = {}) {
+  const opts = {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  };
+  if (opts.body && typeof opts.body === "object") {
+    opts.body = JSON.stringify(opts.body);
+  }
+  try {
+    const res = await fetch(API + path, opts);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: "Network error: " + err.message };
+  }
 }
 
-document.getElementById("adminName").textContent =
-user.username ||
-user.email ||
-"Administrator";
+/* TOAST */
 
-return user;
-
+function toast(message, type = "success") {
+  const el = document.createElement("div");
+  el.style.cssText = `
+    position:fixed;bottom:24px;right:24px;padding:14px 24px;
+    border-radius:8px;font-size:14px;z-index:9999;
+    animation:slideIn .3s ease;max-width:400px;
+    background:${type === "error" ? "#ef4444" : "#22c55e"};
+    color:#fff;
+  `;
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
 }
 
-/* LOAD */
+/* LOAD — GET /api/admin/withdrawals */
 
-function loadWithdrawals(){
+async function loadWithdrawals() {
+  const table = document.getElementById("withdrawalsTable");
+  table.innerHTML = `<tr><td colspan="6"><div class="loading">Inapakia withdrawal requests...</div></td></tr>`;
 
-/*
-Kwa sasa withdrawal requests
-zinahifadhiwa localStorage kutoka wallet.html.
-*/
+  const result = await api("/admin/withdrawals?admin_id=" + ADMIN_ID);
 
-try{
+  if (result.success) {
+    withdrawals = result.withdrawals || [];
+  } else {
+    withdrawals = [];
+    table.innerHTML = `<tr><td colspan="6"><div class="empty"><div class="empty-icon">⚠️</div><div>Imeshindikana kupakia: ${escapeHtml(result.message || "")}</div></div></td></tr>`;
+    document.getElementById("resultCount").textContent = "0 requests";
+    return;
+  }
 
-withdrawals =
-JSON.parse(
-localStorage.getItem(
-"netsimulizi_withdrawals"
-) || "[]"
-);
-
-if(!Array.isArray(withdrawals)){
-withdrawals = [];
-}
-
-}catch(error){
-
-withdrawals = [];
-
-}
-
-updateStats();
-filterWithdrawals();
-
+  updateStats();
+  filterWithdrawals();
 }
 
 /* STATS */
 
-function updateStats(){
+function updateStats() {
+  const total = withdrawals.length;
 
-const total =
-withdrawals.length;
+  const pending = withdrawals.filter(w => normalizeStatus(w.status) === "pending").length;
 
-const pending =
-withdrawals.filter(
-w => normalizeStatus(w.status) === "pending"
-).length;
+  const paid = withdrawals.filter(w => normalizeStatus(w.status) === "paid");
 
-const paid =
-withdrawals.filter(
-w => normalizeStatus(w.status) === "paid"
-);
+  const pendingItems = withdrawals.filter(w => normalizeStatus(w.status) === "pending");
 
-const pendingItems =
-withdrawals.filter(
-w => normalizeStatus(w.status) === "pending"
-);
+  const paidTotal = paid.reduce((sum, w) => sum + Number(w.amount || w.requested_amount || 0), 0);
 
-const paidTotal =
-paid.reduce(
-(sum,w) =>
-sum + Number(
-w.amount ||
-w.requested_amount ||
-0
-),
-0
-);
+  const pendingTotal = pendingItems.reduce((sum, w) => sum + Number(w.amount || w.requested_amount || 0), 0);
 
-const pendingTotal =
-pendingItems.reduce(
-(sum,w) =>
-sum + Number(
-w.amount ||
-w.requested_amount ||
-0
-),
-0
-);
-
-document.getElementById(
-"totalRequests"
-).textContent = total;
-
-document.getElementById(
-"pendingRequests"
-).textContent = pending;
-
-document.getElementById(
-"paidAmount"
-).textContent =
-formatMoney(paidTotal);
-
-document.getElementById(
-"pendingAmount"
-).textContent =
-formatMoney(pendingTotal);
-
+  document.getElementById("totalRequests").textContent = total;
+  document.getElementById("pendingRequests").textContent = pending;
+  document.getElementById("paidAmount").textContent = formatMoney(paidTotal);
+  document.getElementById("pendingAmount").textContent = formatMoney(pendingTotal);
 }
 
 /* FILTER */
 
-function filterWithdrawals(){
+function filterWithdrawals() {
+  const search = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+  const method = document.getElementById("methodFilter").value;
 
-const search =
-document.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
+  const filtered = withdrawals.filter(w => {
+    const author = String(w.author_name || w.username || w.author || "").toLowerCase();
+    const email = String(w.email || "").toLowerCase();
+    const account = String(w.account_number || w.phone || w.account || "").toLowerCase();
 
-const status =
-document.getElementById("statusFilter")
-.value;
+    const matchesSearch = !search || author.includes(search) || email.includes(search) || account.includes(search);
+    const matchesStatus = !status || normalizeStatus(w.status) === status;
+    const currentMethod = String(w.payment_method || w.method || "");
+    const matchesMethod = !method || currentMethod === method;
 
-const method =
-document.getElementById("methodFilter")
-.value;
+    return matchesSearch && matchesStatus && matchesMethod;
+  });
 
-const filtered =
-withdrawals.filter(w => {
+  filtered.sort((a, b) => {
+    const order = { pending: 0, processing: 1, paid: 2, rejected: 3 };
+    return (order[normalizeStatus(a.status)] ?? 9) - (order[normalizeStatus(b.status)] ?? 9);
+  });
 
-const author =
-String(
-w.author_name ||
-w.username ||
-w.author ||
-""
-).toLowerCase();
-
-const email =
-String(
-w.email ||
-""
-).toLowerCase();
-
-const account =
-String(
-w.account_number ||
-w.phone ||
-w.account ||
-""
-).toLowerCase();
-
-const matchesSearch =
-!search ||
-author.includes(search) ||
-email.includes(search) ||
-account.includes(search);
-
-const currentStatus =
-normalizeStatus(w.status);
-
-const matchesStatus =
-!status ||
-currentStatus === status;
-
-const currentMethod =
-String(
-w.payment_method ||
-w.method ||
-""
-);
-
-const matchesMethod =
-!method ||
-currentMethod === method;
-
-return (
-matchesSearch &&
-matchesStatus &&
-matchesMethod
-);
-
-});
-
-/*
-Pending requests ziwe juu.
-*/
-
-filtered.sort((a,b) => {
-
-const order = {
-pending:0,
-processing:1,
-paid:2,
-rejected:3
-};
-
-return (
-(order[normalizeStatus(a.status)] ?? 9) -
-(order[normalizeStatus(b.status)] ?? 9)
-);
-
-});
-
-renderWithdrawals(filtered);
-
+  renderWithdrawals(filtered);
 }
 
 /* RENDER */
 
-function renderWithdrawals(list){
+function renderWithdrawals(list) {
+  const table = document.getElementById("withdrawalsTable");
 
-const table =
-document.getElementById("withdrawalsTable");
+  document.getElementById("resultCount").textContent = `${list.length} requests`;
 
-document.getElementById(
-"resultCount"
-).textContent =
-`${list.length} requests`;
+  if (!list.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            <div class="empty-icon">💰</div>
+            <div>Hakuna withdrawal requests zilizopatikana.</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
-if(!list.length){
+  table.innerHTML = list.map((w, index) => {
+    const id = w.id ?? w.request_id ?? index;
+    const author = w.author_name || w.username || w.author || "Unknown Author";
+    const email = w.email || "";
+    const amount = Number(w.amount || w.requested_amount || 0);
+    const method = w.payment_method || w.method || "—";
+    const account = w.account_number || w.phone || w.account || "—";
+    const date = formatDate(w.created_at || w.requested_at || w.date);
+    const status = normalizeStatus(w.status);
+    const initial = author.charAt(0).toUpperCase();
 
-table.innerHTML = `
-<tr>
-<td colspan="6">
-
-<div class="empty">
-
-<div class="empty-icon">
-💰
-</div>
-
-<div>
-Hakuna withdrawal requests zilizopatikana.
-</div>
-
-</div>
-
-</td>
-</tr>
-`;
-
-return;
-
-}
-
-table.innerHTML =
-list.map((w,index) => {
-
-const id =
-w.id ??
-w.request_id ??
-index;
-
-const author =
-w.author_name ||
-w.username ||
-w.author ||
-"Unknown Author";
-
-const email =
-w.email ||
-"";
-
-const amount =
-Number(
-w.amount ||
-w.requested_amount ||
-0
-);
-
-const method =
-w.payment_method ||
-w.method ||
-"—";
-
-const account =
-w.account_number ||
-w.phone ||
-w.account ||
-"—";
-
-const date =
-w.created_at ||
-w.requested_at ||
-w.date ||
-"—";
-
-const status =
-normalizeStatus(w.status);
-
-const initial =
-author
-.charAt(0)
-.toUpperCase();
-
-return `
-
-<tr>
-
-<td>
-
-<div class="author-info">
-
-<div class="avatar">
-${escapeHtml(initial)}
-</div>
-
-<div>
-
-<div class="author-name">
-${escapeHtml(author)}
-</div>
-
-<div class="author-contact">
-${escapeHtml(email)}
-</div>
-
-</div>
-
-</div>
-
-</td>
-
-<td>
-
-<div class="amount">
-${formatMoney(amount)}
-</div>
-
-</td>
-
-<td>
-
-<div class="method">
-${escapeHtml(method)}
-</div>
-
-<div class="account">
-${escapeHtml(account)}
-</div>
-
-</td>
-
-<td>
-${escapeHtml(date)}
-</td>
-
-<td>
-
-<span class="badge badge-${status}">
-${status.toUpperCase()}
-</span>
-
-</td>
-
-<td>
-
-<div class="actions">
-
-<button
-class="action-btn view-btn"
-onclick="viewWithdrawal('${escapeJs(id)}')"
->
-View
-</button>
-
-${
-status === "pending"
-?
-`
-
-<button
-class="action-btn process-btn"
-onclick="processWithdrawal('${escapeJs(id)}')"
->
-Process
-</button>
-
-<button
-class="action-btn reject-btn"
-onclick="rejectWithdrawal('${escapeJs(id)}')"
->
-Reject
-</button>
-
-`
-:
-""
-}
-
-${
-status === "processing"
-?
-`
-
-<button
-class="action-btn pay-btn"
-onclick="markPaid('${escapeJs(id)}')"
->
-Mark Paid
-</button>
-
-<button
-class="action-btn reject-btn"
-onclick="rejectWithdrawal('${escapeJs(id)}')"
->
-Reject
-</button>
-
-`
-:
-""
-}
-
-</div>
-
-</td>
-
-</tr>
-
-`;
-
-}).join("");
-
+    return `
+      <tr>
+        <td>
+          <div class="author-info">
+            <div class="avatar">${escapeHtml(initial)}</div>
+            <div>
+              <div class="author-name">${escapeHtml(author)}</div>
+              <div class="author-contact">${escapeHtml(email)}</div>
+            </div>
+          </div>
+        </td>
+        <td><div class="amount">${formatMoney(amount)}</div></td>
+        <td>
+          <div class="method">${escapeHtml(method)}</div>
+          <div class="account">${escapeHtml(account)}</div>
+        </td>
+        <td>${escapeHtml(date)}</td>
+        <td><span class="badge badge-${status}">${status.toUpperCase()}</span></td>
+        <td>
+          <div class="actions">
+            <button class="action-btn view-btn" onclick="viewWithdrawal('${escapeJs(id)}')">View</button>
+            ${status === "pending" ? `
+              <button class="action-btn process-btn" onclick="processWithdrawal('${escapeJs(id)}')">Process</button>
+              <button class="action-btn reject-btn" onclick="rejectWithdrawal('${escapeJs(id)}')">Reject</button>
+            ` : ""}
+            ${status === "processing" ? `
+              <button class="action-btn pay-btn" onclick="markPaid('${escapeJs(id)}')">Mark Paid</button>
+              <button class="action-btn reject-btn" onclick="rejectWithdrawal('${escapeJs(id)}')">Reject</button>
+            ` : ""}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 
 /* NORMALIZE STATUS */
 
-function normalizeStatus(status){
-
-const value =
-String(status || "pending")
-.toLowerCase();
-
-if(
-value === "completed" ||
-value === "success" ||
-value === "paid"
-){
-return "paid";
-}
-
-if(
-value === "processing" ||
-value === "in_progress"
-){
-return "processing";
-}
-
-if(
-value === "rejected" ||
-value === "declined"
-){
-return "rejected";
-}
-
-return "pending";
-
+function normalizeStatus(status) {
+  const value = String(status || "pending").toLowerCase();
+  if (value === "completed" || value === "success" || value === "paid" || value === "approved") return "paid";
+  if (value === "processing" || value === "in_progress") return "processing";
+  if (value === "rejected" || value === "declined") return "rejected";
+  return "pending";
 }
 
 /* VIEW */
 
-function viewWithdrawal(id){
+function viewWithdrawal(id) {
+  const withdrawal = findWithdrawal(id);
 
-const withdrawal =
-withdrawals.find(
-(w,index) =>
-String(
-w.id ??
-w.request_id ??
-index
-) === String(id)
-);
+  if (!withdrawal) {
+    toast("Withdrawal request haijapatikana.", "error");
+    return;
+  }
 
-if(!withdrawal){
+  const author = withdrawal.author_name || withdrawal.username || withdrawal.author || "Unknown Author";
+  const email = withdrawal.email || "—";
+  const amount = Number(withdrawal.amount || withdrawal.requested_amount || 0);
+  const method = withdrawal.payment_method || withdrawal.method || "—";
+  const account = withdrawal.account_number || withdrawal.phone || withdrawal.account || "—";
+  const accountName = withdrawal.account_name || author;
+  const status = normalizeStatus(withdrawal.status);
+  const date = formatDate(withdrawal.created_at || withdrawal.requested_at || withdrawal.date);
 
-alert("Withdrawal request haijapatikana.");
+  document.getElementById("modalBody").innerHTML = `
+    <div class="detail-row"><div class="detail-label">Author</div><div class="detail-value">${escapeHtml(author)}</div></div>
+    <div class="detail-row"><div class="detail-label">Email</div><div class="detail-value">${escapeHtml(email)}</div></div>
+    <div class="detail-row"><div class="detail-label">Amount</div><div class="detail-value"><strong style="color:var(--gold-light)">${formatMoney(amount)}</strong></div></div>
+    <div class="detail-row"><div class="detail-label">Payment Method</div><div class="detail-value">${escapeHtml(method)}</div></div>
+    <div class="detail-row"><div class="detail-label">Account Name</div><div class="detail-value">${escapeHtml(accountName)}</div></div>
+    <div class="detail-row"><div class="detail-label">Account / Phone</div><div class="detail-value">${escapeHtml(account)}</div></div>
+    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value">${status.toUpperCase()}</div></div>
+    <div class="detail-row"><div class="detail-label">Requested</div><div class="detail-value">${escapeHtml(date)}</div></div>
+    ${status === "pending" ? `
+      <div class="modal-actions">
+        <button class="modal-process" onclick="processWithdrawal('${escapeJs(id)}');closeModal()">Process</button>
+        <button class="modal-reject" onclick="rejectWithdrawal('${escapeJs(id)}');closeModal()">Reject</button>
+      </div>
+    ` : ""}
+    ${status === "processing" ? `
+      <div class="modal-actions">
+        <button class="modal-pay" onclick="markPaid('${escapeJs(id)}');closeModal()">Mark Paid</button>
+        <button class="modal-reject" onclick="rejectWithdrawal('${escapeJs(id)}');closeModal()">Reject</button>
+      </div>
+    ` : ""}
+  `;
 
-return;
-
+  document.getElementById("detailModal").classList.add("show");
 }
 
-const author =
-withdrawal.author_name ||
-withdrawal.username ||
-withdrawal.author ||
-"Unknown Author";
+/* FIND */
 
-const email =
-withdrawal.email ||
-"—";
-
-const amount =
-Number(
-withdrawal.amount ||
-withdrawal.requested_amount ||
-0
-);
-
-const method =
-withdrawal.payment_method ||
-withdrawal.method ||
-"—";
-
-const account =
-withdrawal.account_number ||
-withdrawal.phone ||
-withdrawal.account ||
-"—";
-
-const accountName =
-withdrawal.account_name ||
-author;
-
-const status =
-normalizeStatus(withdrawal.status);
-
-const date =
-withdrawal.created_at ||
-withdrawal.requested_at ||
-withdrawal.date ||
-"—";
-
-document.getElementById(
-"modalBody"
-).innerHTML = `
-
-<div class="detail-row">
-<div class="detail-label">Author</div>
-<div class="detail-value">
-${escapeHtml(author)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Email</div>
-<div class="detail-value">
-${escapeHtml(email)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Amount</div>
-<div class="detail-value">
-<strong style="color:var(--gold-light)">
-${formatMoney(amount)}
-</strong>
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Payment Method</div>
-<div class="detail-value">
-${escapeHtml(method)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Account Name</div>
-<div class="detail-value">
-${escapeHtml(accountName)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Account / Phone</div>
-<div class="detail-value">
-${escapeHtml(account)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Status</div>
-<div class="detail-value">
-${status.toUpperCase()}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Requested</div>
-<div class="detail-value">
-${escapeHtml(date)}
-</div>
-</div>
-
-${
-status === "pending"
-?
-`
-
-<div class="modal-actions">
-
-<button
-class="modal-process"
-onclick="processWithdrawal('${escapeJs(id)}');closeModal()"
->
-Process
-</button>
-
-<button
-class="modal-reject"
-onclick="rejectWithdrawal('${escapeJs(id)}');closeModal()"
->
-Reject
-</button>
-
-</div>
-
-`
-:
-""
+function findWithdrawal(id) {
+  return withdrawals.find((w, index) => String(w.id ?? w.request_id ?? index) === String(id));
 }
 
-${
-status === "processing"
-?
-`
+/* PROCESS — PUT /api/admin/withdrawals/process */
 
-<div class="modal-actions">
+async function processWithdrawal(id) {
+  if (!confirm("Unataka kuanza kushughulikia withdrawal hii?")) return;
 
-<button
-class="modal-pay"
-onclick="markPaid('${escapeJs(id)}');closeModal()"
->
-Mark Paid
-</button>
+  const result = await api("/admin/withdrawals/process", {
+    method: "PUT",
+    body: { admin_id: ADMIN_ID, withdrawal_id: id }
+  });
 
-<button
-class="modal-reject"
-onclick="rejectWithdrawal('${escapeJs(id)}');closeModal()"
->
-Reject
-</button>
-
-</div>
-
-`
-:
-""
+  if (result.success) {
+    toast("Withdrawal imewekwa Processing!");
+    loadWithdrawals();
+  } else {
+    toast(result.message || "Imeshindikana ku-process.", "error");
+  }
 }
 
-`;
+/* MARK PAID — PUT /api/admin/withdrawals/approve */
 
-document
-.getElementById("detailModal")
-.classList.add("show");
+async function markPaid(id) {
+  if (!confirm("Umeshafanya malipo haya na unataka kuyaweka kuwa Paid?")) return;
 
+  const result = await api("/admin/withdrawals/approve", {
+    method: "PUT",
+    body: { admin_id: ADMIN_ID, withdrawal_id: id }
+  });
+
+  if (result.success) {
+    toast("Withdrawal imewekwa Paid!");
+    loadWithdrawals();
+  } else {
+    toast(result.message || "Imeshindikana ku-mark paid.", "error");
+  }
 }
 
-/* FIND WITHDRAWAL */
+/* REJECT — PUT /api/admin/withdrawals/reject */
 
-function findWithdrawal(id){
+async function rejectWithdrawal(id) {
+  if (!confirm("Unataka ku-reject withdrawal hii?")) return;
 
-return withdrawals.find(
-(w,index) =>
-String(
-w.id ??
-w.request_id ??
-index
-) === String(id)
-);
+  const note = prompt("Sabu ya kukataa (optional):") || "";
 
+  const result = await api("/admin/withdrawals/reject", {
+    method: "PUT",
+    body: { admin_id: ADMIN_ID, withdrawal_id: id, admin_note: note }
+  });
+
+  if (result.success) {
+    toast("Withdrawal imekataliwa.");
+    loadWithdrawals();
+  } else {
+    toast(result.message || "Imeshindikana ku-reject.", "error");
+  }
 }
 
-/* PROCESS */
+/* CLOSE MODAL */
 
-function processWithdrawal(id){
-
-const withdrawal =
-findWithdrawal(id);
-
-if(!withdrawal){
-return;
+function closeModal() {
+  document.getElementById("detailModal").classList.remove("show");
 }
 
-const confirmed =
-confirm(
-"Unataka kuanza kushughulikia withdrawal hii?"
-);
+document.getElementById("detailModal").addEventListener("click", function (e) {
+  if (e.target === this) closeModal();
+});
 
-if(!confirmed){
-return;
-}
-
-withdrawal.status =
-"processing";
-
-saveWithdrawals();
-
-alert(
-"Withdrawal imewekwa Processing."
-);
-
-}
-
-/* MARK PAID */
-
-function markPaid(id){
-
-const withdrawal =
-findWithdrawal(id);
-
-if(!withdrawal){
-return;
-}
-
-const confirmed =
-confirm(
-"Umeshafanya malipo haya na unataka kuyaweka kuwa Paid?"
-);
-
-if(!confirmed){
-return;
-}
-
-withdrawal.status =
-"paid";
-
-withdrawal.paid_at =
-new Date().toISOString();
-
-saveWithdrawals();
-
-alert(
-"Withdrawal imewekwa Paid."
-);
-
-}
-
-/* REJECT */
-
-function rejectWithdrawal(id){
-
-const withdrawal =
-findWithdrawal(id);
-
-if(!withdrawal){
-return;
-}
-
-const confirmed =
-confirm(
-"Unataka ku-reject withdrawal hii?"
-);
-
-if(!confirmed){
-return;
-}
-
-withdrawal.status =
-"rejected";
-
-withdrawal.rejected_at =
-new Date().toISOString();
-
-saveWithdrawals();
-
-alert(
-"Withdrawal imekataliwa."
-);
-
-}
-
-/* SAVE */
-
-function saveWithdrawals(){
-
-localStorage.setItem(
-"netsimulizi_withdrawals",
-JSON.stringify(withdrawals)
-);
-
-updateStats();
-filterWithdrawals();
-
-}
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeModal();
+});
 
 /* MONEY */
 
-function formatMoney(amount){
+function formatMoney(amount) {
+  return "TSh " + Number(amount || 0).toLocaleString("en-US");
+}
 
-return "TSh " +
-Number(amount || 0)
-.toLocaleString("en-US");
+/* DATE */
 
+function formatDate(value) {
+  if (!value || value === "—") return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("sw-TZ", { day: "numeric", month: "short", year: "numeric" });
 }
 
 /* ESCAPE */
 
-function escapeHtml(value){
-
-return String(value ?? "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
-function escapeJs(value){
-
-return String(value ?? "")
-.replace(/\\/g,"\\\\")
-.replace(/'/g,"\\'")
-.replace(/"/g,'\\"');
-
+function escapeJs(value) {
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"');
 }
 
 /* MOBILE */
 
-function openMenu(){
-
-document
-.getElementById("sidebar")
-.classList.add("open");
-
-document
-.getElementById("overlay")
-.classList.add("show");
-
+function openMenu() {
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
 }
 
-function closeMenu(){
-
-document
-.getElementById("sidebar")
-.classList.remove("open");
-
-document
-.getElementById("overlay")
-.classList.remove("show");
-
+function closeMenu() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
 }
 
 /* LOGOUT */
 
-function logout(){
-
-localStorage.removeItem(
-"netsimulizi_user"
-);
-
-window.location.href =
-"admin-login.html";
-
+function logout() {
+  if (!confirm("Unataka kutoka kwenye Admin Panel?")) return;
+  localStorage.removeItem("netsimulizi_user");
+  window.location.href = "admin-login.html";
 }
 
 /* START */
 
-document.addEventListener(
-"DOMContentLoaded",
-function(){
+document.addEventListener("DOMContentLoaded", function () {
+  const admin = checkAdmin();
+  if (admin) loadWithdrawals();
+});
 
-const admin =
-checkAdmin();
-
-if(admin){
-loadWithdrawals();
-}
-
-}
-);
 
 </script>
 
