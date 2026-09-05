@@ -2313,6 +2313,73 @@ export async function onRequest(
             }
         }
 
+       /* =============================================
+   TEMP ADMIN PASSWORD RESET
+   REMOVE AFTER USE
+   ============================================= */
+
+if (
+    method === "POST" &&
+    path === "/admin/reset-password"
+) {
+
+    const newPassword =
+        String(body.password || "");
+
+    if (!newPassword) {
+        return errorResponse(
+            "Password is required",
+            400
+        );
+    }
+
+    try {
+
+        const passwordHash =
+            await hashPassword(
+                newPassword
+            );
+
+        const result =
+            await db
+                .prepare(`
+                    UPDATE users
+                    SET password_hash = ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = 5
+                      AND role = 'admin'
+                `)
+                .bind(passwordHash)
+                .run();
+
+        if (
+            result.meta.changes === 0
+        ) {
+            return errorResponse(
+                "Admin account not found",
+                404
+            );
+        }
+
+        return json({
+            success: true,
+            message:
+                "Admin password updated successfully"
+        });
+
+    } catch (error) {
+
+        return errorResponse(
+            "Password reset failed",
+            500,
+            {
+                error:
+                    error?.message ||
+                    String(error)
+            }
+        );
+    }
+}
 
         /* =============================================
            AUTHOR LOGIN
