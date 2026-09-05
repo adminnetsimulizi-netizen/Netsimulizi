@@ -527,6 +527,33 @@
       }
 
     }
+
+  /* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
+.modal h2{font-size:20px;margin-bottom:20px}
+.modal .form-group{margin-bottom:16px}
+.modal label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}
+.modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);outline:none}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--gold)}
+.modal textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+.modal-detail{display:grid;gap:10px;margin-bottom:20px}
+.modal-detail .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.modal-detail .row span:first-child{color:var(--muted);font-size:12px}
+.modal-detail .row span:last-child{font-weight:600;font-size:13px}
+.btn-cancel{border:1px solid var(--border);background:var(--surface-2);color:var(--muted);padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-confirm{border:0;background:var(--gold);color:#111;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
+.btn-danger{border:0;background:var(--danger);color:#fff;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700}
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:8px;font-size:14px;z-index:300;animation:slideIn .3s ease;max-width:400px}
+.toast-success{background:var(--success);color:#fff}
+.toast-error{background:var(--danger);color:#fff}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+    
   </style>
 </head>
 
@@ -837,772 +864,539 @@
   </main>
 
 </div>
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+    <h2>Add New User</h2>
+    <div class="form-group"><label>Username *</label><input type="text" id="newUserUsername"></div>
+    <div class="form-group"><label>Email *</label><input type="email" id="newUserEmail"></div>
+    <div class="form-group"><label>Password * (min 8 chars)</label><input type="password" id="newUserPassword"></div>
+    <div class="form-group">
+      <label>Role *</label>
+      <select id="newUserRole">
+        <option value="reader">Reader (User)</option>
+        <option value="author">Author</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn-confirm" onclick="createUser()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+    <h2>Edit User</h2>
+    <div class="form-group"><label>Username</label><input type="text" id="editUsername"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="editEmail"></div>
+    <div class="form-group">
+      <label>Role</label>
+      <select id="editRole">
+        <option value="reader">Reader (User)</option>
+        <option value="author">Author</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('editUserModal')">Cancel</button>
+      <button class="btn-confirm" id="editUserConfirm">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW USER MODAL -->
+<div class="modal-overlay" id="viewUserModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('viewUserModal')">&times;</button>
+    <h2 id="viewUserTitle">User Details</h2>
+    <div class="modal-detail" id="viewUserDetail"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('viewUserModal')">Close</button>
+    </div>
+  </div>
+</div>
 
 
 <script>
 
-  const API = "/api";
+ const API = "/api";
 
+/* ADMIN SESSION */
 
-  /* ADMIN SESSION */
+let currentUser = null;
 
-  let currentUser = null;
-
-  try{
-
-    currentUser =
-      JSON.parse(
-        localStorage.getItem(
-          "netsimulizi_user"
-        ) || "null"
-      );
-
-  }catch(error){
-
-    currentUser = null;
-
-  }
-
-
-  if(
-    !currentUser ||
-    String(currentUser.role || "").toLowerCase() !== "admin"
-  ){
-
-    alert(
-      "Ukurasa huu ni wa Admin pekee."
-    );
-
-    window.location.href =
-      "admin-login.html";
-
-  }
-
-
-  if(currentUser){
-
-    document.getElementById("adminName")
-      .textContent =
-        currentUser.username ||
-        currentUser.name ||
-        "Admin";
-
-  }
-
-
-  /* THEME */
-
-  const themeBtn =
-    document.getElementById("themeBtn");
-
-
-  if(
-    localStorage.getItem(
-      "netsimulizi_theme"
-    ) !== "light"
-  ){
-
-    document.body.classList.add("dark");
-
-  }
-
-
-  themeBtn.addEventListener(
-    "click",
-    function(){
-
-      const isDark =
-        document.body.classList.toggle("dark");
-
-      if(isDark){
-
-        localStorage.removeItem(
-          "netsimulizi_theme"
-        );
-
-      }else{
-
-        localStorage.setItem(
-          "netsimulizi_theme",
-          "light"
-        );
-
-      }
-
-    }
+try {
+  currentUser = JSON.parse(
+    localStorage.getItem("netsimulizi_user") || "null"
   );
+} catch (error) {
+  currentUser = null;
+}
 
+if (
+  !currentUser ||
+  String(currentUser.role || "").toLowerCase() !== "admin"
+) {
+  alert("Ukurasa huu ni wa Admin pekee.");
+  window.location.href = "admin-login.html";
+}
 
-  /* MOBILE MENU */
+if (currentUser) {
+  document.getElementById("adminName").textContent =
+    currentUser.username || currentUser.name || "Admin";
+}
 
-  document.getElementById("menuBtn")
-    .addEventListener(
-      "click",
-      function(){
+const ADMIN_ID = currentUser ? (currentUser.admin_id || currentUser.id) : null;
 
-        document
-          .getElementById("sidebar")
-          .classList.toggle("open");
+/* API HELPER */
 
-      }
-    );
+async function api(path, options = {}) {
+  const opts = {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  };
+  if (opts.body && typeof opts.body === "object") {
+    opts.body = JSON.stringify(opts.body);
+  }
+  try {
+    const res = await fetch(API + path, opts);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: "Network error: " + err.message };
+  }
+}
 
+/* TOAST */
 
-  /* DATA */
+function toast(message, type = "success") {
+  const el = document.createElement("div");
+  el.className = "toast toast-" + type;
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
 
-  let allUsers = [];
+/* MODAL HELPERS */
 
+function closeModal(id) {
+  document.getElementById(id).classList.remove("show");
+}
 
-  /*
-   * LOAD USERS
-   *
-   * Endpoint /api/users itakapokuwa
-   * tayari itatumika moja kwa moja.
-   */
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) overlay.classList.remove("show");
+  });
+});
 
-  async function loadUsers(){
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    document.querySelectorAll(".modal-overlay.show").forEach(m => m.classList.remove("show"));
+  }
+});
 
-    const table =
-      document.getElementById("usersTable");
+/* THEME */
 
+const themeBtn = document.getElementById("themeBtn");
 
-    try{
+if (localStorage.getItem("netsimulizi_theme") !== "light") {
+  document.body.classList.add("dark");
+}
 
-      const response =
-        await fetch(`${API}/users`);
+themeBtn.addEventListener("click", function () {
+  const isDark = document.body.classList.toggle("dark");
+  if (isDark) {
+    localStorage.removeItem("netsimulizi_theme");
+  } else {
+    localStorage.setItem("netsimulizi_theme", "light");
+  }
+});
 
+/* MOBILE MENU */
 
-      if(!response.ok){
+document.getElementById("menuBtn").addEventListener("click", function () {
+  document.getElementById("sidebar").classList.toggle("open");
+});
 
-        throw new Error(
-          "Users API unavailable"
-        );
+/* DATA */
 
-      }
+let allUsers = [];
 
+/* LOAD USERS */
 
-      const data =
-        await response.json();
+async function loadUsers() {
+  const table = document.getElementById("usersTable");
 
+  try {
+    const response = await fetch(`${API}/users`);
 
-      if(Array.isArray(data)){
+    if (!response.ok) throw new Error("Users API unavailable");
 
-        allUsers = data;
+    const data = await response.json();
 
-      }else if(Array.isArray(data.users)){
-
-        allUsers = data.users;
-
-      }else{
-
-        allUsers = [];
-
-      }
-
-
-      updateStats();
-
-      renderUsers();
-
-
-    }catch(error){
-
-      console.error(error);
-
-
-      /*
-       * Kwa sasa kama /api/users bado
-       * haipo, tunaonyesha empty state
-       * badala ya kuvunja UI.
-       */
-
+    if (Array.isArray(data)) {
+      allUsers = data;
+    } else if (Array.isArray(data.users)) {
+      allUsers = data.users;
+    } else {
       allUsers = [];
+    }
 
-      updateStats();
+    updateStats();
+    renderUsers();
 
-      table.innerHTML = `
+  } catch (error) {
+    console.error(error);
+    allUsers = [];
+    updateStats();
+    table.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="empty">
+            <strong>Imeshindikana kupakia users.</strong>
+            <br><br>
+            ${escapeHTML(error.message)}
+          </div>
+        </td>
+      </tr>
+    `;
+    document.getElementById("resultCount").textContent = "0 users";
+  }
+}
 
-        <tr>
+/* STATS */
 
-          <td colspan="5">
+function updateStats() {
+  const total = allUsers.length;
 
-            <div class="empty">
+  const active = allUsers.filter(function (user) {
+    const status = String(user.status || "active").toLowerCase();
+    return status === "active" || status === "approved" || status === "enabled";
+  }).length;
 
-              <strong>
-                Users API bado haijaunganishwa.
-              </strong>
+  const authors = allUsers.filter(function (user) {
+    return String(user.role || "").toLowerCase() === "author";
+  }).length;
 
-              <br><br>
+  const admins = allUsers.filter(function (user) {
+    return String(user.role || "").toLowerCase() === "admin";
+  }).length;
 
-              Ukurasa wa User Management
-              uko tayari kwa backend.
+  document.getElementById("totalUsers").textContent = total;
+  document.getElementById("activeUsers").textContent = active;
+  document.getElementById("authorUsers").textContent = authors;
+  document.getElementById("adminUsers").textContent = admins;
+}
 
+/* FILTER */
+
+function getFilteredUsers() {
+  const search = document.getElementById("searchInput").value.trim().toLowerCase();
+  const role = document.getElementById("roleFilter").value;
+  const status = document.getElementById("statusFilter").value;
+
+  return allUsers.filter(function (user) {
+    const username = String(user.username || user.name || "").toLowerCase();
+    const email = String(user.email || "").toLowerCase();
+    const userRole = String(user.role || "user").toLowerCase();
+    const userStatus = String(user.status || "active").toLowerCase();
+
+    const searchMatch = !search || username.includes(search) || email.includes(search);
+    const roleMatch = role === "all" || userRole === role;
+
+    const statusMatch =
+      status === "all" ||
+      (status === "active" && (userStatus === "active" || userStatus === "approved" || userStatus === "enabled")) ||
+      (status === "inactive" && (userStatus === "inactive" || userStatus === "disabled" || userStatus === "blocked"));
+
+    return searchMatch && roleMatch && statusMatch;
+  });
+}
+
+/* RENDER */
+
+function renderUsers() {
+  const users = getFilteredUsers();
+  const table = document.getElementById("usersTable");
+
+  document.getElementById("resultCount").textContent = `${users.length} users`;
+
+  if (!users.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5">
+          <div class="empty">Hakuna users waliopatikana.</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = users.map(function (user) {
+    const id = user.id || user.user_id || "";
+    const username = user.username || user.name || "Unknown";
+    const email = user.email || "—";
+    const role = String(user.role || "user").toLowerCase();
+    const rawStatus = String(user.status || "active").toLowerCase();
+    const active = rawStatus === "active" || rawStatus === "approved" || rawStatus === "enabled";
+
+    const roleClass = ["admin", "author", "user"].includes(role) ? role : "user";
+    const roleText = role === "admin" ? "ADMIN" : role === "author" ? "AUTHOR" : "USER";
+    const statusClass = active ? "active" : "inactive";
+    const statusText = active ? "ACTIVE" : "INACTIVE";
+    const joined = user.created_at || user.createdAt || user.joined_at || user.joined || "—";
+    const initial = username.charAt(0).toUpperCase();
+
+    return `
+      <tr>
+        <td>
+          <div class="user-cell">
+            <div class="avatar">${escapeHTML(initial)}</div>
+            <div>
+              <div class="username">${escapeHTML(username)}</div>
+              <div class="email">${escapeHTML(email)}</div>
             </div>
+          </div>
+        </td>
+        <td><span class="role ${roleClass}">${roleText}</span></td>
+        <td><span class="status ${statusClass}">${statusText}</span></td>
+        <td>${escapeHTML(formatDate(joined))}</td>
+        <td>
+          <div class="actions">
+            <button class="action-btn" onclick="viewUser('${escapeAttribute(id)}')">View</button>
+            <button class="action-btn" onclick="editUser('${escapeAttribute(id)}')">Edit</button>
+            <button class="action-btn" onclick="toggleUser('${escapeAttribute(id)}')">${active ? "Disable" : "Enable"}</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
-          </td>
+/* VIEW USER — modal with details */
 
-        </tr>
+function viewUser(id) {
+  const user = allUsers.find(function (item) {
+    return String(item.id || item.user_id || "") === String(id);
+  });
 
-      `;
+  if (!user) {
+    toast("User hajapatikana.", "error");
+    return;
+  }
 
-      document.getElementById("resultCount")
-        .textContent = "0 users";
+  const username = user.username || user.name || "Unknown";
+  document.getElementById("viewUserTitle").textContent = username;
 
+  document.getElementById("viewUserDetail").innerHTML = `
+    <div class="row"><span>Username</span><span>${escapeHTML(username)}</span></div>
+    <div class="row"><span>Email</span><span>${escapeHTML(user.email || "—")}</span></div>
+    <div class="row"><span>Role</span><span>${escapeHTML(user.role || "user")}</span></div>
+    <div class="row"><span>Status</span><span>${escapeHTML(user.status || "active")}</span></div>
+    <div class="row"><span>Joined</span><span>${escapeHTML(formatDate(user.created_at || user.createdAt || "—"))}</span></div>
+    <div class="row"><span>User ID</span><span>${escapeHTML(id)}</span></div>
+  `;
+
+  document.getElementById("viewUserModal").classList.add("show");
+}
+
+/* EDIT USER — modal + PUT /api/admin/users/:id */
+
+let editUserId = null;
+
+function editUser(id) {
+  const user = allUsers.find(function (item) {
+    return String(item.id || item.user_id || "") === String(id);
+  });
+
+  if (!user) {
+    toast("User hajapatikana.", "error");
+    return;
+  }
+
+  editUserId = id;
+
+  document.getElementById("editUsername").value = user.username || user.name || "";
+  document.getElementById("editEmail").value = user.email || "";
+  document.getElementById("editRole").value = String(user.role || "reader").toLowerCase();
+  document.getElementById("editStatus").value =
+    String(user.status || "active").toLowerCase() === "active" ? "active" : "inactive";
+
+  document.getElementById("editUserModal").classList.add("show");
+}
+
+document.getElementById("editUserConfirm").onclick = async () => {
+  const username = document.getElementById("editUsername").value.trim();
+  const email = document.getElementById("editEmail").value.trim();
+  const role = document.getElementById("editRole").value;
+  const status = document.getElementById("editStatus").value;
+
+  if (!username) {
+    toast("Username ni lazima.", "error");
+    return;
+  }
+
+  const result = await api(`/admin/users/${editUserId}`, {
+    method: "PUT",
+    body: {
+      admin_id: ADMIN_ID,
+      username: username,
+      email: email,
+      role: role,
+      status: status
     }
+  });
 
+  if (result.success) {
+    toast("User updated kikamilifu!");
+    closeModal("editUserModal");
+    loadUsers();
+  } else {
+    toast(result.message || "Imeshindikana ku-update user.", "error");
+  }
+};
+
+/* TOGGLE USER — PUT /api/admin/users/:id/status */
+
+async function toggleUser(id) {
+  const user = allUsers.find(function (item) {
+    return String(item.id || item.user_id || "") === String(id);
+  });
+
+  if (!user) {
+    toast("User hajapatikana.", "error");
+    return;
   }
 
-
-  /* STATS */
-
-  function updateStats(){
-
-    const total =
-      allUsers.length;
-
-
-    const active =
-      allUsers.filter(function(user){
-
-        const status =
-          String(
-            user.status ||
-            "active"
-          ).toLowerCase();
-
-        return (
-          status === "active" ||
-          status === "approved" ||
-          status === "enabled"
-        );
-
-      }).length;
-
-
-    const authors =
-      allUsers.filter(function(user){
-
-        return (
-          String(
-            user.role || ""
-          ).toLowerCase() === "author"
-        );
-
-      }).length;
-
-
-    const admins =
-      allUsers.filter(function(user){
-
-        return (
-          String(
-            user.role || ""
-          ).toLowerCase() === "admin"
-        );
-
-      }).length;
-
-
-    document.getElementById("totalUsers")
-      .textContent = total;
-
-
-    document.getElementById("activeUsers")
-      .textContent = active;
-
-
-    document.getElementById("authorUsers")
-      .textContent = authors;
-
-
-    document.getElementById("adminUsers")
-      .textContent = admins;
-
-  }
-
-
-  /* FILTER */
-
-  function getFilteredUsers(){
-
-    const search =
-      document.getElementById(
-        "searchInput"
-      ).value
-       .trim()
-       .toLowerCase();
-
-
-    const role =
-      document.getElementById(
-        "roleFilter"
-      ).value;
-
-
-    const status =
-      document.getElementById(
-        "statusFilter"
-      ).value;
-
-
-    return allUsers.filter(
-      function(user){
-
-        const username =
-          String(
-            user.username ||
-            user.name ||
-            ""
-          ).toLowerCase();
-
-
-        const email =
-          String(
-            user.email ||
-            ""
-          ).toLowerCase();
-
-
-        const userRole =
-          String(
-            user.role ||
-            "user"
-          ).toLowerCase();
-
-
-        const userStatus =
-          String(
-            user.status ||
-            "active"
-          ).toLowerCase();
-
-
-        const searchMatch =
-          !search ||
-          username.includes(search) ||
-          email.includes(search);
-
-
-        const roleMatch =
-          role === "all" ||
-          userRole === role;
-
-
-        const statusMatch =
-          status === "all" ||
-          (
-            status === "active" &&
-            (
-              userStatus === "active" ||
-              userStatus === "approved" ||
-              userStatus === "enabled"
-            )
-          ) ||
-          (
-            status === "inactive" &&
-            (
-              userStatus === "inactive" ||
-              userStatus === "disabled" ||
-              userStatus === "blocked"
-            )
-          );
-
-
-        return (
-          searchMatch &&
-          roleMatch &&
-          statusMatch
-        );
-
-      }
-    );
-
-  }
-
-
-  /* RENDER */
-
-  function renderUsers(){
-
-    const users =
-      getFilteredUsers();
-
-
-    const table =
-      document.getElementById(
-        "usersTable"
-      );
-
-
-    document.getElementById(
-      "resultCount"
-    ).textContent =
-      `${users.length} users`;
-
-
-    if(!users.length){
-
-      table.innerHTML = `
-
-        <tr>
-
-          <td colspan="5">
-
-            <div class="empty">
-              Hakuna users waliopatikana.
-            </div>
-
-          </td>
-
-        </tr>
-
-      `;
-
-      return;
-
+  const currentStatus = String(user.status || "active").toLowerCase();
+  const isActive = currentStatus === "active" || currentStatus === "approved" || currentStatus === "enabled";
+  const newStatus = isActive ? "inactive" : "active";
+  const action = isActive ? "disable" : "enable";
+
+  if (!confirm(`Unataka ku-${action} user "${user.username || user.name}"?`)) return;
+
+  const result = await api(`/admin/users/${id}/status`, {
+    method: "PUT",
+    body: {
+      admin_id: ADMIN_ID,
+      status: newStatus
     }
+  });
 
+  if (result.success) {
+    toast(`User ${isActive ? "imefutwa" : "imekwashwa"} kikamilifu!`);
+    loadUsers();
+  } else {
+    toast(result.message || `Imeshindikana ku-${action} user.`, "error");
+  }
+}
 
-    table.innerHTML =
-      users.map(function(user){
+/* ADD USER — modal + POST /api/admin/users/create */
 
-        const id =
-          user.id ||
-          user.user_id ||
-          "";
+document.querySelector(".add-btn").onclick = () => {
+  document.getElementById("newUserUsername").value = "";
+  document.getElementById("newUserEmail").value = "";
+  document.getElementById("newUserPassword").value = "";
+  document.getElementById("newUserRole").value = "reader";
+  document.getElementById("addUserModal").classList.add("show");
+};
 
+async function createUser() {
+  const username = document.getElementById("newUserUsername").value.trim();
+  const email = document.getElementById("newUserEmail").value.trim();
+  const password = document.getElementById("newUserPassword").value;
+  const role = document.getElementById("newUserRole").value;
 
-        const username =
-          user.username ||
-          user.name ||
-          "Unknown";
-
-
-        const email =
-          user.email ||
-          "—";
-
-
-        const role =
-          String(
-            user.role ||
-            "user"
-          ).toLowerCase();
-
-
-        const rawStatus =
-          String(
-            user.status ||
-            "active"
-          ).toLowerCase();
-
-
-        const active =
-          (
-            rawStatus === "active" ||
-            rawStatus === "approved" ||
-            rawStatus === "enabled"
-          );
-
-
-        const roleClass =
-          ["admin","author","user"]
-            .includes(role)
-            ? role
-            : "user";
-
-
-        const roleText =
-          role === "admin"
-            ? "ADMIN"
-            : role === "author"
-              ? "AUTHOR"
-              : "USER";
-
-
-        const statusClass =
-          active
-            ? "active"
-            : "inactive";
-
-
-        const statusText =
-          active
-            ? "ACTIVE"
-            : "INACTIVE";
-
-
-        const joined =
-          user.created_at ||
-          user.createdAt ||
-          user.joined_at ||
-          user.joined ||
-          "—";
-
-
-        const initial =
-          username
-            .charAt(0)
-            .toUpperCase();
-
-
-        return `
-
-          <tr>
-
-            <td>
-
-              <div class="user-cell">
-
-                <div class="avatar">
-                  ${escapeHTML(initial)}
-                </div>
-
-                <div>
-
-                  <div class="username">
-                    ${escapeHTML(username)}
-                  </div>
-
-                  <div class="email">
-                    ${escapeHTML(email)}
-                  </div>
-
-                </div>
-
-              </div>
-
-            </td>
-
-
-            <td>
-
-              <span class="role ${roleClass}">
-                ${roleText}
-              </span>
-
-            </td>
-
-
-            <td>
-
-              <span class="status ${statusClass}">
-                ${statusText}
-              </span>
-
-            </td>
-
-
-            <td>
-              ${escapeHTML(formatDate(joined))}
-            </td>
-
-
-            <td>
-
-              <div class="actions">
-
-                <button
-                  class="action-btn"
-                  onclick="viewUser('${escapeAttribute(id)}')"
-                >
-                  View
-                </button>
-
-                <button
-                  class="action-btn"
-                  onclick="editUser('${escapeAttribute(id)}')"
-                >
-                  Edit
-                </button>
-
-                <button
-                  class="action-btn"
-                  onclick="toggleUser('${escapeAttribute(id)}')"
-                >
-                  ${active ? "Disable" : "Enable"}
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-
-        `;
-
-      }).join("");
-
+  if (!username || !email || !password) {
+    toast("All required fields must be filled.", "error");
+    return;
   }
 
+  if (password.length < 8) {
+    toast("Password must be at least 8 characters.", "error");
+    return;
+  }
 
-  /* VIEW */
-
-  function viewUser(id){
-
-    const user =
-      allUsers.find(function(item){
-
-        return String(
-          item.id ||
-          item.user_id ||
-          ""
-        ) === String(id);
-
-      });
-
-
-    if(!user){
-
-      alert(
-        "User hajapatikana."
-      );
-
-      return;
-
+  const result = await api("/admin/users/create", {
+    method: "POST",
+    body: {
+      admin_id: ADMIN_ID,
+      username: username,
+      email: email,
+      password: password,
+      role: role
     }
+  });
 
-
-    alert(
-
-      "Username: " +
-      (user.username || user.name || "—") +
-
-      "\nEmail: " +
-      (user.email || "—") +
-
-      "\nRole: " +
-      (user.role || "user") +
-
-      "\nStatus: " +
-      (user.status || "active")
-
-    );
-
+  if (result.success) {
+    toast("User created kikamilifu!");
+    closeModal("addUserModal");
+    loadUsers();
+  } else {
+    toast(result.message || "Imeshindikana ku-create user.", "error");
   }
+}
 
+/* DATE */
 
-  /* EDIT */
+function formatDate(value) {
+  if (!value || value === "—") return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("sw-TZ", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
 
-  function editUser(id){
+/* SECURITY */
 
-    alert(
-      "User editing itaunganishwa na Admin API."
-    );
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  }
+function escapeAttribute(value) {
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'");
+}
 
+/* SEARCH EVENTS */
 
-  /* ENABLE / DISABLE */
+document.getElementById("searchInput").addEventListener("input", renderUsers);
+document.getElementById("roleFilter").addEventListener("change", renderUsers);
+document.getElementById("statusFilter").addEventListener("change", renderUsers);
 
-  function toggleUser(id){
+/* LOGOUT */
 
-    alert(
-      "User activation/deactivation itaunganishwa na Admin API."
-    );
+document.getElementById("logoutBtn").addEventListener("click", function () {
+  if (!confirm("Unataka kutoka kwenye Admin Panel?")) return;
+  localStorage.removeItem("netsimulizi_user");
+  window.location.href = "admin-login.html";
+});
 
-  }
+/* START */
 
+loadUsers();
 
-  /* DATE */
-
-  function formatDate(value){
-
-    if(!value || value === "—"){
-      return "—";
-    }
-
-
-    const date =
-      new Date(value);
-
-
-    if(isNaN(date.getTime())){
-
-      return String(value);
-
-    }
-
-
-    return date.toLocaleDateString(
-      "sw-TZ",
-      {
-        day:"numeric",
-        month:"short",
-        year:"numeric"
-      }
-    );
-
-  }
-
-
-  /* SECURITY */
-
-  function escapeHTML(value){
-
-    return String(value ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-
-  }
-
-
-  function escapeAttribute(value){
-
-    return String(value ?? "")
-      .replace(/\\/g,"\\\\")
-      .replace(/'/g,"\\'");
-
-  }
-
-
-  /* SEARCH EVENTS */
-
-  document.getElementById("searchInput")
-    .addEventListener(
-      "input",
-      renderUsers
-    );
-
-
-  document.getElementById("roleFilter")
-    .addEventListener(
-      "change",
-      renderUsers
-    );
-
-
-  document.getElementById("statusFilter")
-    .addEventListener(
-      "change",
-      renderUsers
-    );
-
-
-  /* LOGOUT */
-
-  document.getElementById("logoutBtn")
-    .addEventListener(
-      "click",
-      function(){
-
-        localStorage.removeItem(
-          "netsimulizi_user"
-        );
-
-        window.location.href =
-          "admin-login.html";
-
-      }
-    );
-
-
-  /* START */
-
-  loadUsers();
 
 </script>
 
