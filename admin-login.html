@@ -43,11 +43,16 @@
       align-items:center;
     }
 
-    .logo{
-      color:#d4aa43;
-      font-weight:900;
-      letter-spacing:2px;
+    .logo-link{
+      display:flex;
+      align-items:center;
       text-decoration:none;
+    }
+
+    .top-logo{
+      width:150px;
+      height:auto;
+      display:block;
     }
 
     .top-actions{
@@ -165,6 +170,27 @@
       font-size:15px;
     }
 
+    /*
+     * TEMPORARY RESET BUTTON
+     */
+
+    #resetAdminBtn{
+      width:100%;
+      margin-top:10px;
+      padding:10px 18px;
+      border:1px solid #d4aa43;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:14px;
+      font-weight:600;
+      background:transparent;
+      color:inherit;
+    }
+
+    #resetAdminBtn:hover{
+      opacity:.9;
+    }
+
     .message{
       display:none;
       padding:12px;
@@ -191,14 +217,7 @@
       border:1px solid rgba(76,175,80,.25);
       color:#2e7d32;
     }
-    
-    #resetAdminBtn {
-    margin-top: 10px;
-    padding: 10px 18px;
-    border: 0;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
+
     .dark .message.success{
       color:#81c784;
     }
@@ -244,6 +263,13 @@
       padding:30px;
     }
 
+    .footer-logo{
+      width:130px;
+      height:auto;
+      display:block;
+      margin:0 auto 10px;
+    }
+
     .footer p{
       margin:7px 0;
       font-size:12px;
@@ -253,6 +279,10 @@
 
       .top{
         padding:14px;
+      }
+
+      .top-logo{
+        width:125px;
       }
 
       .wrap{
@@ -284,11 +314,18 @@
 <header class="top">
 
   <a
-    class="logo"
+    class="logo-link"
     href="index.html"
   >
-    NET SIMULIZI
+
+    <img
+      src="Logo.png"
+      alt="Net Simulizi Logo"
+      class="top-logo"
+    >
+
   </a>
+
 
   <div class="top-actions">
 
@@ -299,6 +336,7 @@
     >
       ◐
     </button>
+
 
     <button
       class="btn"
@@ -333,6 +371,7 @@
 
     </div>
 
+
     <div
       id="message"
       class="message"
@@ -348,6 +387,7 @@
         Email / Username
       </label>
 
+
       <input
         id="login"
         name="login"
@@ -361,6 +401,7 @@
       <label for="password">
         Password
       </label>
+
 
       <input
         id="password"
@@ -379,15 +420,18 @@
       >
         Login
       </button>
-  <button
-    id="resetAdminBtn"
-    type="button"
-    onclick="resetAdminPassword()"
->
-    Reset Admin Password
-</button>
 
-    
+
+      <!-- TEMPORARY: REMOVE AFTER PASSWORD RESET -->
+
+      <button
+        id="resetAdminBtn"
+        type="button"
+        onclick="resetAdminPassword()"
+      >
+        Reset Admin Password
+      </button>
+
     </form>
 
 
@@ -414,9 +458,11 @@
 
 <footer class="footer">
 
-  <b class="logo">
-    NET SIMULIZI
-  </b>
+  <img
+    src="Logo.png"
+    alt="Net Simulizi Logo"
+    class="footer-logo"
+  >
 
   <p>
     Digital Storytelling Platform
@@ -431,7 +477,90 @@
 
 <script>
 
- const API = "https://netsimulizi.pages.dev/api";
+  /*
+   * API
+   */
+
+  const API =
+    "https://netsimulizi.pages.dev/functions/api";
+
+
+  /*
+   * TEMPORARY ADMIN PASSWORD RESET
+   * REMOVE AFTER SUCCESSFUL RESET
+   */
+
+  async function resetAdminPassword(){
+
+    const password =
+      prompt(
+        "Enter the new Admin password:"
+      );
+
+
+    if(!password){
+      return;
+    }
+
+
+    try{
+
+      const response =
+        await fetch(
+          `${API}/admin/reset-password`,
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+              password:password
+            })
+          }
+        );
+
+
+      let data = {};
+
+
+      try{
+
+        data =
+          await response.json();
+
+      }catch(error){
+
+        data = {};
+
+      }
+
+
+      alert(
+        data.message ||
+        data.error ||
+        "Done"
+      );
+
+
+    }catch(error){
+
+      console.error(
+        "Admin password reset error:",
+        error
+      );
+
+
+      alert(
+        "Reset failed: " +
+        error.message
+      );
+
+    }
+
+  }
 
 
   /*
@@ -439,20 +568,28 @@
    */
 
   const themeBtn =
-    document.getElementById("themeBtn");
+    document.getElementById(
+      "themeBtn"
+    );
 
 
   const savedTheme =
-    localStorage.getItem("netsimulizi_theme");
+    localStorage.getItem(
+      "netsimulizi_theme"
+    );
 
 
   if(savedTheme === "light"){
 
-    document.body.classList.remove("dark");
+    document.body.classList.remove(
+      "dark"
+    );
 
   }else{
 
-    document.body.classList.add("dark");
+    document.body.classList.add(
+      "dark"
+    );
 
   }
 
@@ -461,9 +598,16 @@
     "click",
     function(){
 
-      document.body.classList.toggle("dark");
+      document.body.classList.toggle(
+        "dark"
+      );
 
-      if(document.body.classList.contains("dark")){
+
+      if(
+        document.body.classList.contains(
+          "dark"
+        )
+      ){
 
         localStorage.removeItem(
           "netsimulizi_theme"
@@ -486,12 +630,20 @@
    * MESSAGE
    */
 
-  function showMessage(text,type){
+  function showMessage(
+    text,
+    type
+  ){
 
     const message =
-      document.getElementById("message");
+      document.getElementById(
+        "message"
+      );
 
-    message.textContent = text;
+
+    message.textContent =
+      text;
+
 
     message.className =
       "message " + type;
@@ -504,7 +656,9 @@
    */
 
   document
-    .getElementById("adminLoginForm")
+    .getElementById(
+      "adminLoginForm"
+    )
     .addEventListener(
       "submit",
       async function(event){
@@ -526,7 +680,9 @@
 
 
         const button =
-          document.getElementById("loginBtn");
+          document.getElementById(
+            "loginBtn"
+          );
 
 
         if(!login || !password){
@@ -544,52 +700,47 @@
         button.textContent =
           "Inaingia...";
 
-        button.classList.add("loading");
+
+        button.classList.add(
+          "loading"
+        );
 
 
         try{
 
-         await fetch(
-  `${API}/admin/reset-password`,
-  {
-    method:"POST",
+          /*
+           * NORMAL ADMIN LOGIN
+           */
 
-    headers:{
-      "Content-Type":
-        "application/json"
-    },
+          const response =
+            await fetch(
+              `${API}/login`,
+              {
+                method:"POST",
 
-    body:JSON.stringify({})
-  }
-);
+                headers:{
+                  "Content-Type":
+                    "application/json"
+                },
 
-const response =
-  await fetch(
-    `${API}/login`,
-    {
-      method:"POST",
+                body:JSON.stringify({
 
-      headers:{
-        "Content-Type":
-          "application/json"
-      },
+                  login:login,
 
-      body:JSON.stringify({
+                  email:login,
 
-        login:login,
+                  username:login,
 
-        email:login,
+                  password:password
 
-        username:login,
+                })
 
-        password:password
+              }
+            );
 
-      })
-
-    }
-  );
 
           let data = {};
+
 
           try{
 
@@ -615,8 +766,7 @@ const response =
 
 
           /*
-           * Backend yetu inatarajiwa
-           * kurudisha user.
+           * BACKEND USER
            */
 
           const user =
@@ -642,10 +792,15 @@ const response =
               "error"
             );
 
+
             button.textContent =
               "Login";
 
-            button.classList.remove("loading");
+
+            button.classList.remove(
+              "loading"
+            );
+
 
             return;
 
@@ -701,7 +856,10 @@ const response =
           button.textContent =
             "Login";
 
-          button.classList.remove("loading");
+
+          button.classList.remove(
+            "loading"
+          );
 
         }
 
