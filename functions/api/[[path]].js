@@ -82,7 +82,6 @@ const numberOrNull = (value) => {
 };
 
 const slugify = (value) => {
-
     return cleanString(value, 300)
         .toLowerCase()
         .normalize("NFKD")
@@ -100,7 +99,6 @@ const slugify = (value) => {
 };
 
 const readJson = async (request) => {
-
     try {
         return await request.json();
     } catch {
@@ -120,7 +118,6 @@ const textDecoder =
     new TextDecoder();
 
 const bytesToHex = (bytes) => {
-
     return Array.from(bytes)
         .map(
             byte =>
@@ -132,7 +129,6 @@ const bytesToHex = (bytes) => {
 };
 
 const hexToBytes = (hex) => {
-
     const bytes =
         new Uint8Array(
             hex.length / 2
@@ -496,7 +492,6 @@ const getAdmin = async (
             .first();
 
     } catch {
-
         return null;
     }
 };
@@ -514,7 +509,6 @@ const requireAdmin = async (
         );
 
     if (!admin) {
-
         return {
             ok: false,
             response:
@@ -529,9 +523,8 @@ const requireAdmin = async (
         admin.status &&
         String(admin.status)
             .toLowerCase() !==
-            "active"
+        "active"
     ) {
-
         return {
             ok: false,
             response:
@@ -562,13 +555,17 @@ export async function onRequest(
         env
     } = context;
 
+    /*
+       IMPORTANT:
+       Supports the existing D1 binding name.
+       DB is kept as fallback for compatibility.
+    */
     const db =
-        env.DB;
+        env.D1 ?? env.DB;
 
     if (!db) {
-
         return errorResponse(
-            "Database binding DB not found",
+            "D1 database binding not found",
             500
         );
     }
@@ -596,7 +593,6 @@ export async function onRequest(
        ================================================= */
 
     if (method === "OPTIONS") {
-
         return new Response(
             null,
             {
@@ -614,11 +610,8 @@ export async function onRequest(
 
 
     try {
-
         await ensureExtraTables(db);
-
     } catch (error) {
-
         return errorResponse(
             "Database initialization failed",
             500,
@@ -639,7 +632,6 @@ export async function onRequest(
         method === "GET" &&
         path === "/health"
     ) {
-
         return json({
             success: true,
             message:
@@ -665,7 +657,6 @@ export async function onRequest(
         method === "GET" &&
         path === "/test"
     ) {
-
         return json({
             success: true,
             message:
@@ -2170,7 +2161,6 @@ export async function onRequest(
             await readJson(request);
 
         if (!body) {
-
             return errorResponse(
                 "Invalid JSON request",
                 400
@@ -2958,7 +2948,7 @@ export async function onRequest(
                             description || null,
                             coverUrl || null,
                             language,
-                            categoryId,
+                            categoryId
                         )
                         .run();
 
@@ -4635,7 +4625,6 @@ export async function onRequest(
             await readJson(request);
 
         if (!body) {
-
             return errorResponse(
                 "Invalid JSON request",
                 400
