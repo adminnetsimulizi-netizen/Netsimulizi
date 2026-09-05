@@ -969,940 +969,392 @@ Inapakia submissions...
 
 <script>
 
+const API = "/api";
+
 let allSubmissions = [];
+let ADMIN_ID = null;
 
 /* ADMIN CHECK */
 
-function checkAdmin(){
+function checkAdmin() {
+  let user = null;
+  try {
+    user = JSON.parse(localStorage.getItem("netsimulizi_user") || "null");
+  } catch (e) {
+    user = null;
+  }
 
-const user =
-JSON.parse(
-localStorage.getItem("netsimulizi_user") || "null"
-);
+  if (!user) {
+    window.location.href = "admin-login.html";
+    return null;
+  }
 
-if(!user){
+  if (String(user.role || "").toLowerCase() !== "admin") {
+    alert("Huna ruhusa ya kufungua Admin Panel.");
+    window.location.href = "index.html";
+    return null;
+  }
 
-window.location.href =
-"admin-login.html";
+  ADMIN_ID = user.admin_id || user.id;
 
-return null;
+  document.getElementById("adminName").textContent =
+    user.username || user.email || "Administrator";
+
+  return user;
 }
 
-if(user.role !== "admin"){
+/* API HELPER */
 
-alert("Huna ruhusa ya kufungua Admin Panel.");
-
-window.location.href =
-"index.html";
-
-return null;
+async function api(path, options = {}) {
+  const opts = {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  };
+  if (opts.body && typeof opts.body === "object") {
+    opts.body = JSON.stringify(opts.body);
+  }
+  try {
+    const res = await fetch(API + path, opts);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: "Network error: " + err.message };
+  }
 }
 
-document.getElementById("adminName").textContent =
-user.username ||
-user.email ||
-"Administrator";
+/* TOAST */
 
-return user;
-
+function toast(message, type = "success") {
+  const el = document.createElement("div");
+  el.style.cssText = `
+    position:fixed;bottom:24px;right:24px;padding:14px 24px;
+    border-radius:8px;font-size:14px;z-index:9999;
+    animation:slideIn .3s ease;max-width:400px;
+    background:${type === "error" ? "#ef4444" : "#22c55e"};
+    color:#fff;
+  `;
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
 }
 
-/* LOAD */
+/* LOAD — GET /api/admin/submissions */
 
-async function loadSubmissions(){
+async function loadSubmissions() {
+  const table = document.getElementById("submissionsTable");
+  table.innerHTML = `<tr><td colspan="7"><div class="loading">Inapakia submissions...</div></td></tr>`;
 
-const table =
-document.getElementById("submissionsTable");
+  const result = await api("/admin/submissions?admin_id=" + ADMIN_ID);
 
-table.innerHTML = `
-<tr>
-<td colspan="7">
-<div class="loading">
-Inapakia submissions...
-</div>
-</td>
-</tr>
-`;
+  if (result.success) {
+    allSubmissions = result.submissions || [];
+  } else {
+    allSubmissions = [];
+    table.innerHTML = `<tr><td colspan="7"><div class="empty"><div class="empty-icon">⚠️</div><div>Imeshindikana kupakia: ${escapeHtml(result.message || "")}</div></div></td></tr>`;
+    document.getElementById("resultCount").textContent = "0 submissions";
+    return;
+  }
 
-try{
-
-/*
-Tunatumia stories API kwa sasa.
-Stories ambazo zina status=pending
-zinaonekana kama submissions.
-*/
-
-const response =
-await fetch("/api/stories");
-
-if(!response.ok){
-throw new Error("API error");
-}
-
-const data =
-await response.json();
-
-let stories = [];
-
-if(Array.isArray(data)){
-stories = data;
-}
-else if(Array.isArray(data.stories)){
-stories = data.stories;
-}
-else if(Array.isArray(data.data)){
-stories = data.data;
-}
-
-/*
-Filter ya submission:
-pending / rejected / approved.
-*/
-
-allSubmissions =
-stories.filter(story => {
-
-const status =
-getStatus(story);
-
-return (
-status === "pending" ||
-status === "approved" ||
-status === "rejected"
-);
-
-});
-
-updateStats();
-
-filterSubmissions();
-
-}catch(error){
-
-console.error(error);
-
-table.innerHTML = `
-<tr>
-<td colspan="7">
-<div class="empty">
-<div class="empty-icon">⚠️</div>
-<div>Imeshindikana kupakia submissions.</div>
-</div>
-</td>
-</tr>
-`;
-
-}
-
+  updateStats();
+  filterSubmissions();
 }
 
 /* STATUS */
 
-function getStatus(story){
+function getStatus(story) {
+  let status = story.status || story.approval_status || story.publish_status || "pending";
+  status = String(status).toLowerCase();
 
-let status =
-story.status ||
-story.approval_status ||
-story.publish_status ||
-"approved";
-
-status =
-String(status).toLowerCase();
-
-if(
-status === "published" ||
-status === "active" ||
-status === "approved"
-){
-return "approved";
-}
-
-if(
-status === "pending" ||
-status === "waiting" ||
-status === "submitted"
-){
-return "pending";
-}
-
-if(
-status === "rejected" ||
-status === "declined"
-){
-return "rejected";
-}
-
-return status;
-
+  if (status === "published" || status === "active" || status === "approved") return "approved";
+  if (status === "pending" || status === "waiting" || status === "submitted") return "pending";
+  if (status === "rejected" || status === "declined") return "rejected";
+  return status;
 }
 
 /* PAID */
 
-function isPaid(story){
-
-return Boolean(
-story.is_paid ||
-story.paid ||
-Number(story.price || 0) > 0
-);
-
+function isPaid(story) {
+  return Boolean(story.is_paid || story.paid || Number(story.price || 0) > 0);
 }
 
 /* STATS */
 
-function updateStats(){
+function updateStats() {
+  const total = allSubmissions.length;
+  const pending = allSubmissions.filter(s => getStatus(s) === "pending").length;
+  const approved = allSubmissions.filter(s => getStatus(s) === "approved").length;
+  const rejected = allSubmissions.filter(s => getStatus(s) === "rejected").length;
 
-const total =
-allSubmissions.length;
-
-const pending =
-allSubmissions.filter(
-s => getStatus(s) === "pending"
-).length;
-
-const approved =
-allSubmissions.filter(
-s => getStatus(s) === "approved"
-).length;
-
-const rejected =
-allSubmissions.filter(
-s => getStatus(s) === "rejected"
-).length;
-
-document.getElementById(
-"totalSubmissions"
-).textContent = total;
-
-document.getElementById(
-"pendingSubmissions"
-).textContent = pending;
-
-document.getElementById(
-"approvedSubmissions"
-).textContent = approved;
-
-document.getElementById(
-"rejectedSubmissions"
-).textContent = rejected;
-
+  document.getElementById("totalSubmissions").textContent = total;
+  document.getElementById("pendingSubmissions").textContent = pending;
+  document.getElementById("approvedSubmissions").textContent = approved;
+  document.getElementById("rejectedSubmissions").textContent = rejected;
 }
 
 /* FILTER */
 
-function filterSubmissions(){
+function filterSubmissions() {
+  const search = document.getElementById("searchInput").value.toLowerCase().trim();
+  const status = document.getElementById("statusFilter").value;
+  const type = document.getElementById("typeFilter").value;
 
-const search =
-document.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
+  let filtered = allSubmissions.filter(story => {
+    const title = String(story.title || story.name || "").toLowerCase();
+    const author = String(story.author_name || story.author || "").toLowerCase();
 
-const status =
-document.getElementById("statusFilter")
-.value;
+    const matchesSearch = !search || title.includes(search) || author.includes(search);
+    const storyStatus = getStatus(story);
+    const matchesStatus = !status || storyStatus === status;
 
-const type =
-document.getElementById("typeFilter")
-.value;
+    const paid = isPaid(story);
+    const matchesType = !type || (type === "paid" && paid) || (type === "free" && !paid);
 
-let filtered =
-allSubmissions.filter(story => {
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
-const title =
-String(
-story.title ||
-story.name ||
-""
-).toLowerCase();
+  if (!status) {
+    filtered.sort((a, b) => {
+      const order = { pending: 0, approved: 1, rejected: 2 };
+      return (order[getStatus(a)] ?? 9) - (order[getStatus(b)] ?? 9);
+    });
+  }
 
-const author =
-String(
-story.author_name ||
-story.author ||
-""
-).toLowerCase();
-
-const matchesSearch =
-!search ||
-title.includes(search) ||
-author.includes(search);
-
-const storyStatus =
-getStatus(story);
-
-const matchesStatus =
-!status ||
-storyStatus === status;
-
-const paid =
-isPaid(story);
-
-const matchesType =
-!type ||
-(type === "paid" && paid) ||
-(type === "free" && !paid);
-
-return (
-matchesSearch &&
-matchesStatus &&
-matchesType
-);
-
-});
-
-/*
-Pending submissions ziwe juu.
-*/
-
-if(!status){
-
-filtered.sort((a,b) => {
-
-const order = {
-pending:0,
-approved:1,
-rejected:2
-};
-
-return (
-(order[getStatus(a)] ?? 9) -
-(order[getStatus(b)] ?? 9)
-);
-
-});
-
-}
-
-renderSubmissions(filtered);
-
+  renderSubmissions(filtered);
 }
 
 /* RENDER */
 
-function renderSubmissions(stories){
-
-const table =
-document.getElementById("submissionsTable");
-
-document.getElementById(
-"resultCount"
-).textContent =
-`${stories.length} submissions`;
-
-if(!stories.length){
-
-table.innerHTML = `
-<tr>
-<td colspan="7">
-
-<div class="empty">
-
-<div class="empty-icon">
-📥
-</div>
-
-<div>
-Hakuna submissions zilizopatikana.
-</div>
-
-</div>
-
-</td>
-</tr>
-`;
-
-return;
-
-}
-
-table.innerHTML =
-stories.map(story => {
-
-const id =
-story.id ||
-story.story_id ||
-"";
-
-const title =
-story.title ||
-story.name ||
-"Untitled Story";
-
-const author =
-story.author_name ||
-story.author ||
-"Unknown Author";
-
-const category =
-story.category_name ||
-story.category ||
-"—";
-
-const language =
-story.language ||
-story.lang ||
-"—";
-
-const status =
-getStatus(story);
-
-const paid =
-isPaid(story);
-
-const cover =
-story.cover_image ||
-story.cover ||
-story.image ||
-"";
-
-let coverHtml;
-
-if(cover){
-
-coverHtml = `
-<img
-src="${escapeHtml(cover)}"
-class="story-cover"
-alt=""
-onerror="this.style.display='none'"
->
-`;
-
-}else{
-
-coverHtml = `
-<div
-class="story-cover"
-style="
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:20px
-">
-📖
-</div>
-`;
-
-}
-
-return `
-
-<tr>
-
-<td>
-
-<div class="story-info">
-
-${coverHtml}
-
-<div>
-
-<div
-class="story-title"
-title="${escapeHtml(title)}"
->
-${escapeHtml(title)}
-</div>
-
-<div
-class="story-description"
-title="${escapeHtml(story.description || "")}"
->
-${escapeHtml(
-story.description ||
-"Story submission"
-)}
-</div>
-
-</div>
-
-</div>
-
-</td>
-
-<td>
-
-<span class="author-name">
-${escapeHtml(author)}
-</span>
-
-</td>
-
-<td>
-${escapeHtml(category)}
-</td>
-
-<td>
-${escapeHtml(language)}
-</td>
-
-<td>
-
-<span class="badge ${
-paid
-? "badge-paid"
-: "badge-free"
-}">
-
-${paid ? "PAID" : "FREE"}
-
-</span>
-
-</td>
-
-<td>
-
-<span class="badge badge-${status}">
-
-${status.toUpperCase()}
-
-</span>
-
-</td>
-
-<td>
-
-<div class="actions">
-
-<button
-class="action-btn view-btn"
-onclick="viewSubmission('${escapeJs(id)}')"
->
-View
-</button>
-
-${
-status === "pending"
-?
-`
-
-<button
-class="action-btn approve-btn"
-onclick="approveSubmission('${escapeJs(id)}')"
->
-Approve
-</button>
-
-<button
-class="action-btn reject-btn"
-onclick="rejectSubmission('${escapeJs(id)}')"
->
-Reject
-</button>
-
-`
-:
-""
-}
-
-</div>
-
-</td>
-
-</tr>
-
-`;
-
-}).join("");
-
+function renderSubmissions(stories) {
+  const table = document.getElementById("submissionsTable");
+
+  document.getElementById("resultCount").textContent = `${stories.length} submissions`;
+
+  if (!stories.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty">
+            <div class="empty-icon">📥</div>
+            <div>Hakuna submissions zilizopatikana.</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  table.innerHTML = stories.map(story => {
+    const id = story.id || story.story_id || "";
+    const title = story.title || story.name || "Untitled Story";
+    const author = story.author_name || story.author || "Unknown Author";
+    const category = story.category_name || story.category || "—";
+    const language = story.language || story.lang || "—";
+    const status = getStatus(story);
+    const paid = isPaid(story);
+    const cover = story.cover_image || story.cover || story.image || "";
+
+    let coverHtml;
+    if (cover) {
+      coverHtml = `<img src="${escapeHtml(cover)}" class="story-cover" alt="" onerror="this.style.display='none'">`;
+    } else {
+      coverHtml = `<div class="story-cover" style="display:flex;align-items:center;justify-content:center;font-size:20px">📖</div>`;
+    }
+
+    return `
+      <tr>
+        <td>
+          <div class="story-info">
+            ${coverHtml}
+            <div>
+              <div class="story-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+              <div class="story-description" title="${escapeHtml(story.description || "")}">${escapeHtml(story.description || "Story submission")}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="author-name">${escapeHtml(author)}</span></td>
+        <td>${escapeHtml(category)}</td>
+        <td>${escapeHtml(language)}</td>
+        <td><span class="badge ${paid ? "badge-paid" : "badge-free"}">${paid ? "PAID" : "FREE"}</span></td>
+        <td><span class="badge badge-${status}">${status.toUpperCase()}</span></td>
+        <td>
+          <div class="actions">
+            <button class="action-btn view-btn" onclick="viewSubmission('${escapeJs(id)}')">View</button>
+            ${status === "pending" ? `
+              <button class="action-btn approve-btn" onclick="approveSubmission('${escapeJs(id)}')">Approve</button>
+              <button class="action-btn reject-btn" onclick="rejectSubmission('${escapeJs(id)}')">Reject</button>
+            ` : ""}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 
 /* VIEW */
 
-function viewSubmission(id){
+function viewSubmission(id) {
+  const story = allSubmissions.find(s => String(s.id || s.story_id) === String(id));
 
-const story =
-allSubmissions.find(
-s =>
-String(s.id || s.story_id) ===
-String(id)
-);
+  if (!story) {
+    toast("Story submission haijapatikana.", "error");
+    return;
+  }
 
-if(!story){
+  const title = story.title || story.name || "Untitled Story";
+  const author = story.author_name || story.author || "Unknown Author";
+  const category = story.category_name || story.category || "—";
+  const language = story.language || story.lang || "—";
+  const status = getStatus(story);
+  const paid = isPaid(story);
+  const description = story.description || "Hakuna maelezo yaliyowekwa.";
+  const tags = story.tags || "—";
+  const originality = story.originality_declaration || story.originality || "Haijawekwa";
+  const created = formatDate(story.created_at || story.submitted_at);
+  const cover = story.cover_image || story.cover || story.image || "";
 
-alert("Story submission haijapatikana.");
+  let coverHtml = "";
+  if (cover) {
+    coverHtml = `<img src="${escapeHtml(cover)}" class="detail-cover" alt="Story cover">`;
+  }
 
-return;
+  document.getElementById("modalBody").innerHTML = `
+    ${coverHtml}
+    <div class="detail-row"><div class="detail-label">Title</div><div class="detail-value">${escapeHtml(title)}</div></div>
+    <div class="detail-row"><div class="detail-label">Author</div><div class="detail-value">${escapeHtml(author)}</div></div>
+    <div class="detail-row"><div class="detail-label">Category</div><div class="detail-value">${escapeHtml(category)}</div></div>
+    <div class="detail-row"><div class="detail-label">Language</div><div class="detail-value">${escapeHtml(language)}</div></div>
+    <div class="detail-row"><div class="detail-label">Type</div><div class="detail-value">${paid ? "Paid Story" : "Free Story"}</div></div>
+    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-value">${status.toUpperCase()}</div></div>
+    <div class="detail-row"><div class="detail-label">Description</div><div class="detail-value">${escapeHtml(description)}</div></div>
+    <div class="detail-row"><div class="detail-label">Tags</div><div class="detail-value">${escapeHtml(tags)}</div></div>
+    <div class="detail-row"><div class="detail-label">Originality Declaration</div><div class="detail-value">${escapeHtml(originality)}</div></div>
+    <div class="detail-row"><div class="detail-label">Submitted</div><div class="detail-value">${escapeHtml(created)}</div></div>
+    ${status === "pending" ? `
+      <div class="modal-actions">
+        <button class="modal-approve" onclick="approveSubmission('${escapeJs(id)}');closeModal()">✓ Approve Story</button>
+        <button class="modal-reject" onclick="rejectSubmission('${escapeJs(id)}');closeModal()">✕ Reject Story</button>
+      </div>
+    ` : ""}
+  `;
 
+  document.getElementById("detailModal").classList.add("show");
 }
 
-const title =
-story.title ||
-story.name ||
-"Untitled Story";
+/* APPROVE — POST /api/admin/submissions/approve */
 
-const author =
-story.author_name ||
-story.author ||
-"Unknown Author";
+async function approveSubmission(id) {
+  const story = allSubmissions.find(s => String(s.id || s.story_id) === String(id));
+  if (!story) return;
 
-const category =
-story.category_name ||
-story.category ||
-"—";
+  const title = story.title || story.name || "story";
 
-const language =
-story.language ||
-story.lang ||
-"—";
+  if (!confirm(`Unataka ku-approve "${title}"?`)) return;
 
-const status =
-getStatus(story);
+  const result = await api("/admin/submissions/approve", {
+    method: "POST",
+    body: { admin_id: ADMIN_ID, submission_id: id }
+  });
 
-const paid =
-isPaid(story);
-
-const description =
-story.description ||
-"Hakuna maelezo yaliyowekwa.";
-
-const tags =
-story.tags ||
-"—";
-
-const originality =
-story.originality_declaration ||
-story.originality ||
-"Haijawekwa";
-
-const created =
-story.created_at ||
-story.submitted_at ||
-"—";
-
-const cover =
-story.cover_image ||
-story.cover ||
-story.image ||
-"";
-
-let coverHtml = "";
-
-if(cover){
-
-coverHtml = `
-<img
-src="${escapeHtml(cover)}"
-class="detail-cover"
-alt="Story cover"
->
-`;
-
+  if (result.success) {
+    toast(`"${title}" imeidhinishwa na kuchapishwa!`);
+    loadSubmissions();
+  } else {
+    toast(result.message || "Imeshindikana ku-approve.", "error");
+  }
 }
 
-document.getElementById(
-"modalBody"
-).innerHTML = `
+/* REJECT — POST /api/admin/submissions/reject */
 
-${coverHtml}
+async function rejectSubmission(id) {
+  const story = allSubmissions.find(s => String(s.id || s.story_id) === String(id));
+  if (!story) return;
 
-<div class="detail-row">
-<div class="detail-label">Title</div>
-<div class="detail-value">
-${escapeHtml(title)}
-</div>
-</div>
+  const title = story.title || story.name || "story";
 
-<div class="detail-row">
-<div class="detail-label">Author</div>
-<div class="detail-value">
-${escapeHtml(author)}
-</div>
-</div>
+  if (!confirm(`Unataka ku-reject "${title}"?`)) return;
 
-<div class="detail-row">
-<div class="detail-label">Category</div>
-<div class="detail-value">
-${escapeHtml(category)}
-</div>
-</div>
+  const note = prompt("Sabu ya kukataa (optional):") || "";
 
-<div class="detail-row">
-<div class="detail-label">Language</div>
-<div class="detail-value">
-${escapeHtml(language)}
-</div>
-</div>
+  const result = await api("/admin/submissions/reject", {
+    method: "POST",
+    body: { admin_id: ADMIN_ID, submission_id: id, admin_note: note }
+  });
 
-<div class="detail-row">
-<div class="detail-label">Type</div>
-<div class="detail-value">
-${paid ? "Paid Story" : "Free Story"}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Status</div>
-<div class="detail-value">
-${status.toUpperCase()}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Description</div>
-<div class="detail-value">
-${escapeHtml(description)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">Tags</div>
-<div class="detail-value">
-${escapeHtml(tags)}
-</div>
-</div>
-
-<div class="detail-row">
-<div class="detail-label">
-Originality Declaration
-</div>
-
-<div class="detail-value">
-${escapeHtml(originality)}
-</div>
-
-</div>
-
-<div class="detail-row">
-
-<div class="detail-label">
-Submitted
-</div>
-
-<div class="detail-value">
-${escapeHtml(created)}
-</div>
-
-</div>
-
-${
-status === "pending"
-?
-`
-
-<div class="modal-actions">
-
-<button
-class="modal-approve"
-onclick="approveSubmission('${escapeJs(id)}');closeModal()"
->
-✓ Approve Story
-</button>
-
-<button
-class="modal-reject"
-onclick="rejectSubmission('${escapeJs(id)}');closeModal()"
->
-✕ Reject Story
-</button>
-
-</div>
-
-`
-:
-""
-}
-
-`;
-
-document
-.getElementById("detailModal")
-.classList.add("show");
-
-}
-
-/* APPROVE */
-
-function approveSubmission(id){
-
-const story =
-allSubmissions.find(
-s =>
-String(s.id || s.story_id) ===
-String(id)
-);
-
-if(!story){
-return;
-}
-
-const title =
-story.title ||
-story.name ||
-"story";
-
-const confirmed =
-confirm(
-`Unataka ku-approve "${title}"?`
-);
-
-if(!confirmed){
-return;
-}
-
-/*
-Kwa sasa backend ya approval haijaunganishwa.
-Tunabadilisha status upande wa UI.
-*/
-
-story.status = "approved";
-
-updateStats();
-filterSubmissions();
-
-alert(
-"Story imeidhinishwa upande wa UI. Backend approval itaunganishwa baadaye."
-);
-
-}
-
-/* REJECT */
-
-function rejectSubmission(id){
-
-const story =
-allSubmissions.find(
-s =>
-String(s.id || s.story_id) ===
-String(id)
-);
-
-if(!story){
-return;
-}
-
-const title =
-story.title ||
-story.name ||
-"story";
-
-const confirmed =
-confirm(
-`Unataka ku-reject "${title}"?`
-);
-
-if(!confirmed){
-return;
-}
-
-/*
-Kwa sasa backend rejection haijaunganishwa.
-*/
-
-story.status = "rejected";
-
-updateStats();
-filterSubmissions();
-
-alert(
-"Story imekataliwa upande wa UI. Backend rejection itaunganishwa baadaye."
-);
-
+  if (result.success) {
+    toast(`"${title}" imekataliwa.`);
+    loadSubmissions();
+  } else {
+    toast(result.message || "Imeshindikana ku-reject.", "error");
+  }
 }
 
 /* CLOSE MODAL */
 
-function closeModal(){
-
-document
-.getElementById("detailModal")
-.classList.remove("show");
-
+function closeModal() {
+  document.getElementById("detailModal").classList.remove("show");
 }
 
-/* CLOSE MODAL OUTSIDE */
-
-document
-.getElementById("detailModal")
-.addEventListener(
-"click",
-function(event){
-
-if(event.target === this){
-closeModal();
-}
-
+document.getElementById("detailModal").addEventListener("click", function (e) {
+  if (e.target === this) closeModal();
 });
 
-/* ESCAPE HTML */
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") closeModal();
+});
 
-function escapeHtml(value){
+/* DATE */
 
-return String(value ?? "")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
-
+function formatDate(value) {
+  if (!value || value === "—") return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("sw-TZ", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/* ESCAPE JS */
+/* ESCAPE */
 
-function escapeJs(value){
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-return String(value ?? "")
-.replace(/\\/g,"\\\\")
-.replace(/'/g,"\\'")
-.replace(/"/g,'\\"');
-
+function escapeJs(value) {
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, '\\"');
 }
 
 /* MOBILE MENU */
 
-function openMenu(){
-
-document
-.getElementById("sidebar")
-.classList.add("open");
-
-document
-.getElementById("overlay")
-.classList.add("show");
-
+function openMenu() {
+  document.getElementById("sidebar").classList.add("open");
+  document.getElementById("overlay").classList.add("show");
 }
 
-function closeMenu(){
-
-document
-.getElementById("sidebar")
-.classList.remove("open");
-
-document
-.getElementById("overlay")
-.classList.remove("show");
-
+function closeMenu() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("overlay").classList.remove("show");
 }
 
 /* LOGOUT */
 
-function logout(){
-
-localStorage.removeItem(
-"netsimulizi_user"
-);
-
-window.location.href =
-"admin-login.html";
-
+function logout() {
+  if (!confirm("Unataka kutoka kwenye Admin Panel?")) return;
+  localStorage.removeItem("netsimulizi_user");
+  window.location.href = "admin-login.html";
 }
 
 /* START */
 
-document.addEventListener(
-"DOMContentLoaded",
-function(){
-
-const admin =
-checkAdmin();
-
-if(admin){
-loadSubmissions();
-}
-
-}
-);
+document.addEventListener("DOMContentLoaded", function () {
+  const admin = checkAdmin();
+  if (admin) loadSubmissions();
+});
 
 </script>
 
