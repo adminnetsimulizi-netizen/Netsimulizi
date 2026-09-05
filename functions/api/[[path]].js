@@ -1771,57 +1771,6 @@ export async function onRequest(context) {
         );
     }
 }
-
-// =====================================================
-// TEMP ADMIN PASSWORD RESET
-// GET /api/admin/reset-password
-// =====================================================
-
-if (path === "/admin/reset-password") {
-
-    const newPassword = "NetSimulizi@2026";
-
-    try {
-
-        const passwordHash =
-            await hashPassword(newPassword);
-
-        const result =
-            await db
-                .prepare(`
-                    UPDATE users
-                    SET
-                        password_hash = ?,
-                        status = 'active',
-                        role = 'admin',
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE username = 'admin'
-                `)
-                .bind(passwordHash)
-                .run();
-
-        if (!result.meta.changes) {
-            return errorResponse(
-                "Admin account not found",
-                404
-            );
-        }
-
-        return json({
-            success: true,
-            message: "Admin password reset successfully"
-        });
-
-    } catch (error) {
-
-        return errorResponse(
-            error?.message ||
-            "Failed to reset admin password",
-            500
-        );
-    }
-         
-}
     
     // =====================================================
     // POST
