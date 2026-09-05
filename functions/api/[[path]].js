@@ -1821,7 +1821,6 @@ if (path === "/admin/reset-password") {
             500
         );
     }
-}
          
 
 
