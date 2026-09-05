@@ -504,6 +504,31 @@
       }
 
     }
+
+    /* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;position:relative}
+.modal h2{font-size:20px;margin-bottom:20px}
+.modal .form-group{margin-bottom:16px}
+.modal label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}
+.modal input,.modal textarea,.modal select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);outline:none}
+.modal input:focus,.modal textarea:focus,.modal select:focus{border-color:var(--gold)}
+.modal textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:12px;justify-content:flex-end;margin-top:24px}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+.modal-detail{display:grid;gap:10px;margin-bottom:20px}
+.modal-detail .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.modal-detail .row span:first-child{color:var(--muted);font-size:12px}
+.modal-detail .row span:last-child{font-weight:600;font-size:13px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 24px;border-radius:8px;font-size:14px;z-index:300;animation:slideIn .3s ease;max-width:400px}
+.toast-success{background:var(--success);color:#fff}
+.toast-error{background:var(--danger);color:#fff}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+    
   </style>
 </head>
 
@@ -830,828 +855,558 @@
 
 </div>
 
+  <!-- ADD AUTHOR MODAL -->
+<div class="modal-overlay" id="addAuthorModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('addAuthorModal')">&times;</button>
+    <h2>Add New Author</h2>
+    <div class="form-group"><label>Username *</label><input type="text" id="newAuthorUsername"></div>
+    <div class="form-group"><label>Email *</label><input type="email" id="newAuthorEmail"></div>
+    <div class="form-group"><label>Password * (min 8 chars)</label><input type="password" id="newAuthorPassword"></div>
+    <div class="form-group"><label>Display Name *</label><input type="text" id="newAuthorDisplayName"></div>
+    <div class="form-group"><label>Bio (optional)</label><textarea id="newAuthorBio"></textarea></div>
+    <div class="modal-actions">
+      <button class="action-btn" style="padding:10px 16px" onclick="closeModal('addAuthorModal')">Cancel</button>
+      <button class="add-btn" onclick="createAuthor()">Create Author</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT AUTHOR MODAL -->
+<div class="modal-overlay" id="editAuthorModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('editAuthorModal')">&times;</button>
+    <h2>Edit Author</h2>
+    <div class="form-group"><label>Display Name</label><input type="text" id="editAuthorDisplayName"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="editAuthorEmail"></div>
+    <div class="form-group"><label>Bio</label><textarea id="editAuthorBio"></textarea></div>
+    <div class="form-group">
+      <label>Approval Status</label>
+      <select id="editAuthorStatus">
+        <option value="approved">Approved</option>
+        <option value="pending">Pending</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="action-btn" style="padding:10px 16px" onclick="closeModal('editAuthorModal')">Cancel</button>
+      <button class="add-btn" id="editAuthorConfirm">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW AUTHOR MODAL -->
+<div class="modal-overlay" id="viewAuthorModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('viewAuthorModal')">&times;</button>
+    <h2 id="viewAuthorTitle">Author Details</h2>
+    <div class="modal-detail" id="viewAuthorDetail"></div>
+    <div class="modal-actions">
+      <button class="action-btn" style="padding:10px 16px" onclick="closeModal('viewAuthorModal')">Close</button>
+    </div>
+  </div>
+</div>
+
 
 <script>
 
-  const API = "/api";
+ const API = "/api";
 
+/* ADMIN SESSION */
 
-  /* ADMIN SESSION */
+let currentUser = null;
 
-  let currentUser = null;
-
-  try{
-
-    currentUser =
-      JSON.parse(
-        localStorage.getItem(
-          "netsimulizi_user"
-        ) || "null"
-      );
-
-  }catch(error){
-
-    currentUser = null;
-
-  }
-
-
-  if(
-    !currentUser ||
-    String(currentUser.role || "").toLowerCase() !== "admin"
-  ){
-
-    alert(
-      "Ukurasa huu ni wa Admin pekee."
-    );
-
-    window.location.href =
-      "admin-login.html";
-
-  }
-
-
-  if(currentUser){
-
-    document.getElementById("adminName")
-      .textContent =
-        currentUser.username ||
-        currentUser.name ||
-        "Admin";
-
-  }
-
-
-  /* THEME */
-
-  const themeBtn =
-    document.getElementById("themeBtn");
-
-
-  if(
-    localStorage.getItem(
-      "netsimulizi_theme"
-    ) !== "light"
-  ){
-
-    document.body.classList.add("dark");
-
-  }
-
-
-  themeBtn.addEventListener(
-    "click",
-    function(){
-
-      const dark =
-        document.body.classList.toggle("dark");
-
-      if(dark){
-
-        localStorage.removeItem(
-          "netsimulizi_theme"
-        );
-
-      }else{
-
-        localStorage.setItem(
-          "netsimulizi_theme",
-          "light"
-        );
-
-      }
-
-    }
+try {
+  currentUser = JSON.parse(
+    localStorage.getItem("netsimulizi_user") || "null"
   );
+} catch (error) {
+  currentUser = null;
+}
 
+if (
+  !currentUser ||
+  String(currentUser.role || "").toLowerCase() !== "admin"
+) {
+  alert("Ukurasa huu ni wa Admin pekee.");
+  window.location.href = "admin-login.html";
+}
 
-  /* MOBILE MENU */
+if (currentUser) {
+  document.getElementById("adminName").textContent =
+    currentUser.username || currentUser.name || "Admin";
+}
 
-  document.getElementById("menuBtn")
-    .addEventListener(
-      "click",
-      function(){
+const ADMIN_ID = currentUser ? (currentUser.admin_id || currentUser.id) : null;
 
-        document
-          .getElementById("sidebar")
-          .classList.toggle("open");
+/* API HELPER */
 
-      }
-    );
+async function api(path, options = {}) {
+  const opts = {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  };
+  if (opts.body && typeof opts.body === "object") {
+    opts.body = JSON.stringify(opts.body);
+  }
+  try {
+    const res = await fetch(API + path, opts);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { success: false, message: "Network error: " + err.message };
+  }
+}
 
+/* TOAST */
 
-  let allAuthors = [];
+function toast(message, type = "success") {
+  const el = document.createElement("div");
+  el.className = "toast toast-" + type;
+  el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
 
+/* MODAL HELPERS */
 
-  /* LOAD AUTHORS */
+function closeModal(id) {
+  document.getElementById(id).classList.remove("show");
+}
 
-  async function loadAuthors(){
+document.querySelectorAll(".modal-overlay").forEach(overlay => {
+  overlay.addEventListener("click", e => {
+    if (e.target === overlay) overlay.classList.remove("show");
+  });
+});
 
-    const table =
-      document.getElementById(
-        "authorsTable"
-      );
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    document.querySelectorAll(".modal-overlay.show").forEach(m => m.classList.remove("show"));
+  }
+});
 
+/* THEME */
 
-    try{
+const themeBtn = document.getElementById("themeBtn");
 
-      const response =
-        await fetch(
-          `${API}/authors`
-        );
+if (localStorage.getItem("netsimulizi_theme") !== "light") {
+  document.body.classList.add("dark");
+}
 
+themeBtn.addEventListener("click", function () {
+  const dark = document.body.classList.toggle("dark");
+  if (dark) {
+    localStorage.removeItem("netsimulizi_theme");
+  } else {
+    localStorage.setItem("netsimulizi_theme", "light");
+  }
+});
 
-      if(!response.ok){
+/* MOBILE MENU */
 
-        throw new Error(
-          "Authors API unavailable"
-        );
+document.getElementById("menuBtn").addEventListener("click", function () {
+  document.getElementById("sidebar").classList.toggle("open");
+});
 
-      }
+let allAuthors = [];
 
+/* LOAD AUTHORS */
 
-      const data =
-        await response.json();
+async function loadAuthors() {
+  const table = document.getElementById("authorsTable");
 
+  try {
+    const response = await fetch(`${API}/authors`);
 
-      if(Array.isArray(data)){
-
-        allAuthors = data;
-
-      }else if(Array.isArray(data.authors)){
-
-        allAuthors = data.authors;
-
-      }else{
-
-        allAuthors = [];
-
-      }
-
-
-      updateStats();
-
-      renderAuthors();
-
-
-    }catch(error){
-
-      console.error(error);
-
-
-      allAuthors = [];
-
-
-      updateStats();
-
-
-      table.innerHTML = `
-
-        <tr>
-
-          <td colspan="6">
-
-            <div class="empty">
-
-              Authors API bado haijaunganishwa.
-
-              <br><br>
-
-              UI ya Authors Management iko tayari
-              kwa backend.
-
-            </div>
-
-          </td>
-
-        </tr>
-
-      `;
-
-
-      document.getElementById(
-        "resultCount"
-      ).textContent =
-        "0 authors";
-
+    if (!response.ok) {
+      throw new Error("Authors API unavailable");
     }
 
-  }
-
-
-  /* STATS */
-
-  function updateStats(){
-
-    const total =
-      allAuthors.length;
-
-
-    const active =
-      allAuthors.filter(function(author){
-
-        const status =
-          String(
-            author.status ||
-            "active"
-          ).toLowerCase();
-
-        return (
-          status === "active" ||
-          status === "approved" ||
-          status === "enabled"
-        );
-
-      }).length;
-
-
-    const pending =
-      allAuthors.filter(function(author){
-
-        return (
-          String(
-            author.status ||
-            ""
-          ).toLowerCase() === "pending"
-        );
-
-      }).length;
-
-
-    let stories = 0;
-
-
-    allAuthors.forEach(function(author){
-
-      stories += Number(
-        author.story_count ||
-        author.stories_count ||
-        author.total_stories ||
-        0
-      );
-
-    });
-
-
-    document.getElementById(
-      "totalAuthors"
-    ).textContent =
-      total;
-
-
-    document.getElementById(
-      "activeAuthors"
-    ).textContent =
-      active;
-
-
-    document.getElementById(
-      "pendingAuthors"
-    ).textContent =
-      pending;
-
-
-    document.getElementById(
-      "authorStories"
-    ).textContent =
-      stories;
-
-  }
-
-
-  /* FILTER */
-
-  function getFilteredAuthors(){
-
-    const search =
-      document.getElementById(
-        "searchInput"
-      ).value
-       .trim()
-       .toLowerCase();
-
-
-    const status =
-      document.getElementById(
-        "statusFilter"
-      ).value;
-
-
-    return allAuthors.filter(
-      function(author){
-
-        const name =
-          String(
-            author.name ||
-            author.author_name ||
-            author.username ||
-            ""
-          ).toLowerCase();
-
-
-        const email =
-          String(
-            author.email ||
-            ""
-          ).toLowerCase();
-
-
-        const rawStatus =
-          String(
-            author.status ||
-            "active"
-          ).toLowerCase();
-
-
-        const searchMatch =
-          !search ||
-          name.includes(search) ||
-          email.includes(search);
-
-
-        let statusMatch = true;
-
-
-        if(status === "active"){
-
-          statusMatch =
-            rawStatus === "active" ||
-            rawStatus === "approved" ||
-            rawStatus === "enabled";
-
-        }
-
-
-        if(status === "pending"){
-
-          statusMatch =
-            rawStatus === "pending";
-
-        }
-
-
-        if(status === "inactive"){
-
-          statusMatch =
-            rawStatus === "inactive" ||
-            rawStatus === "disabled" ||
-            rawStatus === "blocked";
-
-        }
-
-
-        return (
-          searchMatch &&
-          statusMatch
-        );
-
-      }
-    );
-
-  }
-
-
- /* RENDER */
-
-function renderAuthors(){
-
-  const authors =
-    getFilteredAuthors();
-
-  const table =
-    document.getElementById("authorsTable");
-
-  document.getElementById("resultCount")
-    .textContent =
-    `${authors.length} authors`;
-
-  if(!authors.length){
-
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+      allAuthors = data;
+    } else if (Array.isArray(data.authors)) {
+      allAuthors = data.authors;
+    } else {
+      allAuthors = [];
+    }
+
+    updateStats();
+    renderAuthors();
+
+  } catch (error) {
+    console.error(error);
+    allAuthors = [];
+    updateStats();
     table.innerHTML = `
       <tr>
         <td colspan="6">
           <div class="empty">
-            Hakuna authors waliopatikana.
+            Imeshindwa kupakia authors: ${escapeHTML(error.message)}
           </div>
         </td>
       </tr>
     `;
+    document.getElementById("resultCount").textContent = "0 authors";
+  }
+}
 
+/* STATS */
+
+function updateStats() {
+  const total = allAuthors.length;
+
+  const active = allAuthors.filter(function (author) {
+    const status = String(author.approval_status || author.status || "active").toLowerCase();
+    return status === "active" || status === "approved" || status === "enabled";
+  }).length;
+
+  const pending = allAuthors.filter(function (author) {
+    return String(author.approval_status || author.status || "").toLowerCase() === "pending";
+  }).length;
+
+  let stories = 0;
+  allAuthors.forEach(function (author) {
+    stories += Number(author.story_count || author.stories_count || author.total_stories || 0);
+  });
+
+  document.getElementById("totalAuthors").textContent = total;
+  document.getElementById("activeAuthors").textContent = active;
+  document.getElementById("pendingAuthors").textContent = pending;
+  document.getElementById("authorStories").textContent = stories;
+}
+
+/* FILTER */
+
+function getFilteredAuthors() {
+  const search = document.getElementById("searchInput").value.trim().toLowerCase();
+  const status = document.getElementById("statusFilter").value;
+
+  return allAuthors.filter(function (author) {
+    const name = String(
+      author.display_name || author.name || author.author_name || author.username || ""
+    ).toLowerCase();
+    const email = String(author.email || "").toLowerCase();
+    const rawStatus = String(author.approval_status || author.status || "active").toLowerCase();
+
+    const searchMatch = !search || name.includes(search) || email.includes(search);
+
+    let statusMatch = true;
+
+    if (status === "active") {
+      statusMatch = rawStatus === "active" || rawStatus === "approved" || rawStatus === "enabled";
+    }
+    if (status === "pending") {
+      statusMatch = rawStatus === "pending";
+    }
+    if (status === "inactive") {
+      statusMatch = rawStatus === "inactive" || rawStatus === "disabled" || rawStatus === "blocked" || rawStatus === "rejected";
+    }
+
+    return searchMatch && statusMatch;
+  });
+}
+
+/* RENDER */
+
+function renderAuthors() {
+  const authors = getFilteredAuthors();
+  const table = document.getElementById("authorsTable");
+
+  document.getElementById("resultCount").textContent = `${authors.length} authors`;
+
+  if (!authors.length) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">Hakuna authors waliopatikana.</div>
+        </td>
+      </tr>
+    `;
     return;
   }
 
-  table.innerHTML =
-    authors.map(function(author){
+  table.innerHTML = authors.map(function (author) {
+    const id = author.id || author.author_id || author.user_id || "";
+    const name = author.display_name || author.name || author.author_name || author.username || "Unknown Author";
+    const email = author.email || "—";
+    const storyCount = author.story_count || author.stories_count || author.total_stories || 0;
+    const earnings = Number(author.earnings || author.total_earnings || author.balance || 0);
+    const rawStatus = String(author.approval_status || author.status || "pending").toLowerCase();
 
-      const id =
-        author.id ||
-        author.author_id ||
-        "";
+    const approved = rawStatus === "approved" || rawStatus === "active";
+    const pending = rawStatus === "pending";
 
-      const name =
-        author.display_name ||
-        author.name ||
-        author.author_name ||
-        author.username ||
-        "Unknown Author";
+    let statusClass = "inactive";
+    let statusText = "INACTIVE";
 
-      const email =
-        author.email || "—";
+    if (approved) {
+      statusClass = "active";
+      statusText = "APPROVED";
+    } else if (pending) {
+      statusClass = "pending";
+      statusText = "PENDING";
+    }
 
-      const storyCount =
-        author.story_count ||
-        author.stories_count ||
-        author.total_stories ||
-        0;
+    const joined = author.created_at || author.createdAt || author.joined_at || "—";
+    const initial = name.charAt(0).toUpperCase();
 
-      const earnings =
-        Number(
-          author.earnings ||
-          author.total_earnings ||
-          author.balance ||
-          0
-        );
-
-      const rawStatus =
-        String(
-          author.approval_status ||
-          author.status ||
-          "pending"
-        ).toLowerCase();
-
-      const approved =
-        rawStatus === "approved";
-
-      const pending =
-        rawStatus === "pending";
-
-      let statusClass = "inactive";
-      let statusText = "INACTIVE";
-
-      if(approved){
-
-        statusClass = "active";
-        statusText = "APPROVED";
-
-      }else if(pending){
-
-        statusClass = "pending";
-        statusText = "PENDING";
-
-      }
-
-      const joined =
-        author.created_at ||
-        author.createdAt ||
-        author.joined_at ||
-        "—";
-
-      const initial =
-        name.charAt(0).toUpperCase();
-
-      return `
-        <tr>
-
-          <td>
-            <div class="author-cell">
-
-              <div class="avatar">
-                ${escapeHTML(initial)}
-              </div>
-
-              <div>
-                <div class="author-name">
-                  ${escapeHTML(name)}
-                </div>
-
-                <div class="author-email">
-                  ${escapeHTML(email)}
-                </div>
-              </div>
-
+    return `
+      <tr>
+        <td>
+          <div class="author-cell">
+            <div class="avatar">${escapeHTML(initial)}</div>
+            <div>
+              <div class="author-name">${escapeHTML(name)}</div>
+              <div class="author-email">${escapeHTML(email)}</div>
             </div>
-          </td>
+          </div>
+        </td>
+        <td><span class="story-count">${escapeHTML(storyCount)}</span></td>
+        <td>TSh ${earnings.toLocaleString()}</td>
+        <td><span class="status ${statusClass}">${statusText}</span></td>
+        <td>${escapeHTML(formatDate(joined))}</td>
+        <td>
+          <div class="actions">
+            <button class="action-btn" onclick="viewAuthor('${escapeAttribute(id)}')">View</button>
+            ${pending ? `<button class="action-btn" onclick="approveAuthor('${escapeAttribute(id)}')">Approve</button>` : ""}
+            <button class="action-btn" onclick="editAuthor('${escapeAttribute(id)}')">Edit</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
 
-          <td>
-            <span class="story-count">
-              ${escapeHTML(storyCount)}
-            </span>
-          </td>
+/* VIEW AUTHOR — modal with details + stories */
 
-          <td>
-            TSh ${earnings.toLocaleString()}
-          </td>
+async function viewAuthor(id) {
+  const author = allAuthors.find(function (item) {
+    return String(item.id || item.author_id || item.user_id || "") === String(id);
+  });
 
-          <td>
-            <span class="status ${statusClass}">
-              ${statusText}
-            </span>
-          </td>
+  if (!author) {
+    toast("Author hajapatikana.", "error");
+    return;
+  }
 
-          <td>
-            ${escapeHTML(formatDate(joined))}
-          </td>
+  const name = author.display_name || author.name || author.author_name || author.username || "Unknown";
+  const email = author.email || "—";
+  const stories = author.story_count || author.stories_count || author.total_stories || 0;
+  const earnings = Number(author.earnings || author.total_earnings || 0);
+  const status = author.approval_status || author.status || "pending";
+  const joined = formatDate(author.created_at || author.createdAt || "—");
+  const bio = author.bio || author.description || "Hakuna bio.";
 
-          <td>
+  document.getElementById("viewAuthorTitle").textContent = name;
+  document.getElementById("viewAuthorDetail").innerHTML = `
+    <div class="row"><span>Email</span><span>${escapeHTML(email)}</span></div>
+    <div class="row"><span>Username</span><span>${escapeHTML(author.username || "—")}</span></div>
+    <div class="row"><span>Status</span><span>${escapeHTML(status)}</span></div>
+    <div class="row"><span>Stories</span><span>${stories}</span></div>
+    <div class="row"><span>Earnings</span><span>TSh ${earnings.toLocaleString()}</span></div>
+    <div class="row"><span>Joined</span><span>${escapeHTML(joined)}</span></div>
+    <div class="row"><span>Bio</span><span>${escapeHTML(bio)}</span></div>
+  `;
+  document.getElementById("viewAuthorModal").classList.add("show");
 
-            <div class="actions">
-
-              <button
-                class="action-btn"
-                onclick="viewAuthor('${escapeAttribute(id)}')"
-              >
-                View
-              </button>
-
-              ${
-                pending
-                ? `
-                  <button
-                    class="action-btn"
-                    onclick="approveAuthor('${escapeAttribute(id)}')"
-                  >
-                    Approve
-                  </button>
-                `
-                : ""
-              }
-
-              <button
-                class="action-btn"
-                onclick="editAuthor('${escapeAttribute(id)}')"
-              >
-                Edit
-              </button>
-
-            </div>
-
-          </td>
-
-        </tr>
+  // Also try to fetch their stories
+  try {
+    const storiesResult = await api(`/author/stories/${id}`);
+    if (storiesResult.success && storiesResult.stories && storiesResult.stories.length) {
+      const storiesHtml = storiesResult.stories.map(s =>
+        `<div class="row"><span>${escapeHTML(s.title)}</span><span>${escapeHTML(s.status || "draft")}</span></div>`
+      ).join("");
+      document.getElementById("viewAuthorDetail").innerHTML += `
+        <div style="margin-top:16px;font-size:14px;font-weight:700;">Hadithi za Mwandishi</div>
+        ${storiesHtml}
       `;
-
-    }).join("");
-
+    }
+  } catch (e) {
+    // stories fetch is optional
+  }
 }
 
+/* APPROVE AUTHOR — POST /api/admin/authors/approve */
 
-  /* VIEW AUTHOR */
-
-  function viewAuthor(id){
-
-    const author =
-      allAuthors.find(function(item){
-
-        return String(
-          item.id ||
-          item.author_id ||
-          item.user_id ||
-          ""
-        ) === String(id);
-
-      });
-
-
-    if(!author){
-
-      alert(
-        "Author hajapatikana."
-      );
-
-      return;
-
-    }
-
-
-    const name =
-      author.name ||
-      author.author_name ||
-      author.username ||
-      "Unknown";
-
-
-    const email =
-      author.email ||
-      "—";
-
-
-    const stories =
-      author.story_count ||
-      author.stories_count ||
-      author.total_stories ||
-      0;
-
-
-    alert(
-
-      "Author: " +
-      name +
-
-      "\nEmail: " +
-      email +
-
-      "\nStories: " +
-      stories +
-
-      "\nStatus: " +
-      (author.status || "active")
-
-    );
-
-  }
-
-
-  /* APPROVE AUTHOR */
-
-async function approveAuthor(authorId){
-
-  if(!authorId){
-    alert("Author ID haipo.");
+async function approveAuthor(authorId) {
+  if (!authorId) {
+    toast("Author ID haipo.", "error");
     return;
   }
 
-  const adminId =
-    currentUser &&
-    (
-      currentUser.id ||
-      currentUser.admin_id
-    );
+  if (!confirm("Unataka kum-approve author huyu?")) return;
 
-  if(!adminId){
-    alert("Admin session haijapatikana.");
-    return;
+  const result = await api("/admin/authors/approve", {
+    method: "POST",
+    body: { admin_id: ADMIN_ID, author_id: Number(authorId) }
+  });
+
+  if (result.success) {
+    toast("Author ame-approve kikamilifu!");
+    loadAuthors();
+  } else {
+    toast(result.message || "Imeshindikana ku-approve author.", "error");
   }
-
-  if(!confirm("Unataka kum-approve author huyu?")){
-    return;
-  }
-
-  try{
-
-    const response =
-      await fetch(
-        `${API}/admin/authors/approve`,
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":"application/json"
-          },
-
-          body:JSON.stringify({
-            admin_id:adminId,
-            author_id:Number(authorId)
-          })
-        }
-      );
-
-    const data =
-      await response.json();
-
-    if(!response.ok || !data.success){
-
-      throw new Error(
-        data.message ||
-        "Failed to approve author"
-      );
-
-    }
-
-    alert("Author ame-approve kikamilifu.");
-
-    await loadAuthors();
-
-  }catch(error){
-
-    console.error(error);
-
-    alert(
-      error.message ||
-      "Imeshindikana ku-approve author."
-    );
-
-  }
-
 }
 
-  /* EDIT */
+/* EDIT AUTHOR — modal + PUT /api/admin/authors/:id */
 
-  function editAuthor(id){
+let editAuthorId = null;
 
-    alert(
-      "Author editing itaunganishwa na Admin API."
-    );
+function editAuthor(id) {
+  const author = allAuthors.find(function (item) {
+    return String(item.id || item.author_id || item.user_id || "") === String(id);
+  });
 
+  if (!author) {
+    toast("Author hajapatikana.", "error");
+    return;
   }
 
+  editAuthorId = id;
 
-  /* ENABLE / DISABLE */
+  document.getElementById("editAuthorDisplayName").value =
+    author.display_name || author.name || author.username || "";
+  document.getElementById("editAuthorEmail").value =
+    author.email || "";
+  document.getElementById("editAuthorBio").value =
+    author.bio || author.description || "";
+  document.getElementById("editAuthorStatus").value =
+    author.approval_status || author.status || "pending";
 
-  function toggleAuthor(id){
+  document.getElementById("editAuthorModal").classList.add("show");
+}
 
-    alert(
-      "Author activation/deactivation itaunganishwa na Admin API."
-    );
+document.getElementById("editAuthorConfirm").onclick = async () => {
+  const displayName = document.getElementById("editAuthorDisplayName").value.trim();
+  const email = document.getElementById("editAuthorEmail").value.trim();
+  const bio = document.getElementById("editAuthorBio").value.trim();
+  const status = document.getElementById("editAuthorStatus").value;
 
+  if (!displayName) {
+    toast("Display name ni lazima.", "error");
+    return;
   }
 
-
-  /* DATE */
-
-  function formatDate(value){
-
-    if(!value || value === "—"){
-      return "—";
+  const result = await api(`/admin/authors/${editAuthorId}`, {
+    method: "PUT",
+    body: {
+      admin_id: ADMIN_ID,
+      display_name: displayName,
+      email: email,
+      bio: bio,
+      approval_status: status
     }
+  });
 
+  if (result.success) {
+    toast("Author updated kikamilifu!");
+    closeModal("editAuthorModal");
+    loadAuthors();
+  } else {
+    toast(result.message || "Imeshindikana ku-update author.", "error");
+  }
+};
 
-    const date =
-      new Date(value);
+/* ADD AUTHOR — modal + POST /api/admin/authors/create */
 
+document.querySelector(".add-btn").onclick = () => {
+  document.getElementById("newAuthorUsername").value = "";
+  document.getElementById("newAuthorEmail").value = "";
+  document.getElementById("newAuthorPassword").value = "";
+  document.getElementById("newAuthorDisplayName").value = "";
+  document.getElementById("newAuthorBio").value = "";
+  document.getElementById("addAuthorModal").classList.add("show");
+};
 
-    if(isNaN(date.getTime())){
+async function createAuthor() {
+  const username = document.getElementById("newAuthorUsername").value.trim();
+  const email = document.getElementById("newAuthorEmail").value.trim();
+  const password = document.getElementById("newAuthorPassword").value;
+  const displayName = document.getElementById("newAuthorDisplayName").value.trim();
+  const bio = document.getElementById("newAuthorBio").value.trim();
 
-      return String(value);
+  if (!username || !email || !password || !displayName) {
+    toast("All required fields must be filled.", "error");
+    return;
+  }
 
+  if (password.length < 8) {
+    toast("Password must be at least 8 characters.", "error");
+    return;
+  }
+
+  const result = await api("/admin/authors/create", {
+    method: "POST",
+    body: {
+      admin_id: ADMIN_ID,
+      username: username,
+      email: email,
+      password: password,
+      display_name: displayName,
+      bio: bio
     }
+  });
 
-
-    return date.toLocaleDateString(
-      "sw-TZ",
-      {
-        day:"numeric",
-        month:"short",
-        year:"numeric"
-      }
-    );
-
+  if (result.success) {
+    toast("Author created kikamilifu!");
+    closeModal("addAuthorModal");
+    loadAuthors();
+  } else {
+    toast(result.message || "Imeshindikana ku-create author.", "error");
   }
+}
 
+/* DATE */
 
-  /* SECURITY */
+function formatDate(value) {
+  if (!value || value === "—") return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString("sw-TZ", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
+}
 
-  function escapeHTML(value){
+/* SECURITY */
 
-    return String(value ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  }
+function escapeAttribute(value) {
+  return String(value ?? "")
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'");
+}
 
+/* EVENTS */
 
-  function escapeAttribute(value){
+document.getElementById("searchInput").addEventListener("input", renderAuthors);
+document.getElementById("statusFilter").addEventListener("change", renderAuthors);
 
-    return String(value ?? "")
-      .replace(/\\/g,"\\\\")
-      .replace(/'/g,"\\'");
+/* LOGOUT */
 
-  }
+document.getElementById("logoutBtn").addEventListener("click", function () {
+  localStorage.removeItem("netsimulizi_user");
+  window.location.href = "admin-login.html";
+});
 
+/* START */
 
-  /* EVENTS */
+loadAuthors();
 
-  document.getElementById(
-    "searchInput"
-  ).addEventListener(
-    "input",
-    renderAuthors
-  );
-
-
-  document.getElementById(
-    "statusFilter"
-  ).addEventListener(
-    "change",
-    renderAuthors
-  );
-
-
-  /* LOGOUT */
-
-  document.getElementById(
-    "logoutBtn"
-  ).addEventListener(
-    "click",
-    function(){
-
-      localStorage.removeItem(
-        "netsimulizi_user"
-      );
-
-      window.location.href =
-        "admin-login.html";
-
-    }
-  );
-
-
-  /* START */
-
-  loadAuthors();
-
+  
 </script>
 
 </body>
