@@ -1,20 +1,106 @@
-// functions/api/[[path]].js
+const { DB } = globalThis;
 
-const json = (data, status = 200) =>
-    new Response(JSON.stringify(data), {
-        status,
-        headers: {
-            "Content-Type": "application/json; charset=UTF-8",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization"
+/* =====================================================
+   HELPERS
+   ===================================================== */
+
+const json = (data, status = 200) => {
+    return new Response(
+        JSON.stringify(data),
+        {
+            status,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods":
+                    "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers":
+                    "Content-Type, Authorization"
+            }
         }
-    });
+    );
+};
 
-const errorResponse = (message, status = 400, extra = {}) =>
-    json({ success: false, message, ...extra }, status);
+const errorResponse = (
+    message,
+    status = 400,
+    extra = {}
+) => {
+    return json(
+        {
+            success: false,
+            message,
+            ...extra
+        },
+        status
+    );
+};
 
-const readJson = async request => {
+const cleanString = (
+    value,
+    maxLength = 500
+) => {
+    if (
+        value === undefined ||
+        value === null
+    ) {
+        return "";
+    }
+
+    return String(value)
+        .trim()
+        .slice(0, maxLength);
+};
+
+const positiveInt = (value) => {
+    const number = Number(value);
+
+    if (
+        !Number.isInteger(number) ||
+        number <= 0
+    ) {
+        return null;
+    }
+
+    return number;
+};
+
+const numberOrNull = (value) => {
+    if (
+        value === undefined ||
+        value === null ||
+        value === ""
+    ) {
+        return null;
+    }
+
+    const number = Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : null;
+};
+
+const slugify = (value) => {
+
+    return cleanString(value, 300)
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .replace(
+            /[^a-z0-9]+/g,
+            "-"
+        )
+        .replace(
+            /^-+|-+$/g,
+            "");
+};
+
+const readJson = async (request) => {
+
     try {
         return await request.json();
     } catch {
@@ -22,325 +108,437 @@ const readJson = async request => {
     }
 };
 
-const cleanString = (value, max = 5000) =>
-    String(value ?? "").trim().slice(0, max);
 
-const positiveInt = value => {
-    const n = Number(value);
-    return Number.isInteger(n) && n > 0 ? n : null;
+/* =====================================================
+   PASSWORD HASHING
+   ===================================================== */
+
+const textEncoder =
+    new TextEncoder();
+
+const textDecoder =
+    new TextDecoder();
+
+const bytesToHex = (bytes) => {
+
+    return Array.from(bytes)
+        .map(
+            byte =>
+                byte
+                    .toString(16)
+                    .padStart(2, "0")
+        )
+        .join("");
 };
 
-const numberOrNull = value => {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : null;
-};
+const hexToBytes = (hex) => {
 
-const slugify = value =>
-    cleanString(value, 200)
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
-
-// =====================================================
-// PASSWORD
-// =====================================================
-
-const bytesToBase64 = bytes => {
-    let binary = "";
-    const size = 0x8000;
-
-    for (let i = 0; i < bytes.length; i += size) {
-        binary += String.fromCharCode(
-            ...bytes.subarray(i, i + size)
+    const bytes =
+        new Uint8Array(
+            hex.length / 2
         );
-    }
 
-    return btoa(binary);
-};
-
-const base64ToBytes = value => {
-    const binary = atob(value);
-    const bytes = new Uint8Array(binary.length);
-
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
+    for (
+        let i = 0;
+        i < bytes.length;
+        i++
+    ) {
+        bytes[i] =
+            parseInt(
+                hex.slice(
+                    i * 2,
+                    i * 2 + 2
+                ),
+                16
+            );
     }
 
     return bytes;
 };
 
-const hashPassword = async password => {
-    const salt = crypto.getRandomValues(new Uint8Array(16));
+const hashPassword = async (
+    password
+) => {
 
-    const key = await crypto.subtle.importKey(
-        "raw",
-        new TextEncoder().encode(password),
-        "PBKDF2",
-        false,
-        ["deriveBits"]
-    );
+    const salt =
+        crypto.getRandomValues(
+            new Uint8Array(16)
+        );
 
-    const buffer = await crypto.subtle.deriveBits(
-        {
-            name: "PBKDF2",
-            salt,
-            iterations: 100000,
-            hash: "SHA-256"
-        },
-        key,
-        256
-    );
-
-    return [
-        "pbkdf2",
-        100000,
-        bytesToBase64(salt),
-        bytesToBase64(new Uint8Array(buffer))
-    ].join("$");
-};
-
-const verifyPassword = async (password, stored) => {
-    try {
-        const parts = String(stored || "").split("$");
-
-        if (parts.length !== 4 || parts[0] !== "pbkdf2") {
-            return false;
-        }
-
-        const iterations = Number(parts[1]);
-
-        const key = await crypto.subtle.importKey(
+    const key =
+        await crypto.subtle.importKey(
             "raw",
-            new TextEncoder().encode(password),
-            "PBKDF2",
+            textEncoder.encode(password),
+            {
+                name: "PBKDF2"
+            },
             false,
             ["deriveBits"]
         );
 
-        const buffer = await crypto.subtle.deriveBits(
+    const bits =
+        await crypto.subtle.deriveBits(
             {
                 name: "PBKDF2",
-                salt: base64ToBytes(parts[2]),
-                iterations,
+                salt,
+                iterations: 100000,
                 hash: "SHA-256"
             },
             key,
             256
         );
 
-        const actual = new Uint8Array(buffer);
-        const expected = base64ToBytes(parts[3]);
+    return [
+        "pbkdf2",
+        "sha256",
+        "100000",
+        bytesToHex(salt),
+        bytesToHex(
+            new Uint8Array(bits)
+        )
+    ].join("$");
+};
 
-        if (actual.length !== expected.length) {
+const verifyPassword = async (
+    password,
+    stored
+) => {
+
+    try {
+
+        const parts =
+            String(stored || "")
+                .split("$");
+
+        if (
+            parts.length !== 5 ||
+            parts[0] !== "pbkdf2" ||
+            parts[1] !== "sha256"
+        ) {
             return false;
         }
 
-        let difference = 0;
+        const iterations =
+            Number(parts[2]);
 
-        for (let i = 0; i < actual.length; i++) {
-            difference |= actual[i] ^ expected[i];
+        const salt =
+            hexToBytes(parts[3]);
+
+        const expected =
+            hexToBytes(parts[4]);
+
+        const key =
+            await crypto.subtle.importKey(
+                "raw",
+                textEncoder.encode(password),
+                {
+                    name: "PBKDF2"
+                },
+                false,
+                ["deriveBits"]
+            );
+
+        const bits =
+            await crypto.subtle.deriveBits(
+                {
+                    name: "PBKDF2",
+                    salt,
+                    iterations,
+                    hash: "SHA-256"
+                },
+                key,
+                256
+            );
+
+        const actual =
+            new Uint8Array(bits);
+
+        if (
+            actual.length !==
+            expected.length
+        ) {
+            return false;
         }
 
-        return difference === 0;
+        let result = 0;
+
+        for (
+            let i = 0;
+            i < actual.length;
+            i++
+        ) {
+            result |=
+                actual[i] ^
+                expected[i];
+        }
+
+        return result === 0;
+
     } catch {
         return false;
     }
 };
 
 
-// =====================================================
-// DATABASE HELPERS
-// =====================================================
+/* =====================================================
+   DATABASE HELPERS
+   ===================================================== */
 
-const ensureExtraTables = async db => {
+const ensureExtraTables = async (
+    db
+) => {
 
-    const tables = [
-
-        `
+    await db.prepare(`
         CREATE TABLE IF NOT EXISTS story_submissions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             author_id INTEGER NOT NULL,
             title TEXT NOT NULL,
             slug TEXT,
-            language TEXT DEFAULT 'sw',
-            category_id INTEGER,
             description TEXT,
             cover_url TEXT,
-            tags TEXT,
-            is_ongoing INTEGER DEFAULT 1,
-            is_paid INTEGER DEFAULT 0,
+            language TEXT,
+            category_id INTEGER,
+            originality_declaration INTEGER DEFAULT 0,
             status TEXT DEFAULT 'pending',
-            originality_declared INTEGER DEFAULT 0,
             admin_note TEXT,
             reviewed_by INTEGER,
             reviewed_at TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-        `,
+    `).run();
 
-        `
+    await db.prepare(`
         CREATE TABLE IF NOT EXISTS author_earnings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             author_id INTEGER NOT NULL,
             story_id INTEGER,
             episode_id INTEGER,
-            source_type TEXT DEFAULT 'story',
             gross_amount REAL DEFAULT 0,
             author_amount REAL DEFAULT 0,
             platform_amount REAL DEFAULT 0,
+            source TEXT,
             status TEXT DEFAULT 'available',
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-        `,
+    `).run();
 
-        `
+    await db.prepare(`
         CREATE TABLE IF NOT EXISTS withdrawals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             author_id INTEGER NOT NULL,
             amount REAL NOT NULL,
-            method TEXT,
-            account_name TEXT,
-            account_number TEXT,
             status TEXT DEFAULT 'pending',
+            payment_method TEXT,
+            payment_account TEXT,
             admin_note TEXT,
-            processed_by INTEGER,
-            processed_at TEXT,
+            reviewed_by INTEGER,
+            reviewed_at TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-        `,
+    `).run();
 
-        `
+    await db.prepare(`
         CREATE TABLE IF NOT EXISTS recommendations (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            story_id INTEGER NOT NULL,
             author_id INTEGER NOT NULL,
-            gross_amount REAL DEFAULT 0,
+            story_id INTEGER,
+            amount REAL DEFAULT 0,
             author_amount REAL DEFAULT 0,
             platform_amount REAL DEFAULT 0,
-            status TEXT DEFAULT 'available',
             created_at TEXT DEFAULT CURRENT_TIMESTAMP
         )
-        `
-    ];
+    `).run();
 
-    for (const sql of tables) {
-        try {
-            await db.prepare(sql).run();
-        } catch {
-            // Existing tables are preserved.
-        }
-    }
+    await db.prepare(`
+        CREATE TABLE IF NOT EXISTS admins (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER NOT NULL UNIQUE,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+    `).run();
 };
 
 
-// =====================================================
-// READER
-// users = READERS ONLY
-// =====================================================
+const getUser = async (
+    db,
+    userId
+) => {
 
-const getReader = async (db, readerId) => {
-    const id = positiveInt(readerId);
+    const id =
+        positiveInt(userId);
 
-    if (!id) return null;
+    if (!id) {
+        return null;
+    }
 
-    try {
-        return await db.prepare(`
+    return await db
+        .prepare(`
             SELECT
                 id,
                 username,
                 email,
+                role,
                 status,
                 created_at,
                 updated_at
             FROM users
             WHERE id = ?
             LIMIT 1
-        `).bind(id).first();
-    } catch {
-        return null;
-    }
+        `)
+        .bind(id)
+        .first();
 };
 
 
-// =====================================================
-// AUTHOR
-// authors = AUTHORS ONLY
-// =====================================================
+const getReader = async (
+    db,
+    readerId
+) => {
 
-const getAuthor = async (db, authorId) => {
-    const id = positiveInt(authorId);
+    const id =
+        positiveInt(readerId);
 
-    if (!id) return null;
+    if (!id) {
+        return null;
+    }
 
-    try {
-        return await db.prepare(`
+    return await db
+        .prepare(`
+            SELECT *
+            FROM users
+            WHERE id = ?
+              AND (
+                    role = 'reader'
+                    OR role IS NULL
+                    OR role = ''
+              )
+            LIMIT 1
+        `)
+        .bind(id)
+        .first();
+};
+
+
+const getAuthor = async (
+    db,
+    authorId
+) => {
+
+    const id =
+        positiveInt(authorId);
+
+    if (!id) {
+        return null;
+    }
+
+    return await db
+        .prepare(`
             SELECT *
             FROM authors
             WHERE id = ?
             LIMIT 1
-        `).bind(id).first();
-    } catch {
-        return null;
-    }
+        `)
+        .bind(id)
+        .first();
 };
 
 
-// Compatibility name.
-// IMPORTANT: value is now authors.id, NOT users.id.
-const getAuthorByUserId = async (db, authorId) =>
-    getAuthor(db, authorId);
+const getAuthorByUserId = async (
+    db,
+    userId
+) => {
+
+    const id =
+        positiveInt(userId);
+
+    if (!id) {
+        return null;
+    }
+
+    return await db
+        .prepare(`
+            SELECT *
+            FROM authors
+            WHERE user_id = ?
+            LIMIT 1
+        `)
+        .bind(id)
+        .first();
+};
 
 
-// =====================================================
-// ADMIN
-// admins = ADMINS ONLY
-// NO ADMIN TABLE IS CREATED HERE
-// =====================================================
+const getAdmin = async (
+    db,
+    adminId
+) => {
 
-const getAdmin = async (db, adminId) => {
-    const id = positiveInt(adminId);
+    const id =
+        positiveInt(adminId);
 
-    if (!id) return null;
+    if (!id) {
+        return null;
+    }
 
     try {
-        return await db.prepare(`
-            SELECT *
-            FROM admins
-            WHERE id = ?
-            LIMIT 1
-        `).bind(id).first();
+
+        return await db
+            .prepare(`
+                SELECT *
+                FROM admins
+                WHERE id = ?
+                LIMIT 1
+            `)
+            .bind(id)
+            .first();
+
     } catch {
+
         return null;
     }
 };
 
-const requireAdmin = async (db, adminId) => {
 
-    const admin = await getAdmin(db, adminId);
+const requireAdmin = async (
+    db,
+    adminId
+) => {
+
+    const admin =
+        await getAdmin(
+            db,
+            adminId
+        );
 
     if (!admin) {
+
         return {
             ok: false,
-            response: errorResponse(
-                "Admin account not found",
-                404
-            )
+            response:
+                errorResponse(
+                    "Admin account not found",
+                    404
+                )
         };
     }
 
     if (
         admin.status &&
-        String(admin.status).toLowerCase() !== "active"
+        String(admin.status)
+            .toLowerCase() !==
+            "active"
     ) {
+
         return {
             ok: false,
-            response: errorResponse(
-                "Admin account is not active",
-                403
-            )
+            response:
+                errorResponse(
+                    "Admin account is not active",
+                    403
+                )
         };
     }
 
@@ -350,359 +548,79 @@ const requireAdmin = async (db, adminId) => {
     };
 };
 
-// =====================================================
-// MAIN
-// =====================================================
 
-export async function onRequest(context) {
+/* =====================================================
+   MAIN HANDLER
+   ===================================================== */
 
-    const { request, env } = context;
+export async function onRequest(
+    context
+) {
 
-    // Prefer DB, but keep D1 compatibility.
-    const db = env.DB || env.D1;
+    const {
+        request,
+        env
+    } = context;
+
+    const db =
+        env.DB;
 
     if (!db) {
+
         return errorResponse(
-            "D1 database binding not found",
+            "Database binding DB not found",
             500
         );
     }
 
-    const url = new URL(request.url);
+    const url =
+        new URL(request.url);
 
     const path =
         url.pathname
-            .replace(/^\/api/, "")
-            .replace(/\/+$/, "") || "/";
+            .replace(
+                /^\/api/,
+                ""
+            )
+            .replace(
+                /\/+$/,
+                ""
+            ) || "/";
 
-    const method = request.method.toUpperCase();
+    const method =
+        request.method.toUpperCase();
+
+
+    /* =================================================
+       OPTIONS
+       ================================================= */
 
     if (method === "OPTIONS") {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods":
-                    "GET, POST, PUT, DELETE, OPTIONS",
-                "Access-Control-Allow-Headers":
-                    "Content-Type, Authorization"
-            }
-        });
-    }
 
-    try {
-        await ensureExtraTables(db);
-    } catch {
-        // Existing database remains usable.
-    }
-
-
-    // =====================================================
-    // GET
-    // =====================================================
-
-    if (method === "GET") {
-
-        // -------------------------------------------------
-        // HEALTH
-        // -------------------------------------------------
-
-        if (path === "/health") {
-            return json({
-                success: true,
-                message: "Net Simulizi API is running",
-                service: "netsimulizi-api",
-                version: "3.0",
-                account_structure: {
-                    users: "readers",
-                    authors: "authors",
-                    admins: "admins"
-                }
-            });
-        }
-
-
-        // -------------------------------------------------
-        // TEST
-        // -------------------------------------------------
-
-        if (path === "/test") {
-            return json({
-                success: true,
-                message: "Net Simulizi API test successful"
-            });
-        }
-
-
-        // -------------------------------------------------
-        // DB TEST
-        // -------------------------------------------------
-
-        if (path === "/db-test") {
-            try {
-                const result = await db
-                    .prepare("SELECT 1 AS test")
-                    .first();
-
-                return json({
-                    success: true,
-                    message: "D1 database connection successful",
-                    database: "netsimulizi",
-                    result
-                });
-            } catch (error) {
-                return errorResponse(
-                    "D1 database connection failed",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
-        }
-     if (path === "/stories-test") {
-    try {
-        const result = await db
-            .prepare("SELECT * FROM stories LIMIT 5")
-            .all();
-
-        return json({
-            success: true,
-            count: (result.results || []).length,
-            stories: result.results || []
-        });
-
-    } catch (error) {
-        return errorResponse(
-            "Stories database test failed",
-            500,
+        return new Response(
+            null,
             {
-                error: error?.message || String(error)
+                status: 204,
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods":
+                        "GET, POST, PUT, DELETE, OPTIONS",
+                    "Access-Control-Allow-Headers":
+                        "Content-Type, Authorization"
+                }
             }
         );
     }
-}
 
-        // -------------------------------------------------
-        // CATEGORIES / GENRES
-        // -------------------------------------------------
-
-        if (
-            path === "/categories" ||
-            path === "/genres"
-        ) {
-
-            try {
-
-                const language =
-                    cleanString(
-                        url.searchParams.get("language"),
-                        20
-                    );
-
-                let sql = `
-                    SELECT *
-                    FROM categories
-                    WHERE status = 'active'
-                `;
-
-                const params = [];
-
-                if (language) {
-                    sql += `
-                        AND (
-                            language = ?
-                            OR language IS NULL
-                            OR language = ''
-                        )
-                    `;
-
-                    params.push(language);
-                }
-
-                sql += `
-                    ORDER BY name ASC
-                `;
-
-                const result =
-                    await db
-                        .prepare(sql)
-                        .bind(...params)
-                        .all();
-
-                return json({
-                    success: true,
-                    categories: result.results || [],
-                    genres: result.results || []
-                });
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Failed to load categories",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
-        }
-
-
-        // -------------------------------------------------
-        // STORIES
-        // -------------------------------------------------
-
-     if (path === "/stories") {
 
     try {
 
-        const language =
-            cleanString(
-                url.searchParams.get("language"),
-                20
-            );
-
-        const search =
-            cleanString(
-                url.searchParams.get("search"),
-                200
-            );
-
-        const authorId =
-            positiveInt(
-                url.searchParams.get("author_id")
-            );
-
-        let limit =
-            Number(
-                url.searchParams.get("limit") || 50
-            );
-
-        let offset =
-            Number(
-                url.searchParams.get("offset") || 0
-            );
-
-        if (!Number.isInteger(limit)) {
-            limit = 50;
-        }
-
-        if (!Number.isInteger(offset)) {
-            offset = 0;
-        }
-
-        limit = Math.min(
-            Math.max(limit, 1),
-            100
-        );
-
-        offset = Math.max(offset, 0);
-
-        let sql = `
-            SELECT
-                stories.*,
-                authors.id AS author_id,
-                authors.display_name AS author_name
-            FROM stories
-            LEFT JOIN authors
-                ON stories.author_id = authors.id
-            WHERE 1 = 1
-        `;
-
-        const params = [];
-
-        /*
-         * Published stories.
-         * NULL/empty status allowed temporarily
-         * for existing database records.
-         */
-        sql += `
-            AND (
-                stories.status = 'published'
-                OR stories.status IS NULL
-                OR stories.status = ''
-            )
-        `;
-
-        if (language) {
-
-            sql += `
-                AND stories.language = ?
-            `;
-
-            params.push(language);
-        }
-
-        if (authorId) {
-
-            sql += `
-                AND stories.author_id = ?
-            `;
-
-            params.push(authorId);
-        }
-
-        if (search) {
-
-            sql += `
-                AND (
-                    LOWER(stories.title)
-                    LIKE LOWER(?)
-
-                    OR LOWER(
-                        COALESCE(
-                            stories.description,
-                            ''
-                        )
-                    )
-                    LIKE LOWER(?)
-                )
-            `;
-
-            const term = `%${search}%`;
-
-            params.push(
-                term,
-                term
-            );
-        }
-
-        sql += `
-            ORDER BY stories.id DESC
-            LIMIT ? OFFSET ?
-        `;
-
-        params.push(
-            limit,
-            offset
-        );
-
-        const result =
-            await db
-                .prepare(sql)
-                .bind(...params)
-                .all();
-
-        return json({
-
-            success: true,
-
-            stories:
-                result.results || [],
-
-            pagination: {
-
-                limit,
-
-                offset,
-
-                count:
-                    (result.results || []).length
-            }
-
-        });
+        await ensureExtraTables(db);
 
     } catch (error) {
 
         return errorResponse(
-            "Failed to load stories",
+            "Database initialization failed",
             500,
             {
                 error:
@@ -711,34 +629,150 @@ export async function onRequest(context) {
             }
         );
     }
-}
 
 
-        // -------------------------------------------------
-        // STORY EPISODES
-        // -------------------------------------------------
+    /* =================================================
+       HEALTH
+       ================================================= */
+
+    if (
+        method === "GET" &&
+        path === "/health"
+    ) {
+
+        return json({
+            success: true,
+            message:
+                "Net Simulizi API is running",
+            service:
+                "netsimulizi-api",
+            version:
+                "3.0",
+            account_structure: {
+                users: "readers",
+                authors: "authors",
+                admins: "admins"
+            }
+        });
+    }
+
+
+    /* =================================================
+       TEST
+       ================================================= */
+
+    if (
+        method === "GET" &&
+        path === "/test"
+    ) {
+
+        return json({
+            success: true,
+            message:
+                "Net Simulizi API test successful"
+        });
+    }
+
+
+    /* =================================================
+       DB TEST
+       ================================================= */
+
+    if (
+        method === "GET" &&
+        path === "/db-test"
+    ) {
+
+        try {
+
+            const result =
+                await db
+                    .prepare(`
+                        SELECT
+                            1 AS ok
+                    `)
+                    .first();
+
+            return json({
+                success: true,
+                database:
+                    result?.ok === 1
+                        ? "connected"
+                        : "unknown"
+            });
+
+        } catch (error) {
+
+            return errorResponse(
+                "Database test failed",
+                500,
+                {
+                    error:
+                        error?.message ||
+                        String(error)
+                }
+            );
+        }
+    }
+
+
+    /* =================================================
+       STORIES TEST
+       ================================================= */
+
+    if (
+        method === "GET" &&
+        path === "/stories-test"
+    ) {
+
+        try {
+
+            const result =
+                await db
+                    .prepare(`
+                        SELECT
+                            COUNT(*) AS total
+                        FROM stories
+                    `)
+                    .first();
+
+            return json({
+                success: true,
+                total:
+                    Number(
+                        result?.total || 0
+                    )
+            });
+
+        } catch (error) {
+
+            return errorResponse(
+                "Stories test failed",
+                500,
+                {
+                    error:
+                        error?.message ||
+                        String(error)
+                }
+            );
+        }
+    }
+
+
+    /* =================================================
+       GET ROUTES
+       ================================================= */
+
+    if (method === "GET") {
+
+
+        /* =============================================
+           CATEGORIES
+           ============================================= */
 
         if (
-            path.startsWith("/stories/") &&
-            path.endsWith("/episodes")
+            path === "/categories"
         ) {
-
-            const parts =
-                path.split("/").filter(Boolean);
-
-            const storyId =
-                positiveInt(parts[1]);
-
-            if (
-                parts.length !== 3 ||
-                parts[2] !== "episodes" ||
-                !storyId
-            ) {
-                return errorResponse(
-                    "Invalid story ID",
-                    400
-                );
-            }
 
             try {
 
@@ -746,38 +780,203 @@ export async function onRequest(context) {
                     await db
                         .prepare(`
                             SELECT *
-                            FROM episodes
-                            WHERE story_id = ?
-                            AND status = 'published'
-                            ORDER BY episode_number ASC
+                            FROM categories
+                            ORDER BY name ASC
                         `)
-                        .bind(storyId)
                         .all();
 
                 return json({
                     success: true,
-                    episodes: result.results || []
+                    categories:
+                        result.results || []
                 });
 
             } catch (error) {
 
                 return errorResponse(
-                    "Failed to load episodes",
+                    "Failed to load categories",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // STORY DETAILS
-        // -------------------------------------------------
+        /* =============================================
+           GENRES
+           ============================================= */
 
-        if (path.startsWith("/stories/")) {
+        if (
+            path === "/genres"
+        ) {
+
+            try {
+
+                const result =
+                    await db
+                        .prepare(`
+                            SELECT *
+                            FROM categories
+                            ORDER BY name ASC
+                        `)
+                        .all();
+
+                return json({
+                    success: true,
+                    genres:
+                        result.results || []
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to load genres",
+                    500
+                );
+            }
+        }
+
+
+        /* =============================================
+           STORIES
+           ============================================= */
+
+        if (
+            path === "/stories"
+        ) {
+
+            const categoryId =
+                positiveInt(
+                    url.searchParams.get(
+                        "category_id"
+                    )
+                );
+
+            const language =
+                cleanString(
+                    url.searchParams.get(
+                        "language"
+                    ),
+                    50
+                );
+
+            const status =
+                cleanString(
+                    url.searchParams.get(
+                        "status"
+                    ),
+                    50
+                );
+
+            try {
+
+                let query = `
+                    SELECT
+                        stories.*,
+                        authors.display_name
+                            AS author_name,
+                        categories.name
+                            AS category_name
+                    FROM stories
+                    LEFT JOIN authors
+                        ON stories.author_id =
+                           authors.id
+                    LEFT JOIN categories
+                        ON stories.category_id =
+                           categories.id
+                    WHERE 1 = 1
+                `;
+
+                const params = [];
+
+                if (categoryId) {
+
+                    query += `
+                        AND stories.category_id = ?
+                    `;
+
+                    params.push(categoryId);
+                }
+
+                if (language) {
+
+                    query += `
+                        AND stories.language = ?
+                    `;
+
+                    params.push(language);
+                }
+
+                if (status) {
+
+                    query += `
+                        AND stories.status = ?
+                    `;
+
+                    params.push(status);
+
+                } else {
+
+                    query += `
+                        AND (
+                            stories.status = 'published'
+                            OR stories.status IS NULL
+                        )
+                    `;
+                }
+
+                query += `
+                    ORDER BY
+                        stories.created_at DESC
+                `;
+
+                const result =
+                    await db
+                        .prepare(query)
+                        .bind(...params)
+                        .all();
+
+                return json({
+                    success: true,
+                    stories:
+                        result.results || []
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to load stories",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
+
+
+        /* =============================================
+           STORY DETAIL
+           ============================================= */
+
+        if (
+            path.startsWith(
+                "/stories/"
+            ) &&
+            !path.endsWith(
+                "/episodes"
+            )
+        ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const storyId =
                 positiveInt(parts[1]);
@@ -786,6 +985,7 @@ export async function onRequest(context) {
                 parts.length !== 2 ||
                 !storyId
             ) {
+
                 return errorResponse(
                     "Invalid story ID",
                     400
@@ -799,29 +999,25 @@ export async function onRequest(context) {
                         .prepare(`
                             SELECT
                                 stories.*,
-                                authors.id AS author_id,
-                                authors.display_name AS author_name,
-                                categories.id AS category_id,
-                                categories.name AS category_name,
-                                categories.slug AS category_slug
+                                authors.display_name
+                                    AS author_name,
+                                categories.name
+                                    AS category_name
                             FROM stories
                             LEFT JOIN authors
-                                ON stories.author_id = authors.id
+                                ON stories.author_id =
+                                   authors.id
                             LEFT JOIN categories
-                                ON stories.category_id = categories.id
+                                ON stories.category_id =
+                                   categories.id
                             WHERE stories.id = ?
-                            AND stories.status = 'published'
-                            AND (
-                                stories.visibility = 'public'
-                                OR stories.visibility IS NULL
-                                OR stories.visibility = ''
-                            )
                             LIMIT 1
                         `)
                         .bind(storyId)
                         .first();
 
                 if (!story) {
+
                     return errorResponse(
                         "Story not found",
                         404
@@ -837,56 +1033,121 @@ export async function onRequest(context) {
 
                 return errorResponse(
                     "Failed to load story",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHORS
-        // -------------------------------------------------
+        /* =============================================
+           STORY EPISODES
+           ============================================= */
 
-        if (path === "/authors") {
+        if (
+            path.startsWith(
+                "/stories/"
+            ) &&
+            path.endsWith(
+                "/episodes"
+            )
+        ) {
+
+            const parts =
+                path.split("/")
+                    .filter(Boolean);
+
+            const storyId =
+                positiveInt(parts[1]);
+
+            if (
+                parts.length !== 3 ||
+                parts[2] !== "episodes" ||
+                !storyId
+            ) {
+
+                return errorResponse(
+                    "Invalid story ID",
+                    400
+                );
+            }
 
             try {
 
-                const search =
-                    cleanString(
-                        url.searchParams.get("search"),
-                        200
-                    );
-
-                let sql = `
-                    SELECT *
-                    FROM authors
-                `;
-
-                const params = [];
-
-                if (search) {
-                    sql += `
-                        WHERE LOWER(display_name)
-                        LIKE LOWER(?)
-                    `;
-
-                    params.push(`%${search}%`);
-                }
-
-                sql += `
-                    ORDER BY display_name ASC
-                `;
-
                 const result =
                     await db
-                        .prepare(sql)
-                        .bind(...params)
+                        .prepare(`
+                            SELECT
+                                *
+                            FROM episodes
+                            WHERE story_id = ?
+                            ORDER BY
+                                episode_number ASC,
+                                id ASC
+                        `)
+                        .bind(storyId)
                         .all();
 
                 return json({
                     success: true,
-                    authors: result.results || []
+                    episodes:
+                        result.results || []
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to load episodes",
+                    500
+                );
+            }
+        }
+
+
+        /* =============================================
+           AUTHORS
+           ============================================= */
+
+        if (
+            path === "/authors"
+        ) {
+
+            try {
+
+                const result =
+                    await db
+                        .prepare(`
+                            SELECT
+                                authors.*,
+                                users.username,
+                                users.email,
+                                (
+                                    SELECT COUNT(*)
+                                    FROM stories
+                                    WHERE stories.author_id =
+                                          authors.id
+                                ) AS story_count,
+                                (
+                                    SELECT COALESCE(
+                                        SUM(author_amount),
+                                        0
+                                    )
+                                    FROM author_earnings
+                                    WHERE author_earnings.author_id =
+                                          authors.id
+                                ) AS earnings
+                            FROM authors
+                            LEFT JOIN users
+                                ON authors.user_id =
+                                   users.id
+                            ORDER BY
+                                authors.created_at DESC
+                        `)
+                        .all();
+
+                return json({
+                    success: true,
+                    authors:
+                        result.results || []
                 });
 
             } catch (error) {
@@ -894,20 +1155,29 @@ export async function onRequest(context) {
                 return errorResponse(
                     "Failed to load authors",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR PROFILE
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR DETAIL
+           ============================================= */
 
-        if (path.startsWith("/authors/")) {
+        if (
+            path.startsWith(
+                "/authors/"
+            )
+        ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const authorId =
                 positiveInt(parts[1]);
@@ -916,95 +1186,129 @@ export async function onRequest(context) {
                 parts.length !== 2 ||
                 !authorId
             ) {
+
                 return errorResponse(
                     "Invalid author ID",
                     400
                 );
             }
 
-            const author =
-                await getAuthor(db, authorId);
+            try {
 
-            if (!author) {
+                const author =
+                    await db
+                        .prepare(`
+                            SELECT
+                                authors.*,
+                                users.username,
+                                users.email
+                            FROM authors
+                            LEFT JOIN users
+                                ON authors.user_id =
+                                   users.id
+                            WHERE authors.id = ?
+                            LIMIT 1
+                        `)
+                        .bind(authorId)
+                        .first();
+
+                if (!author) {
+
+                    return errorResponse(
+                        "Author not found",
+                        404
+                    );
+                }
+
+                return json({
+                    success: true,
+                    author
+                });
+
+            } catch {
+
                 return errorResponse(
-                    "Author not found",
+                    "Failed to load author",
+                    500
+                );
+            }
+        }
+
+
+        /* =============================================
+           PROFILE
+           ============================================= */
+
+        if (
+            path.startsWith(
+                "/profile/"
+            )
+        ) {
+
+            const parts =
+                path.split("/")
+                    .filter(Boolean);
+
+            const userId =
+                positiveInt(parts[1]);
+
+            if (
+                parts.length !== 2 ||
+                !userId
+            ) {
+
+                return errorResponse(
+                    "Invalid user ID",
+                    400
+                );
+            }
+
+            const user =
+                await getUser(
+                    db,
+                    userId
+                );
+
+            if (!user) {
+
+                return errorResponse(
+                    "User not found",
                     404
                 );
             }
 
             return json({
                 success: true,
-                author
+                user
             });
         }
 
 
-        // -------------------------------------------------
-        // READER PROFILE
-        // -------------------------------------------------
+        /* =============================================
+           BOOKMARKS
+           ============================================= */
 
-        if (path.startsWith("/profile/")) {
+        if (
+            path.startsWith(
+                "/bookmarks/"
+            )
+        ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
-            const readerId =
+            const userId =
                 positiveInt(parts[1]);
 
             if (
                 parts.length !== 2 ||
-                !readerId
+                !userId
             ) {
+
                 return errorResponse(
-                    "Invalid reader ID",
+                    "Invalid user ID",
                     400
-                );
-            }
-
-            const reader =
-                await getReader(db, readerId);
-
-            if (!reader) {
-                return errorResponse(
-                    "Reader not found",
-                    404
-                );
-            }
-
-            return json({
-                success: true,
-                user: reader,
-                reader
-            });
-        }
-
-
-        // -------------------------------------------------
-        // BOOKMARKS
-        // -------------------------------------------------
-
-        if (path.startsWith("/bookmarks/")) {
-
-            const parts =
-                path.split("/").filter(Boolean);
-
-            const readerId =
-                positiveInt(parts[1]);
-
-            if (
-                parts.length !== 2 ||
-                !readerId
-            ) {
-                return errorResponse(
-                    "Invalid reader ID",
-                    400
-                );
-            }
-
-            if (!(await getReader(db, readerId))) {
-                return errorResponse(
-                    "Reader not found",
-                    404
                 );
             }
 
@@ -1021,50 +1325,60 @@ export async function onRequest(context) {
                                 stories.cover_url,
                                 stories.language,
                                 stories.readers_count,
-                                authors.id AS author_id,
-                                authors.display_name AS author_name,
-                                categories.name AS category_name
+                                authors.id
+                                    AS author_id,
+                                authors.display_name
+                                    AS author_name,
+                                categories.name
+                                    AS category_name
                             FROM bookmarks
                             INNER JOIN stories
-                                ON bookmarks.story_id = stories.id
+                                ON bookmarks.story_id =
+                                   stories.id
                             LEFT JOIN authors
-                                ON stories.author_id = authors.id
+                                ON stories.author_id =
+                                   authors.id
                             LEFT JOIN categories
-                                ON stories.category_id = categories.id
+                                ON stories.category_id =
+                                   categories.id
                             WHERE bookmarks.user_id = ?
-                            ORDER BY bookmarks.created_at DESC
+                            ORDER BY
+                                bookmarks.created_at DESC
                         `)
-                        .bind(readerId)
+                        .bind(userId)
                         .all();
 
                 return json({
                     success: true,
-                    bookmarks: result.results || []
+                    bookmarks:
+                        result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load bookmarks",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // READING PROGRESS
-        // -------------------------------------------------
+        /* =============================================
+           READING PROGRESS
+           ============================================= */
 
         if (
-            path.startsWith("/reading-progress/")
+            path.startsWith(
+                "/reading-progress/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
-            const readerId =
+            const userId =
                 positiveInt(parts[1]);
 
             const storyId =
@@ -1072,11 +1386,12 @@ export async function onRequest(context) {
 
             if (
                 parts.length !== 3 ||
-                !readerId ||
+                !userId ||
                 !storyId
             ) {
+
                 return errorResponse(
-                    "Invalid reader ID or story ID",
+                    "Invalid user ID or story ID",
                     400
                 );
             }
@@ -1086,61 +1401,58 @@ export async function onRequest(context) {
                 const progress =
                     await db
                         .prepare(`
-                            SELECT
-                                reading_progress.*,
-                                episodes.episode_number,
-                                episodes.title AS episode_title,
-                                stories.title AS story_title
+                            SELECT *
                             FROM reading_progress
-                            LEFT JOIN episodes
-                                ON reading_progress.episode_id =
-                                   episodes.id
-                            INNER JOIN stories
-                                ON reading_progress.story_id =
-                                   stories.id
-                            WHERE reading_progress.user_id = ?
-                            AND reading_progress.story_id = ?
+                            WHERE user_id = ?
+                              AND story_id = ?
                             LIMIT 1
                         `)
-                        .bind(readerId, storyId)
+                        .bind(
+                            userId,
+                            storyId
+                        )
                         .first();
 
                 return json({
                     success: true,
-                    progress: progress || null
+                    progress:
+                        progress || null
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load reading progress",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // READING HISTORY
-        // -------------------------------------------------
+        /* =============================================
+           READING HISTORY
+           ============================================= */
 
         if (
-            path.startsWith("/reading-history/")
+            path.startsWith(
+                "/reading-history/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
-            const readerId =
+            const userId =
                 positiveInt(parts[1]);
 
             if (
                 parts.length !== 2 ||
-                !readerId
+                !userId
             ) {
+
                 return errorResponse(
-                    "Invalid reader ID",
+                    "Invalid user ID",
                     400
                 );
             }
@@ -1152,51 +1464,55 @@ export async function onRequest(context) {
                         .prepare(`
                             SELECT
                                 reading_progress.*,
-                                stories.title AS story_title,
-                                stories.slug AS story_slug,
+                                stories.title,
+                                stories.slug,
                                 stories.cover_url,
-                                episodes.episode_number,
-                                episodes.title AS episode_title
+                                stories.language,
+                                authors.display_name
+                                    AS author_name
                             FROM reading_progress
                             INNER JOIN stories
                                 ON reading_progress.story_id =
                                    stories.id
-                            LEFT JOIN episodes
-                                ON reading_progress.episode_id =
-                                   episodes.id
+                            LEFT JOIN authors
+                                ON stories.author_id =
+                                   authors.id
                             WHERE reading_progress.user_id = ?
-                            ORDER BY reading_progress.last_read_at DESC
+                            ORDER BY
+                                reading_progress.updated_at DESC
                         `)
-                        .bind(readerId)
+                        .bind(userId)
                         .all();
 
                 return json({
                     success: true,
-                    history: result.results || []
+                    history:
+                        result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load reading history",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR STORIES
-        // URL ID = authors.id
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR STORIES
+           ============================================= */
 
         if (
-            path.startsWith("/author/stories/")
+            path.startsWith(
+                "/author/stories/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const authorId =
                 positiveInt(parts[2]);
@@ -1205,6 +1521,7 @@ export async function onRequest(context) {
                 parts.length !== 3 ||
                 !authorId
             ) {
+
                 return errorResponse(
                     "Invalid author ID",
                     400
@@ -1212,11 +1529,15 @@ export async function onRequest(context) {
             }
 
             const author =
-                await getAuthor(db, authorId);
+                await getAuthor(
+                    db,
+                    authorId
+                );
 
             if (!author) {
+
                 return errorResponse(
-                    "Author profile not found",
+                    "Author not found",
                     404
                 );
             }
@@ -1226,45 +1547,44 @@ export async function onRequest(context) {
                 const result =
                     await db
                         .prepare(`
-                            SELECT
-                                stories.*,
-                                categories.name AS category_name
+                            SELECT *
                             FROM stories
-                            LEFT JOIN categories
-                                ON stories.category_id =
-                                   categories.id
-                            WHERE stories.author_id = ?
-                            ORDER BY stories.created_at DESC
+                            WHERE author_id = ?
+                            ORDER BY
+                                created_at DESC
                         `)
                         .bind(author.id)
                         .all();
 
                 return json({
                     success: true,
-                    stories: result.results || []
+                    stories:
+                        result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load author stories",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR SUBMISSIONS
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR SUBMISSIONS
+           ============================================= */
 
         if (
-            path.startsWith("/author/submissions/")
+            path.startsWith(
+                "/author/submissions/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const authorId =
                 positiveInt(parts[2]);
@@ -1273,15 +1593,23 @@ export async function onRequest(context) {
                 parts.length !== 3 ||
                 !authorId
             ) {
+
                 return errorResponse(
                     "Invalid author ID",
                     400
                 );
             }
 
-            if (!(await getAuthor(db, authorId))) {
+            const author =
+                await getAuthor(
+                    db,
+                    authorId
+                );
+
+            if (!author) {
+
                 return errorResponse(
-                    "Author profile not found",
+                    "Author not found",
                     404
                 );
             }
@@ -1294,35 +1622,41 @@ export async function onRequest(context) {
                             SELECT *
                             FROM story_submissions
                             WHERE author_id = ?
-                            ORDER BY created_at DESC
+                            ORDER BY
+                                created_at DESC
                         `)
-                        .bind(authorId)
+                        .bind(author.id)
                         .all();
 
                 return json({
                     success: true,
-                    submissions: result.results || []
+                    submissions:
+                        result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load submissions",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR WALLET
-        // -------------------------------------------------
+        /* =============================================
+           WALLET
+           ============================================= */
 
-        if (path.startsWith("/wallet/")) {
+        if (
+            path.startsWith(
+                "/wallet/"
+            )
+        ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const authorId =
                 positiveInt(parts[1]);
@@ -1331,15 +1665,23 @@ export async function onRequest(context) {
                 parts.length !== 2 ||
                 !authorId
             ) {
+
                 return errorResponse(
                     "Invalid author ID",
                     400
                 );
             }
 
-            if (!(await getAuthor(db, authorId))) {
+            const author =
+                await getAuthor(
+                    db,
+                    authorId
+                );
+
+            if (!author) {
+
                 return errorResponse(
-                    "Author profile not found",
+                    "Author not found",
                     404
                 );
             }
@@ -1350,32 +1692,36 @@ export async function onRequest(context) {
                     await db
                         .prepare(`
                             SELECT
-                                COALESCE(SUM(author_amount),0)
-                                    AS total_earnings,
-
+                                COALESCE(
+                                    SUM(author_amount),
+                                    0
+                                ) AS total_earnings,
                                 COALESCE(
                                     SUM(
                                         CASE
-                                            WHEN status = 'available'
+                                            WHEN status =
+                                                'available'
                                             THEN author_amount
                                             ELSE 0
                                         END
-                                    ),0
+                                    ),
+                                    0
                                 ) AS available_balance,
-
                                 COALESCE(
                                     SUM(
                                         CASE
-                                            WHEN status = 'paid'
+                                            WHEN status =
+                                                'paid'
                                             THEN author_amount
                                             ELSE 0
                                         END
-                                    ),0
+                                    ),
+                                    0
                                 ) AS paid_earnings
                             FROM author_earnings
                             WHERE author_id = ?
                         `)
-                        .bind(authorId)
+                        .bind(author.id)
                         .first();
 
                 const recommendations =
@@ -1383,12 +1729,13 @@ export async function onRequest(context) {
                         .prepare(`
                             SELECT
                                 COALESCE(
-                                    SUM(author_amount),0
+                                    SUM(author_amount),
+                                    0
                                 ) AS total
                             FROM recommendations
                             WHERE author_id = ?
                         `)
-                        .bind(authorId)
+                        .bind(author.id)
                         .first();
 
                 const withdrawals =
@@ -1398,70 +1745,80 @@ export async function onRequest(context) {
                                 COALESCE(
                                     SUM(
                                         CASE
-                                            WHEN status = 'pending'
+                                            WHEN status =
+                                                'pending'
                                             THEN amount
                                             ELSE 0
                                         END
-                                    ),0
+                                    ),
+                                    0
                                 ) AS pending,
-
                                 COALESCE(
                                     SUM(
                                         CASE
-                                            WHEN status IN
-                                                ('approved','paid')
+                                            WHEN status =
+                                                'approved'
+                                            OR status =
+                                                'paid'
                                             THEN amount
                                             ELSE 0
                                         END
-                                    ),0
+                                    ),
+                                    0
                                 ) AS withdrawn
                             FROM withdrawals
                             WHERE author_id = ?
                         `)
-                        .bind(authorId)
+                        .bind(author.id)
                         .first();
 
                 const available =
                     Number(
-                        earnings?.available_balance || 0
+                        earnings?.available_balance ||
+                        0
+                    );
+
+                const pending =
+                    Number(
+                        withdrawals?.pending ||
+                        0
+                    );
+
+                const withdrawable =
+                    Math.max(
+                        0,
+                        available - pending
                     );
 
                 return json({
                     success: true,
                     wallet: {
+                        author_id:
+                            author.id,
                         total_earnings:
                             Number(
-                                earnings?.total_earnings || 0
+                                earnings?.total_earnings ||
+                                0
                             ),
-
                         available_balance:
                             available,
-
-                        paid_earnings:
-                            Number(
-                                earnings?.paid_earnings || 0
-                            ),
-
-                        recommendation_earnings:
-                            Number(
-                                recommendations?.total || 0
-                            ),
-
                         pending_withdrawals:
-                            Number(
-                                withdrawals?.pending || 0
-                            ),
-
+                            pending,
                         withdrawn:
                             Number(
-                                withdrawals?.withdrawn || 0
+                                withdrawals?.withdrawn ||
+                                0
                             ),
-
-                        withdrawal_threshold:
+                        recommendations:
+                            Number(
+                                recommendations?.total ||
+                                0
+                            ),
+                        withdrawable,
+                        minimum_withdrawal:
                             50000,
-
                         can_withdraw:
-                            available >= 50000
+                            withdrawable >= 50000
                     }
                 });
 
@@ -1470,20 +1827,29 @@ export async function onRequest(context) {
                 return errorResponse(
                     "Failed to load wallet",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR WITHDRAWAL HISTORY
-        // -------------------------------------------------
+        /* =============================================
+           WITHDRAWALS
+           ============================================= */
 
-        if (path.startsWith("/withdrawals/")) {
+        if (
+            path.startsWith(
+                "/withdrawals/"
+            )
+        ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const authorId =
                 positiveInt(parts[1]);
@@ -1492,16 +1858,10 @@ export async function onRequest(context) {
                 parts.length !== 2 ||
                 !authorId
             ) {
+
                 return errorResponse(
                     "Invalid author ID",
                     400
-                );
-            }
-
-            if (!(await getAuthor(db, authorId))) {
-                return errorResponse(
-                    "Author profile not found",
-                    404
                 );
             }
 
@@ -1513,7 +1873,8 @@ export async function onRequest(context) {
                             SELECT *
                             FROM withdrawals
                             WHERE author_id = ?
-                            ORDER BY created_at DESC
+                            ORDER BY
+                                created_at DESC
                         `)
                         .bind(authorId)
                         .all();
@@ -1524,30 +1885,36 @@ export async function onRequest(context) {
                         result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load withdrawals",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN SUBMISSIONS
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN SUBMISSIONS
+           ============================================= */
 
-        if (path === "/admin/submissions") {
+        if (
+            path === "/admin/submissions"
+        ) {
 
             const adminId =
                 positiveInt(
-                    url.searchParams.get("admin_id")
+                    url.searchParams.get(
+                        "admin_id"
+                    )
                 );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
@@ -1555,40 +1922,22 @@ export async function onRequest(context) {
 
             try {
 
-                const status =
-                    cleanString(
-                        url.searchParams.get("status"),
-                        50
-                    );
-
-                let sql = `
-                    SELECT
-                        story_submissions.*,
-                        authors.display_name AS author_name
-                    FROM story_submissions
-                    LEFT JOIN authors
-                        ON story_submissions.author_id =
-                           authors.id
-                `;
-
-                const params = [];
-
-                if (status) {
-                    sql += `
-                        WHERE story_submissions.status = ?
-                    `;
-
-                    params.push(status);
-                }
-
-                sql += `
-                    ORDER BY story_submissions.created_at DESC
-                `;
-
                 const result =
                     await db
-                        .prepare(sql)
-                        .bind(...params)
+                        .prepare(`
+                            SELECT
+                                story_submissions.*,
+                                authors.display_name
+                                    AS author_name
+                            FROM story_submissions
+                            LEFT JOIN authors
+                                ON story_submissions.author_id =
+                                   authors.id
+                            WHERE story_submissions.status =
+                                'pending'
+                            ORDER BY
+                                story_submissions.created_at DESC
+                        `)
                         .all();
 
                 return json({
@@ -1597,30 +1946,36 @@ export async function onRequest(context) {
                         result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load admin submissions",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN WITHDRAWALS
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN WITHDRAWALS
+           ============================================= */
 
-        if (path === "/admin/withdrawals") {
+        if (
+            path === "/admin/withdrawals"
+        ) {
 
             const adminId =
                 positiveInt(
-                    url.searchParams.get("admin_id")
+                    url.searchParams.get(
+                        "admin_id"
+                    )
                 );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
@@ -1633,12 +1988,16 @@ export async function onRequest(context) {
                         .prepare(`
                             SELECT
                                 withdrawals.*,
-                                authors.display_name AS author_name
+                                authors.display_name
+                                    AS author_name
                             FROM withdrawals
                             LEFT JOIN authors
                                 ON withdrawals.author_id =
                                    authors.id
-                            ORDER BY withdrawals.created_at DESC
+                            WHERE withdrawals.status =
+                                'pending'
+                            ORDER BY
+                                withdrawals.created_at ASC
                         `)
                         .all();
 
@@ -1648,31 +2007,36 @@ export async function onRequest(context) {
                         result.results || []
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to load admin withdrawals",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-   
-     // -------------------------------------------------
-        // ADMIN STATS
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN STATS
+           ============================================= */
 
-        if (path === "/admin/stats") {
+        if (
+            path === "/admin/stats"
+        ) {
 
             const adminId =
                 positiveInt(
-                    url.searchParams.get("admin_id")
+                    url.searchParams.get(
+                        "admin_id"
+                    )
                 );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
@@ -1682,49 +2046,61 @@ export async function onRequest(context) {
 
                 const users =
                     await db
-                        .prepare(
-                            "SELECT COUNT(*) AS total FROM users"
-                        )
+                        .prepare(`
+                            SELECT
+                                COUNT(*) AS total
+                            FROM users
+                        `)
                         .first();
 
                 const authors =
                     await db
-                        .prepare(
-                            "SELECT COUNT(*) AS total FROM authors"
-                        )
+                        .prepare(`
+                            SELECT
+                                COUNT(*) AS total
+                            FROM authors
+                        `)
                         .first();
 
                 const stories =
                     await db
-                        .prepare(
-                            "SELECT COUNT(*) AS total FROM stories"
-                        )
+                        .prepare(`
+                            SELECT
+                                COUNT(*) AS total
+                            FROM stories
+                        `)
                         .first();
 
                 const published =
                     await db
                         .prepare(`
-                            SELECT COUNT(*) AS total
+                            SELECT
+                                COUNT(*) AS total
                             FROM stories
-                            WHERE status = 'published'
+                            WHERE status =
+                                'published'
                         `)
                         .first();
 
                 const submissions =
                     await db
                         .prepare(`
-                            SELECT COUNT(*) AS total
+                            SELECT
+                                COUNT(*) AS total
                             FROM story_submissions
-                            WHERE status = 'pending'
+                            WHERE status =
+                                'pending'
                         `)
                         .first();
 
                 const withdrawals =
                     await db
                         .prepare(`
-                            SELECT COUNT(*) AS total
+                            SELECT
+                                COUNT(*) AS total
                             FROM withdrawals
-                            WHERE status = 'pending'
+                            WHERE status =
+                                'pending'
                         `)
                         .first();
 
@@ -1732,25 +2108,33 @@ export async function onRequest(context) {
                     success: true,
                     stats: {
                         readers:
-                            Number(users?.total || 0),
-
+                            Number(
+                                users?.total || 0
+                            ),
                         users:
-                            Number(users?.total || 0),
-
+                            Number(
+                                users?.total || 0
+                            ),
                         authors:
-                            Number(authors?.total || 0),
-
+                            Number(
+                                authors?.total || 0
+                            ),
                         stories:
-                            Number(stories?.total || 0),
-
+                            Number(
+                                stories?.total || 0
+                            ),
                         published_stories:
-                            Number(published?.total || 0),
-
+                            Number(
+                                published?.total || 0
+                            ),
                         pending_submissions:
-                            Number(submissions?.total || 0),
-
+                            Number(
+                                submissions?.total || 0
+                            ),
                         pending_withdrawals:
-                            Number(withdrawals?.total || 0)
+                            Number(
+                                withdrawals?.total || 0
+                            )
                     }
                 });
 
@@ -1759,7 +2143,11 @@ export async function onRequest(context) {
                 return errorResponse(
                     "Failed to load admin statistics",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
@@ -1770,83 +2158,67 @@ export async function onRequest(context) {
             404
         );
     }
-}
-    
-    // =====================================================
-    // POST
-    // =====================================================
+
+
+    /* =================================================
+       POST ROUTES
+       ================================================= */
 
     if (method === "POST") {
 
-        const body = await readJson(request);
+        const body =
+            await readJson(request);
 
         if (!body) {
+
             return errorResponse(
                 "Invalid JSON request",
                 400
             );
         }
 
-     // -------------------------------------------------
-// AUTHOR LOGIN
-// -------------------------------------------------
 
-        if (path === "/author/login") {
+        /* =============================================
+           ADMIN LOGIN
+           ============================================= */
+
+        if (
+            path === "/login"
+        ) {
 
             const login =
-                cleanString(body.login, 200);
+                cleanString(
+                    body.login ||
+                    body.email ||
+                    body.username,
+                    200
+                );
 
             const password =
-                String(body.password || "");
-
-            if (!login) {
-                return errorResponse(
-                    "Username or email is required",
-                    400
+                String(
+                    body.password || ""
                 );
-            }
 
-            if (!password) {
+            if (
+                !login ||
+                !password
+            ) {
+
                 return errorResponse(
-                    "Password is required",
+                    "Login and password are required",
                     400
                 );
             }
 
             try {
 
-                /*
-                 * Author identity = authors.id
-                 *
-                 * Current database:
-                 * authors.user_id -> users.id
-                 */
-
-                const author =
+                const user =
                     await db
                         .prepare(`
-                            SELECT
-                                authors.id,
-                                authors.user_id,
-                                authors.display_name,
-                                authors.bio,
-                                
-                                authors.approval_status,
-
-                                users.username,
-                                users.email,
-                                users.password_hash,
-                                users.status AS user_status
-
-                            FROM authors
-
-                            INNER JOIN users
-                                ON authors.user_id = users.id
-
-                            WHERE
-                                users.username = ?
-                                OR users.email = ?
-
+                            SELECT *
+                            FROM users
+                            WHERE username = ?
+                               OR email = ?
                             LIMIT 1
                         `)
                         .bind(
@@ -1855,86 +2227,92 @@ export async function onRequest(context) {
                         )
                         .first();
 
-                if (!author) {
+                if (!user) {
+
                     return errorResponse(
-                        "Invalid author username/email or password",
+                        "Invalid login credentials",
                         401
                     );
                 }
 
-                if (
-                    author.user_status &&
-                    String(author.user_status).toLowerCase() !== "active"
-                ) {
-                    return errorResponse(
-                        "Author account is not active",
-                        403
-                    );
-                }
-
-                /*
-                 * Author must be approved before login.
-                 *
-                 * Test Author currently has:
-                 * approval_status = pending
-                 *
-                 * Therefore it will correctly return
-                 * the pending message until approved.
-                 */
-
-                if (
-                    author.approval_status &&
-                    String(author.approval_status).toLowerCase() !== "approved"
-                ) {
-                    return errorResponse(
-                        "Author account is pending approval",
-                        403
-                    );
-                }
-
-                const validPassword =
+                const valid =
                     await verifyPassword(
                         password,
-                        author.password_hash
+                        user.password_hash
                     );
 
-                if (!validPassword) {
+                if (!valid) {
+
                     return errorResponse(
-                        "Invalid author username/email or password",
+                        "Invalid login credentials",
                         401
+                    );
+                }
+
+                if (
+                    String(user.role || "")
+                        .toLowerCase() !==
+                    "admin"
+                ) {
+
+                    return errorResponse(
+                        "Admin account required",
+                        403
+                    );
+                }
+
+                const admin =
+                    await db
+                        .prepare(`
+                            SELECT *
+                            FROM admins
+                            WHERE user_id = ?
+                            LIMIT 1
+                        `)
+                        .bind(user.id)
+                        .first();
+
+                if (!admin) {
+
+                    return errorResponse(
+                        "Admin account not found",
+                        404
+                    );
+                }
+
+                if (
+                    String(admin.status)
+                        .toLowerCase() !==
+                    "active"
+                ) {
+
+                    return errorResponse(
+                        "Admin account is not active",
+                        403
                     );
                 }
 
                 return json({
                     success: true,
-
-                    message:
-                        "Author login successful",
-
-                    author: {
-                        id: author.id,
-                        user_id: author.user_id,
-                        username: author.username,
-                        email: author.email,
-                        display_name: author.display_name,
-                        bio: author.bio,
-                        avatar_url: author.avatar_url,
-                        approval_status:
-                            author.approval_status ||
-                            "approved"
+                    user: {
+                        id: user.id,
+                        admin_id:
+                            admin.id,
+                        username:
+                            user.username,
+                        email:
+                            user.email,
+                        role:
+                            "admin",
+                        status:
+                            user.status
                     }
                 });
 
             } catch (error) {
 
-                console.error(
-                    "Author login error:",
-                    error
-                );
-
                 return errorResponse(
-                    error?.message ||
-                    String(error),
+                    "Login failed",
                     500,
                     {
                         error:
@@ -1944,195 +2322,49 @@ export async function onRequest(context) {
                 );
             }
         }
-        // -------------------------------------------------
-        // READER REGISTER
-        // -------------------------------------------------
-
-        if (path === "/register") {
-
-            const username =
-                cleanString(body.username, 100);
-
-            const email =
-                cleanString(body.email, 200)
-                    .toLowerCase();
-
-            const password =
-                String(body.password || "");
-
-            if (!username) {
-                return errorResponse(
-                    "Username is required",
-                    400
-                );
-            }
-
-            if (!email) {
-                return errorResponse(
-                    "Email is required",
-                    400
-                );
-            }
-
-            if (password.length < 6) {
-                return errorResponse(
-                    "Password must be at least 6 characters",
-                    400
-                );
-            }
-
-            try {
-
-                const existing =
-                    await db
-                        .prepare(`
-                            SELECT id
-                            FROM users
-                            WHERE username = ?
-                            OR email = ?
-                            LIMIT 1
-                        `)
-                        .bind(username, email)
-                        .first();
-
-                if (existing) {
-                    return errorResponse(
-                        "Username or email already exists",
-                        409
-                    );
-                }
-
-                const passwordHash =
-                    await hashPassword(password);
-
-                /*
-                 * users = READERS ONLY.
-                 *
-                 * role haitumiki tena kwenye logic.
-                 * Tunaiweka tu ikiwa legacy schema
-                 * inailazimisha.
-                 */
-
-                let result;
-
-                try {
-
-                    result =
-                        await db
-                            .prepare(`
-                                INSERT INTO users (
-                                    username,
-                                    email,
-                                    password_hash,
-                                    status
-                                )
-                                VALUES (?, ?, ?, 'active')
-                            `)
-                            .bind(
-                                username,
-                                email,
-                                passwordHash
-                            )
-                            .run();
-
-                } catch {
-
-                    /*
-                     * Compatibility kwa database ya zamani
-                     * ambayo bado ina role NOT NULL.
-                     *
-                     * Hii haibadilishi architecture:
-                     * users bado ni Readers pekee.
-                     */
-
-                    result =
-                        await db
-                            .prepare(`
-                                INSERT INTO users (
-                                    username,
-                                    email,
-                                    password_hash,
-                                    role,
-                                    status
-                                )
-                                VALUES (
-                                    ?, ?, ?, 'reader', 'active'
-                                )
-                            `)
-                            .bind(
-                                username,
-                                email,
-                                passwordHash
-                            )
-                            .run();
-                }
-
-                return json({
-                    success: true,
-                    message:
-                        "Reader registration successful",
-
-                    user: {
-                        id:
-                            result.meta.last_row_id,
-
-                        username,
-                        email,
-
-                        account_type:
-                            "reader",
-
-                        status:
-                            "active"
-                    }
-                }, 201);
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Registration failed",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
-        }
 
 
-        // -------------------------------------------------
-        // READER LOGIN
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR LOGIN
+           ============================================= */
 
-        if (path === "/login") {
+        if (
+            path === "/author/login"
+        ) {
 
             const login =
-                cleanString(body.login, 200);
+                cleanString(
+                    body.login ||
+                    body.email ||
+                    body.username,
+                    200
+                );
 
             const password =
-                String(body.password || "");
+                String(
+                    body.password || ""
+                );
 
-            if (!login || !password) {
+            if (
+                !login ||
+                !password
+            ) {
+
                 return errorResponse(
-                    "Username/email and password are required",
+                    "Login and password are required",
                     400
                 );
             }
 
             try {
 
-                const reader =
+                const user =
                     await db
                         .prepare(`
-                            SELECT
-                                id,
-                                username,
-                                email,
-                                password_hash,
-                                status,
-                                created_at,
-                                updated_at
+                            SELECT *
                             FROM users
                             WHERE username = ?
-                            OR email = ?
+                               OR email = ?
                             LIMIT 1
                         `)
                         .bind(
@@ -2141,110 +2373,264 @@ export async function onRequest(context) {
                         )
                         .first();
 
-                if (!reader) {
-                    return errorResponse(
-                        "Invalid username/email or password",
-                        401
-                    );
-                }
+                if (!user) {
 
-                if (reader.status !== "active") {
                     return errorResponse(
-                        "Your account is not active",
-                        403
+                        "Invalid login credentials",
+                        401
                     );
                 }
 
                 const valid =
                     await verifyPassword(
                         password,
-                        reader.password_hash
+                        user.password_hash
                     );
 
                 if (!valid) {
+
                     return errorResponse(
-                        "Invalid username/email or password",
+                        "Invalid login credentials",
                         401
+                    );
+                }
+
+                const author =
+                    await getAuthorByUserId(
+                        db,
+                        user.id
+                    );
+
+                if (!author) {
+
+                    return errorResponse(
+                        "Author profile not found",
+                        404
+                    );
+                }
+
+                if (
+                    String(
+                        author.approval_status ||
+                        ""
+                    ).toLowerCase() !==
+                    "approved"
+                ) {
+
+                    return errorResponse(
+                        "Author account is pending approval",
+                        403,
+                        {
+                            approval_status:
+                                author.approval_status ||
+                                "pending"
+                        }
                     );
                 }
 
                 return json({
                     success: true,
-                    message: "Login successful",
-
-                    user: {
-                        id: reader.id,
-                        username: reader.username,
-                        email: reader.email,
-                        account_type: "reader",
-                        status: reader.status,
-                        created_at: reader.created_at,
-                        updated_at: reader.updated_at
+                    author: {
+                        id:
+                            author.id,
+                        user_id:
+                            author.user_id,
+                        username:
+                            user.username,
+                        email:
+                            user.email,
+                        display_name:
+                            author.display_name,
+                        approval_status:
+                            author.approval_status
                     }
                 });
 
             } catch (error) {
 
                 return errorResponse(
-                    "Login failed",
+                    "Author login failed",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADD BOOKMARK
-        // -------------------------------------------------
+        /* =============================================
+           REGISTER READER
+           ============================================= */
 
-        if (path === "/bookmarks") {
+        if (
+            path === "/register"
+        ) {
 
-            const readerId =
-                positiveInt(body.user_id);
+            const username =
+                cleanString(
+                    body.username,
+                    100
+                );
 
-            const storyId =
-                positiveInt(body.story_id);
+            const email =
+                cleanString(
+                    body.email,
+                    200
+                ).toLowerCase();
 
-            if (!readerId || !storyId) {
+            const password =
+                String(
+                    body.password || ""
+                );
+
+            if (
+                !username ||
+                !email ||
+                !password
+            ) {
+
                 return errorResponse(
-                    "Reader ID and story ID are required",
+                    "Username, email and password are required",
                     400
                 );
             }
 
-            if (!(await getReader(db, readerId))) {
+            if (
+                password.length < 8
+            ) {
+
                 return errorResponse(
-                    "Reader not found",
-                    404
+                    "Password must be at least 8 characters",
+                    400
                 );
             }
 
             try {
 
-                const story =
+                const existing =
                     await db
                         .prepare(`
                             SELECT id
-                            FROM stories
-                            WHERE id = ?
+                            FROM users
+                            WHERE username = ?
+                               OR email = ?
                             LIMIT 1
                         `)
-                        .bind(storyId)
+                        .bind(
+                            username,
+                            email
+                        )
                         .first();
 
-                if (!story) {
+                if (existing) {
+
                     return errorResponse(
-                        "Story not found",
-                        404
+                        "Username or email already exists",
+                        409
                     );
                 }
 
-                /*
-                 * Fix:
-                 * UNIQUE(user_id, story_id)
-                 * haitasababisha 500 tena.
-                 */
+                const passwordHash =
+                    await hashPassword(
+                        password
+                    );
+
+                const result =
+                    await db
+                        .prepare(`
+                            INSERT INTO users (
+                                username,
+                                email,
+                                password_hash,
+                                role,
+                                status
+                            )
+                            VALUES (
+                                ?,
+                                ?,
+                                ?,
+                                'reader',
+                                'active'
+                            )
+                        `)
+                        .bind(
+                            username,
+                            email,
+                            passwordHash
+                        )
+                        .run();
+
+                const userId =
+                    result.meta.last_row_id;
+
+                return json(
+                    {
+                        success: true,
+                        message:
+                            "Reader registered successfully",
+                        user: {
+                            id:
+                                userId,
+                            username,
+                            email,
+                            role:
+                                "reader",
+                            status:
+                                "active"
+                        }
+                    },
+                    201
+                );
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Registration failed",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
+
+
+        /* =============================================
+           BOOKMARK
+           ============================================= */
+
+        if (
+            path === "/bookmarks"
+        ) {
+
+            const userId =
+                positiveInt(
+                    body.user_id ||
+                    body.reader_id
+                );
+
+            const storyId =
+                positiveInt(
+                    body.story_id
+                );
+
+            if (
+                !userId ||
+                !storyId
+            ) {
+
+                return errorResponse(
+                    "User ID and story ID are required",
+                    400
+                );
+            }
+
+            try {
 
                 const existing =
                     await db
@@ -2252,17 +2638,21 @@ export async function onRequest(context) {
                             SELECT id
                             FROM bookmarks
                             WHERE user_id = ?
-                            AND story_id = ?
+                              AND story_id = ?
                             LIMIT 1
                         `)
-                        .bind(readerId, storyId)
+                        .bind(
+                            userId,
+                            storyId
+                        )
                         .first();
 
                 if (existing) {
+
                     return json({
                         success: true,
                         message:
-                            "Story already bookmarked",
+                            "Bookmark already exists",
                         bookmark_id:
                             existing.id
                     });
@@ -2277,130 +2667,160 @@ export async function onRequest(context) {
                             )
                             VALUES (?, ?)
                         `)
-                        .bind(readerId, storyId)
+                        .bind(
+                            userId,
+                            storyId
+                        )
                         .run();
 
-                return json({
-                    success: true,
-                    message:
-                        "Story bookmarked successfully",
-                    bookmark_id:
-                        result.meta.last_row_id
-                }, 201);
+                return json(
+                    {
+                        success: true,
+                        message:
+                            "Bookmark added successfully",
+                        bookmark_id:
+                            result.meta.last_row_id
+                    },
+                    201
+                );
 
             } catch (error) {
 
                 return errorResponse(
                     "Failed to add bookmark",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // READING PROGRESS
-        // -------------------------------------------------
+        /* =============================================
+           READING PROGRESS
+           ============================================= */
 
-        if (path === "/reading-progress") {
+        if (
+            path === "/reading-progress"
+        ) {
 
-            const readerId =
-                positiveInt(body.user_id);
+            const userId =
+                positiveInt(
+                    body.user_id ||
+                    body.reader_id
+                );
 
             const storyId =
-                positiveInt(body.story_id);
+                positiveInt(
+                    body.story_id
+                );
 
             const episodeId =
-                positiveInt(body.episode_id);
+                numberOrNull(
+                    body.episode_id
+                );
 
-            let progress =
-                Number(body.progress_percent);
+            const progressPercent =
+                numberOrNull(
+                    body.progress_percent ??
+                    body.progress
+                );
 
-            if (!readerId || !storyId || !episodeId) {
+            if (
+                !userId ||
+                !storyId
+            ) {
+
                 return errorResponse(
-                    "Reader ID, story ID and episode ID are required",
+                    "User ID and story ID are required",
                     400
                 );
             }
 
-            if (!Number.isFinite(progress)) {
-                progress = 0;
-            }
-
-            progress =
-                Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        Math.round(progress)
+            const progress =
+                Math.min(
+                    100,
+                    Math.max(
+                        0,
+                        Number(
+                            progressPercent || 0
+                        )
                     )
                 );
 
             try {
 
-                const episode =
+                const existing =
                     await db
                         .prepare(`
                             SELECT id
-                            FROM episodes
-                            WHERE id = ?
-                            AND story_id = ?
+                            FROM reading_progress
+                            WHERE user_id = ?
+                              AND story_id = ?
                             LIMIT 1
                         `)
                         .bind(
-                            episodeId,
+                            userId,
                             storyId
                         )
                         .first();
 
-                if (!episode) {
-                    return errorResponse(
-                        "Episode not found for this story",
-                        404
-                    );
-                }
+                if (existing) {
 
-                await db
-                    .prepare(`
-                        INSERT INTO reading_progress (
-                            user_id,
-                            story_id,
-                            episode_id,
-                            progress_percent,
-                            last_read_at
+                    await db
+                        .prepare(`
+                            UPDATE reading_progress
+                            SET
+                                episode_id = ?,
+                                progress_percent = ?,
+                                updated_at =
+                                    CURRENT_TIMESTAMP
+                            WHERE id = ?
+                        `)
+                        .bind(
+                            episodeId,
+                            progress,
+                            existing.id
                         )
-                        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-                        ON CONFLICT(
-                            user_id,
-                            story_id
-                        )
-                        DO UPDATE SET
-                            episode_id =
-                                excluded.episode_id,
-                            progress_percent =
-                                excluded.progress_percent,
-                            last_read_at =
+                        .run();
+
+                } else {
+
+                    await db
+                        .prepare(`
+                            INSERT INTO reading_progress (
+                                user_id,
+                                story_id,
+                                episode_id,
+                                progress_percent,
+                                created_at,
+                                updated_at
+                            )
+                            VALUES (
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                CURRENT_TIMESTAMP,
                                 CURRENT_TIMESTAMP
-                    `)
-                    .bind(
-                        readerId,
-                        storyId,
-                        episodeId,
-                        progress
-                    )
-                    .run();
+                            )
+                        `)
+                        .bind(
+                            userId,
+                            storyId,
+                            episodeId,
+                            progress
+                        )
+                        .run();
+                }
 
                 return json({
                     success: true,
                     message:
-                        "Reading progress saved",
-                    progress: {
-                        user_id: readerId,
-                        story_id: storyId,
-                        episode_id: episodeId,
-                        progress_percent: progress
-                    }
+                        "Reading progress saved"
                 });
 
             } catch (error) {
@@ -2408,119 +2828,102 @@ export async function onRequest(context) {
                 return errorResponse(
                     "Failed to save reading progress",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR STORY SUBMISSION
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR CREATE STORY
+           ============================================= */
 
-        if (path === "/author/stories") {
+        if (
+            path === "/author/stories"
+        ) {
 
-            /*
-             * author_id = authors.id
-             *
-             * user_id imeachwa kama compatibility tu.
-             * Haifanyi lookup kwenye users.
-             */
-
-            const authorId =
+            const userId =
                 positiveInt(
-                    body.author_id ||
                     body.user_id
                 );
 
-            if (!authorId) {
-                return errorResponse(
-                    "Author ID is required",
-                    400
-                );
-            }
-
-            const author =
-                await getAuthor(db, authorId);
-
-            if (!author) {
-                return errorResponse(
-                    "Author profile not found",
-                    404
-                );
-            }
-
-            if (
-                author.status &&
-                String(author.status).toLowerCase() !== "active"
-            ) {
-                return errorResponse(
-                    "Author account is not active",
-                    403
-                );
-            }
-
             const title =
-                cleanString(body.title, 300);
+                cleanString(
+                    body.title,
+                    300
+                );
 
             const description =
-                cleanString(body.description, 10000);
+                cleanString(
+                    body.description,
+                    10000
+                );
 
             const language =
                 cleanString(
-                    body.language || "sw",
-                    20
+                    body.language,
+                    50
                 );
 
             const categoryId =
-                positiveInt(body.category_id);
+                positiveInt(
+                    body.category_id
+                );
 
             const coverUrl =
                 cleanString(
-                    body.cover_url ||
-                    body.cover ||
-                    "",
+                    body.cover_url,
                     1000
                 );
 
-            const tags =
-                cleanString(body.tags, 1000);
-
-            const isOngoing =
-                body.is_ongoing === false ||
-                body.is_ongoing === 0
-                    ? 0
-                    : 1;
-
-            const isPaid =
-                body.is_paid === true ||
-                body.is_paid === 1
-                    ? 1
-                    : 0;
-
             const originality =
-                body.originality_declared === true ||
-                body.originality_declared === 1 ||
-                body.originality === true;
+                body.originality_declaration === true ||
+                body.originality_declaration === 1 ||
+                body.originality_declaration === "1" ||
+                body.originality_declaration === "true";
 
-            if (!title) {
+            if (
+                !userId ||
+                !title ||
+                !language
+            ) {
+
                 return errorResponse(
-                    "Story title is required",
+                    "User ID, title and language are required",
                     400
                 );
             }
 
             if (!originality) {
+
                 return errorResponse(
                     "Originality declaration is required",
                     400
                 );
             }
 
+            const author =
+                await getAuthorByUserId(
+                    db,
+                    userId
+                );
+
+            if (!author) {
+
+                return errorResponse(
+                    "Author profile not found",
+                    404
+                );
+            }
+
             try {
 
                 const slug =
-                    `${slugify(title)}-${Date.now()}`;
+                    slugify(title);
 
                 const result =
                     await db
@@ -2529,77 +2932,446 @@ export async function onRequest(context) {
                                 author_id,
                                 title,
                                 slug,
-                                language,
-                                category_id,
                                 description,
                                 cover_url,
-                                tags,
-                                is_ongoing,
-                                is_paid,
-                                status,
-                                originality_declared
+                                language,
+                                category_id,
+                                originality_declaration,
+                                status
                             )
                             VALUES (
-                                ?, ?, ?, ?, ?, ?, ?, ?,
-                                ?, ?, 'pending', 1
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                1,
+                                'pending'
                             )
                         `)
                         .bind(
-                            authorId,
+                            author.id,
                             title,
                             slug,
+                            description || null,
+                            coverUrl || null,
                             language,
                             categoryId,
-                            description,
-                            coverUrl,
-                            tags,
-                            isOngoing,
-                            isPaid
                         )
                         .run();
 
-                return json({
-                    success: true,
-                    message:
-                        "Story submitted successfully",
-                    submission_id:
-                        result.meta.last_row_id,
-                    status: "pending"
-                }, 201);
+                return json(
+                    {
+                        success: true,
+                        message:
+                            "Story submitted successfully and is pending approval",
+                        submission_id:
+                            result.meta.last_row_id,
+                        status:
+                            "pending"
+                    },
+                    201
+                );
 
             } catch (error) {
 
                 return errorResponse(
                     "Failed to submit story",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN APPROVE STORY
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN CREATE AUTHOR
+           ============================================= */
 
         if (
-            path === "/admin/submissions/approve"
+            path === "/admin/authors/create"
         ) {
 
             const adminId =
-                positiveInt(body.admin_id);
+                positiveInt(
+                    body.admin_id
+                );
 
-            const submissionId =
-                positiveInt(body.submission_id);
+            const username =
+                cleanString(
+                    body.username,
+                    100
+                );
+
+            const email =
+                cleanString(
+                    body.email,
+                    200
+                ).toLowerCase();
+
+            const password =
+                String(
+                    body.password || ""
+                );
+
+            const displayName =
+                cleanString(
+                    body.display_name,
+                    200
+                );
+
+            const bio =
+                cleanString(
+                    body.bio,
+                    5000
+                );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
+
+            if (!auth.ok) {
+                return auth.response;
+            }
+
+            if (
+                !username ||
+                !email ||
+                !password ||
+                !displayName
+            ) {
+
+                return errorResponse(
+                    "username, email, password and display_name are required",
+                    400
+                );
+            }
+
+            if (
+                password.length < 8
+            ) {
+
+                return errorResponse(
+                    "Password must be at least 8 characters",
+                    400
+                );
+            }
+
+            try {
+
+                const existingUser =
+                    await db
+                        .prepare(`
+                            SELECT id
+                            FROM users
+                            WHERE username = ?
+                               OR email = ?
+                            LIMIT 1
+                        `)
+                        .bind(
+                            username,
+                            email
+                        )
+                        .first();
+
+                if (existingUser) {
+
+                    return errorResponse(
+                        "Username or email already exists",
+                        409
+                    );
+                }
+
+                const passwordHash =
+                    await hashPassword(
+                        password
+                    );
+
+                const userResult =
+                    await db
+                        .prepare(`
+                            INSERT INTO users (
+                                username,
+                                email,
+                                password_hash,
+                                role,
+                                status
+                            )
+                            VALUES (
+                                ?,
+                                ?,
+                                ?,
+                                'author',
+                                'active'
+                            )
+                        `)
+                        .bind(
+                            username,
+                            email,
+                            passwordHash
+                        )
+                        .run();
+
+                const userId =
+                    userResult.meta.last_row_id;
+
+                if (!userId) {
+
+                    return errorResponse(
+                        "Failed to create author user account",
+                        500
+                    );
+                }
+
+                try {
+
+                    const authorResult =
+                        await db
+                            .prepare(`
+                                INSERT INTO authors (
+                                    user_id,
+                                    display_name,
+                                    bio,
+                                    approval_status
+                                )
+                                VALUES (
+                                    ?,
+                                    ?,
+                                    ?,
+                                    'pending'
+                                )
+                            `)
+                            .bind(
+                                userId,
+                                displayName,
+                                bio || null
+                            )
+                            .run();
+
+                    const authorId =
+                        authorResult.meta.last_row_id;
+
+                    if (!authorId) {
+
+                        await db
+                            .prepare(`
+                                DELETE FROM users
+                                WHERE id = ?
+                            `)
+                            .bind(userId)
+                            .run();
+
+                        return errorResponse(
+                            "Failed to create author profile",
+                            500
+                        );
+                    }
+
+                    return json(
+                        {
+                            success: true,
+                            message:
+                                "Author created successfully and is pending approval",
+                            author: {
+                                id:
+                                    authorId,
+                                user_id:
+                                    userId,
+                                username,
+                                email,
+                                display_name:
+                                    displayName,
+                                approval_status:
+                                    "pending"
+                            }
+                        },
+                        201
+                    );
+
+                } catch (authorError) {
+
+                    try {
+
+                        await db
+                            .prepare(`
+                                DELETE FROM users
+                                WHERE id = ?
+                            `)
+                            .bind(userId)
+                            .run();
+
+                    } catch {}
+
+                    throw authorError;
+                }
+
+            } catch (error) {
+
+                return errorResponse(
+                    error?.message ||
+                    "Failed to create author",
+                    500
+                );
+            }
+        }
+
+
+        /* =============================================
+           ADMIN APPROVE AUTHOR
+           ============================================= */
+
+        if (
+            path === "/admin/authors/approve"
+        ) {
+
+            const adminId =
+                positiveInt(
+                    body.admin_id
+                );
+
+            const authorId =
+                positiveInt(
+                    body.author_id
+                );
+
+            const auth =
+                await requireAdmin(
+                    db,
+                    adminId
+                );
+
+            if (!auth.ok) {
+                return auth.response;
+            }
+
+            if (!authorId) {
+
+                return errorResponse(
+                    "author_id is required",
+                    400
+                );
+            }
+
+            try {
+
+                const author =
+                    await db
+                        .prepare(`
+                            SELECT
+                                id,
+                                user_id,
+                                display_name,
+                                approval_status
+                            FROM authors
+                            WHERE id = ?
+                            LIMIT 1
+                        `)
+                        .bind(authorId)
+                        .first();
+
+                if (!author) {
+
+                    return errorResponse(
+                        "Author not found",
+                        404
+                    );
+                }
+
+                if (
+                    String(
+                        author.approval_status ||
+                        ""
+                    ).toLowerCase() ===
+                    "approved"
+                ) {
+
+                    return errorResponse(
+                        "Author is already approved",
+                        409
+                    );
+                }
+
+                await db
+                    .prepare(`
+                        UPDATE authors
+                        SET
+                            approval_status =
+                                'approved',
+                            approved_at =
+                                CURRENT_TIMESTAMP,
+                            updated_at =
+                                CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `)
+                    .bind(authorId)
+                    .run();
+
+                return json({
+                    success: true,
+                    message:
+                        "Author approved successfully",
+                    author: {
+                        id:
+                            author.id,
+                        user_id:
+                            author.user_id,
+                        display_name:
+                            author.display_name,
+                        approval_status:
+                            "approved"
+                    }
+                });
+
+            } catch (error) {
+
+                return errorResponse(
+                    error?.message ||
+                    "Failed to approve author",
+                    500
+                );
+            }
+        }
+
+
+        /* =============================================
+           ADMIN APPROVE SUBMISSION
+           ============================================= */
+
+        if (
+            path ===
+            "/admin/submissions/approve"
+        ) {
+
+            const adminId =
+                positiveInt(
+                    body.admin_id
+                );
+
+            const submissionId =
+                positiveInt(
+                    body.submission_id
+                );
+
+            const auth =
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
             }
 
             if (!submissionId) {
+
                 return errorResponse(
                     "Invalid submission ID",
                     400
@@ -2616,35 +3388,37 @@ export async function onRequest(context) {
                             WHERE id = ?
                             LIMIT 1
                         `)
-                        .bind(submissionId)
+                        .bind(
+                            submissionId
+                        )
                         .first();
 
                 if (!submission) {
+
                     return errorResponse(
                         "Submission not found",
                         404
                     );
                 }
 
-                if (submission.status === "approved") {
+                if (
+                    String(
+                        submission.status
+                    ).toLowerCase() !==
+                    "pending"
+                ) {
+
                     return errorResponse(
-                        "Submission is already approved",
+                        "Submission is not pending",
                         409
                     );
                 }
 
-                const author =
-                    await getAuthor(
-                        db,
-                        submission.author_id
+                const storySlug =
+                    submission.slug ||
+                    slugify(
+                        submission.title
                     );
-
-                if (!author) {
-                    return errorResponse(
-                        "Author not found",
-                        404
-                    );
-                }
 
                 const storyResult =
                     await db
@@ -2655,24 +3429,32 @@ export async function onRequest(context) {
                                 description,
                                 cover_url,
                                 language,
+                                author_id,
+                                category_id,
                                 status,
                                 visibility,
                                 readers_count,
-                                author_id,
-                                category_id,
                                 created_at,
                                 updated_at
                             )
                             VALUES (
-                                ?, ?, ?, ?, ?, 'published',
-                                'public', 0, ?, ?, 
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                'published',
+                                'public',
+                                0,
                                 CURRENT_TIMESTAMP,
                                 CURRENT_TIMESTAMP
                             )
                         `)
                         .bind(
                             submission.title,
-                            submission.slug,
+                            storySlug,
                             submission.description,
                             submission.cover_url,
                             submission.language,
@@ -2688,10 +3470,13 @@ export async function onRequest(context) {
                     .prepare(`
                         UPDATE story_submissions
                         SET
-                            status = 'approved',
+                            status =
+                                'approved',
                             reviewed_by = ?,
-                            reviewed_at = CURRENT_TIMESTAMP,
-                            updated_at = CURRENT_TIMESTAMP
+                            reviewed_at =
+                                CURRENT_TIMESTAMP,
+                            updated_at =
+                                CURRENT_TIMESTAMP
                         WHERE id = ?
                     `)
                     .bind(
@@ -2704,35 +3489,43 @@ export async function onRequest(context) {
                     success: true,
                     message:
                         "Submission approved and story published",
-                    story_id: storyId,
-                    submission_id: submissionId,
-                    status: "published"
+                    story_id:
+                        storyId,
+                    submission_id:
+                        submissionId,
+                    status:
+                        "published"
                 });
 
             } catch (error) {
 
                 return errorResponse(
+                    error?.message ||
                     "Failed to approve submission",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN REJECT STORY
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN REJECT SUBMISSION
+           ============================================= */
 
         if (
-            path === "/admin/submissions/reject"
+            path ===
+            "/admin/submissions/reject"
         ) {
 
             const adminId =
-                positiveInt(body.admin_id);
+                positiveInt(
+                    body.admin_id
+                );
 
             const submissionId =
-                positiveInt(body.submission_id);
+                positiveInt(
+                    body.submission_id
+                );
 
             const note =
                 cleanString(
@@ -2741,13 +3534,17 @@ export async function onRequest(context) {
                 );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
             }
 
             if (!submissionId) {
+
                 return errorResponse(
                     "Invalid submission ID",
                     400
@@ -2761,11 +3558,14 @@ export async function onRequest(context) {
                         .prepare(`
                             UPDATE story_submissions
                             SET
-                                status = 'rejected',
+                                status =
+                                    'rejected',
                                 admin_note = ?,
                                 reviewed_by = ?,
-                                reviewed_at = CURRENT_TIMESTAMP,
-                                updated_at = CURRENT_TIMESTAMP
+                                reviewed_at =
+                                    CURRENT_TIMESTAMP,
+                                updated_at =
+                                    CURRENT_TIMESTAMP
                             WHERE id = ?
                         `)
                         .bind(
@@ -2775,7 +3575,10 @@ export async function onRequest(context) {
                         )
                         .run();
 
-                if (!result.meta.changes) {
+                if (
+                    result.meta.changes === 0
+                ) {
+
                     return errorResponse(
                         "Submission not found",
                         404
@@ -2788,54 +3591,71 @@ export async function onRequest(context) {
                         "Submission rejected",
                     submission_id:
                         submissionId,
-                    status: "rejected"
+                    status:
+                        "rejected"
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to reject submission",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR CREATE EPISODE
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR CREATE EPISODE
+           ============================================= */
 
-        if (path === "/author/episodes") {
+        if (
+            path === "/author/episodes"
+        ) {
 
-            const authorId =
+            const userId =
                 positiveInt(
-                    body.author_id ||
                     body.user_id
                 );
 
             const storyId =
-                positiveInt(body.story_id);
+                positiveInt(
+                    body.story_id
+                );
 
             const title =
-                cleanString(body.title, 300);
+                cleanString(
+                    body.title,
+                    300
+                );
 
             const content =
-                cleanString(body.content, 1000000);
+                cleanString(
+                    body.content,
+                    1000000
+                );
 
-            let episodeNumber =
+            const episodeNumber =
                 positiveInt(
                     body.episode_number
                 );
 
-            if (!authorId || !storyId) {
+            if (
+                !userId ||
+                !storyId
+            ) {
+
                 return errorResponse(
-                    "Author ID and story ID are required",
+                    "User ID and story ID are required",
                     400
                 );
             }
 
-            if (!title || !content) {
+            if (
+                !title ||
+                !content
+            ) {
+
                 return errorResponse(
                     "Episode title and content are required",
                     400
@@ -2843,9 +3663,13 @@ export async function onRequest(context) {
             }
 
             const author =
-                await getAuthor(db, authorId);
+                await getAuthorByUserId(
+                    db,
+                    userId
+                );
 
             if (!author) {
+
                 return errorResponse(
                     "Author profile not found",
                     404
@@ -2857,7 +3681,9 @@ export async function onRequest(context) {
                 const story =
                     await db
                         .prepare(`
-                            SELECT id, author_id
+                            SELECT
+                                id,
+                                author_id
                             FROM stories
                             WHERE id = ?
                             LIMIT 1
@@ -2866,6 +3692,7 @@ export async function onRequest(context) {
                         .first();
 
                 if (!story) {
+
                     return errorResponse(
                         "Story not found",
                         404
@@ -2873,32 +3700,42 @@ export async function onRequest(context) {
                 }
 
                 if (
-                    Number(story.author_id) !==
-                    Number(author.id)
+                    Number(
+                        story.author_id
+                    ) !==
+                    Number(
+                        author.id
+                    )
                 ) {
+
                     return errorResponse(
                         "You do not own this story",
                         403
                     );
                 }
 
-                if (!episodeNumber) {
+                let number =
+                    episodeNumber;
+
+                if (!number) {
 
                     const last =
                         await db
                             .prepare(`
                                 SELECT
-                                    MAX(episode_number)
-                                    AS max_episode
+                                    MAX(
+                                        episode_number
+                                    ) AS max_episode
                                 FROM episodes
                                 WHERE story_id = ?
                             `)
                             .bind(storyId)
                             .first();
 
-                    episodeNumber =
+                    number =
                         Number(
-                            last?.max_episode || 0
+                            last?.max_episode ||
+                            0
                         ) + 1;
                 }
 
@@ -2909,7 +3746,9 @@ export async function onRequest(context) {
                         : 1;
 
                 let price =
-                    Number(body.price || 0);
+                    Number(
+                        body.price || 0
+                    );
 
                 if (
                     !Number.isFinite(price) ||
@@ -2928,20 +3767,23 @@ export async function onRequest(context) {
                                 content,
                                 is_free,
                                 price,
-                                status,
                                 created_at,
                                 updated_at
                             )
                             VALUES (
-                                ?, ?, ?, ?, ?, ?,
-                                'published',
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
                                 CURRENT_TIMESTAMP,
                                 CURRENT_TIMESTAMP
                             )
                         `)
                         .bind(
                             storyId,
-                            episodeNumber,
+                            number,
                             title,
                             content,
                             isFree,
@@ -2949,834 +3791,487 @@ export async function onRequest(context) {
                         )
                         .run();
 
-                return json({
-                    success: true,
-                    message:
-                        "Episode created successfully",
-                    episode_id:
-                        result.meta.last_row_id
-                }, 201);
+                return json(
+                    {
+                        success: true,
+                        message:
+                            "Episode created successfully",
+                        episode_id:
+                            result.meta.last_row_id,
+                        episode_number:
+                            number
+                    },
+                    201
+                );
 
             } catch (error) {
 
                 return errorResponse(
                     "Failed to create episode",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // AUTHOR EARNINGS
-        // -------------------------------------------------
+        /* =============================================
+           AUTHOR EARNINGS
+           70 / 30
+           ============================================= */
 
-        if (path === "/author/earnings") {
+        if (
+            path === "/author/earnings"
+        ) {
 
             const authorId =
                 positiveInt(
-                    body.author_id ||
-                    body.user_id
+                    body.author_id
                 );
 
             const gross =
-                Number(body.amount || 0);
-
-            if (!authorId) {
-                return errorResponse(
-                    "Author ID is required",
-                    400
+                Number(
+                    body.amount || 0
                 );
-            }
 
             if (
+                !authorId ||
                 !Number.isFinite(gross) ||
                 gross <= 0
             ) {
+
                 return errorResponse(
-                    "Invalid earning amount",
+                    "Valid author_id and amount are required",
                     400
                 );
             }
 
-            const author =
-                await getAuthor(db, authorId);
-
-            if (!author) {
-                return errorResponse(
-                    "Author profile not found",
-                    404
-                );
-            }
-
-            const sourceType =
-                cleanString(
-                    body.source_type || "story",
-                    50
-                );
-
-            const recommendation =
-                sourceType === "recommendation";
-
-            const authorRate =
-                recommendation ? 0.50 : 0.70;
-
-            const platformRate =
-                recommendation ? 0.50 : 0.30;
-
             const authorAmount =
-                Math.round(
-                    gross *
-                    authorRate *
-                    100
-                ) / 100;
+                Number(
+                    (
+                        gross * 0.70
+                    ).toFixed(2)
+                );
 
             const platformAmount =
-                Math.round(
-                    gross *
-                    platformRate *
-                    100
-                ) / 100;
+                Number(
+                    (
+                        gross * 0.30
+                    ).toFixed(2)
+                );
 
             try {
 
-                if (recommendation) {
+                const author =
+                    await getAuthor(
+                        db,
+                        authorId
+                    );
 
-                    const storyId =
-                        positiveInt(body.story_id);
+                if (!author) {
 
-                    if (!storyId) {
-                        return errorResponse(
-                            "Story ID is required for recommendation earnings",
-                            400
-                        );
-                    }
+                    return errorResponse(
+                        "Author not found",
+                        404
+                    );
+                }
 
-                    await db
-                        .prepare(`
-                            INSERT INTO recommendations (
-                                story_id,
-                                author_id,
-                                gross_amount,
-                                author_amount,
-                                platform_amount,
-                                status
-                            )
-                            VALUES (?, ?, ?, ?, ?, 'available')
-                        `)
-                        .bind(
-                            storyId,
-                            author.id,
-                            gross,
-                            authorAmount,
-                            platformAmount
-                        )
-                        .run();
-
-                } else {
-
+                const result =
                     await db
                         .prepare(`
                             INSERT INTO author_earnings (
                                 author_id,
                                 story_id,
                                 episode_id,
-                                source_type,
                                 gross_amount,
                                 author_amount,
                                 platform_amount,
+                                source,
                                 status
                             )
                             VALUES (
-                                ?, ?, ?, ?, ?, ?, ?, 'available'
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                'available'
                             )
                         `)
                         .bind(
-                            author.id,
-                            positiveInt(body.story_id),
-                            positiveInt(body.episode_id),
-                            sourceType,
+                            authorId,
+                            positiveInt(
+                                body.story_id
+                            ),
+                            positiveInt(
+                                body.episode_id
+                            ),
+                            gross,
+                            authorAmount,
+                            platformAmount,
+                            cleanString(
+                                body.source,
+                                100
+                            ) || "sale"
+                        )
+                        .run();
+
+                return json(
+                    {
+                        success: true,
+                        earning_id:
+                            result.meta.last_row_id,
+                        gross_amount:
+                            gross,
+                        author_amount:
+                            authorAmount,
+                        platform_amount:
+                            platformAmount
+                    },
+                    201
+                );
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to record earnings",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
+
+
+        /* =============================================
+           RECOMMENDATION
+           50 / 50
+           ============================================= */
+
+        if (
+            path === "/recommendations"
+        ) {
+
+            const authorId =
+                positiveInt(
+                    body.author_id
+                );
+
+            const gross =
+                Number(
+                    body.amount || 0
+                );
+
+            if (
+                !authorId ||
+                !Number.isFinite(gross) ||
+                gross <= 0
+            ) {
+
+                return errorResponse(
+                    "Valid author_id and amount are required",
+                    400
+                );
+            }
+
+            const authorAmount =
+                Number(
+                    (
+                        gross * 0.50
+                    ).toFixed(2)
+                );
+
+            const platformAmount =
+                Number(
+                    (
+                        gross * 0.50
+                    ).toFixed(2)
+                );
+
+            try {
+
+                const author =
+                    await getAuthor(
+                        db,
+                        authorId
+                    );
+
+                if (!author) {
+
+                    return errorResponse(
+                        "Author not found",
+                        404
+                    );
+                }
+
+                const result =
+                    await db
+                        .prepare(`
+                            INSERT INTO recommendations (
+                                author_id,
+                                story_id,
+                                amount,
+                                author_amount,
+                                platform_amount
+                            )
+                            VALUES (
+                                ?,
+                                ?,
+                                ?,
+                                ?,
+                                ?
+                            )
+                        `)
+                        .bind(
+                            authorId,
+                            positiveInt(
+                                body.story_id
+                            ),
                             gross,
                             authorAmount,
                             platformAmount
                         )
                         .run();
-                }
 
-                return json({
-                    success: true,
-                    message:
-                        "Earning recorded",
-
-                    distribution: {
-                        gross_amount: gross,
-                        author_rate: authorRate,
-                        platform_rate: platformRate,
-                        author_amount: authorAmount,
-                        platform_amount: platformAmount
-                    }
-                });
-
-            } catch (error) {
-
-                return errorResponse(
-                    "Failed to record earning",
-                    500,
-                    { error: error?.message || String(error) }
-                );
-            }
-        }
-
-
-        // -------------------------------------------------
-        // AUTHOR WITHDRAWAL
-        // -------------------------------------------------
-
-             // -------------------------------------------------
-        // ADMIN APPROVE WITHDRAWAL
-        // -------------------------------------------------
-
-        if (
-            path === "/admin/withdrawals/approve"
-        ) {
-
-            const adminId =
-                positiveInt(body.admin_id);
-
-            const withdrawalId =
-                positiveInt(body.withdrawal_id);
-
-            const auth =
-                await requireAdmin(db, adminId);
-
-            if (!auth.ok) {
-                return auth.response;
-            }
-
-            if (!withdrawalId) {
-                return errorResponse(
-                    "Invalid withdrawal ID",
-                    400
-                );
-            }
-
-            try {
-
-                const withdrawal =
-                    await db
-                        .prepare(`
-                            SELECT *
-                            FROM withdrawals
-                            WHERE id = ?
-                            LIMIT 1
-                        `)
-                        .bind(withdrawalId)
-                        .first();
-
-                if (!withdrawal) {
-                    return errorResponse(
-                        "Withdrawal not found",
-                        404
-                    );
-                }
-
-                if (
-                    String(withdrawal.status).toLowerCase() !==
-                    "pending"
-                ) {
-                    return errorResponse(
-                        "Withdrawal is not pending",
-                        409
-                    );
-                }
-
-                const withdrawalAmount =
-                    Number(withdrawal.amount || 0);
-
-                if (
-                    !Number.isFinite(withdrawalAmount) ||
-                    withdrawalAmount <= 0
-                ) {
-                    return errorResponse(
-                        "Invalid withdrawal amount",
-                        400
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // GET AVAILABLE EARNINGS FIRST
-                // IMPORTANT:
-                // Hakuna earning itabadilishwa kabla ya
-                // kuhakikisha balance inatosha.
-                // -------------------------------------------------
-
-                const balance =
-                    await db
-                        .prepare(`
-                            SELECT
-                                COALESCE(
-                                    SUM(author_amount),
-                                    0
-                                ) AS available
-                            FROM author_earnings
-                            WHERE author_id = ?
-                            AND status = 'available'
-                        `)
-                        .bind(withdrawal.author_id)
-                        .first();
-
-                const available =
-                    Number(balance?.available || 0);
-
-
-                if (available < withdrawalAmount) {
-
-                    return errorResponse(
-                        "Insufficient available earnings",
-                        400,
-                        {
-                            available_balance: available,
-                            withdrawal_amount:
-                                withdrawalAmount
-                        }
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // GET AVAILABLE EARNINGS
-                // Oldest earnings are consumed first.
-                // -------------------------------------------------
-
-                const earnings =
-                    await db
-                        .prepare(`
-                            SELECT
-                                id,
-                                author_id,
-                                story_id,
-                                episode_id,
-                                source_type,
-                                gross_amount,
-                                author_amount,
-                                platform_amount
-                            FROM author_earnings
-                            WHERE author_id = ?
-                            AND status = 'available'
-                            AND author_amount > 0
-                            ORDER BY created_at ASC, id ASC
-                        `)
-                        .bind(withdrawal.author_id)
-                        .all();
-
-
-                let remaining =
-                    withdrawalAmount;
-
-                const statements = [];
-
-
-                // -------------------------------------------------
-                // CONSUME EARNINGS
-                //
-                // Kama earning moja ni kubwa kuliko kiasi
-                // kinachohitajika, tunaigawa.
-                //
-                // Mfano:
-                // earning = 100,000
-                // withdrawal = 50,000
-                //
-                // earning iliyopo:
-                // 50,000 available
-                //
-                // earning mpya:
-                // 50,000 paid
-                // -------------------------------------------------
-
-                for (
-                    const earning
-                    of (earnings.results || [])
-                ) {
-
-                    if (remaining <= 0) {
-                        break;
-                    }
-
-                    const earningAmount =
-                        Number(
-                            earning.author_amount || 0
-                        );
-
-                    if (
-                        !Number.isFinite(earningAmount) ||
-                        earningAmount <= 0
-                    ) {
-                        continue;
-                    }
-
-
-                    const consume =
-                        Math.min(
-                            remaining,
-                            earningAmount
-                        );
-
-
-                    // ---------------------------------------------
-                    // EARNING INATUMIKA YOTE
-                    // ---------------------------------------------
-
-                    if (
-                        consume >= earningAmount
-                    ) {
-
-                        statements.push(
-                            db
-                                .prepare(`
-                                    UPDATE author_earnings
-                                    SET status = 'paid'
-                                    WHERE id = ?
-                                    AND status = 'available'
-                                `)
-                                .bind(earning.id)
-                        );
-
-                    }
-
-                    // ---------------------------------------------
-                    // EARNING INATUMIKA SEHEMU TU
-                    // ---------------------------------------------
-
-                    else {
-
-                        const ratio =
-                            consume /
-                            earningAmount;
-
-
-                        const grossAmount =
-                            Number(
-                                earning.gross_amount || 0
-                            );
-
-                        const platformAmount =
-                            Number(
-                                earning.platform_amount || 0
-                            );
-
-
-                        const paidGross =
-                            Math.round(
-                                grossAmount *
-                                ratio *
-                                100
-                            ) / 100;
-
-                        const paidPlatform =
-                            Math.round(
-                                platformAmount *
-                                ratio *
-                                100
-                            ) / 100;
-
-
-                        const remainingGross =
-                            Math.round(
-                                (
-                                    grossAmount -
-                                    paidGross
-                                ) *
-                                100
-                            ) / 100;
-
-                        const remainingPlatform =
-                            Math.round(
-                                (
-                                    platformAmount -
-                                    paidPlatform
-                                ) *
-                                100
-                            ) / 100;
-
-                        const remainingAuthor =
-                            Math.round(
-                                (
-                                    earningAmount -
-                                    consume
-                                ) *
-                                100
-                            ) / 100;
-
-
-                        // Keep the unused balance on the
-                        // original earning row.
-
-                        statements.push(
-                            db
-                                .prepare(`
-                                    UPDATE author_earnings
-                                    SET
-                                        gross_amount = ?,
-                                        author_amount = ?,
-                                        platform_amount = ?
-                                    WHERE id = ?
-                                    AND status = 'available'
-                                `)
-                                .bind(
-                                    remainingGross,
-                                    remainingAuthor,
-                                    remainingPlatform,
-                                    earning.id
-                                )
-                        );
-
-
-                        // Create the consumed part
-                        // as a separate paid earning.
-
-                        statements.push(
-                            db
-                                .prepare(`
-                                    INSERT INTO author_earnings (
-                                        author_id,
-                                        story_id,
-                                        episode_id,
-                                        source_type,
-                                        gross_amount,
-                                        author_amount,
-                                        platform_amount,
-                                        status
-                                    )
-                                    VALUES (
-                                        ?, ?, ?, ?, ?, ?, ?, 'paid'
-                                    )
-                                `)
-                                .bind(
-                                    earning.author_id,
-                                    earning.story_id,
-                                    earning.episode_id,
-                                    earning.source_type,
-                                    paidGross,
-                                    consume,
-                                    paidPlatform
-                                )
-                        );
-                    }
-
-
-                    remaining =
-                        Math.round(
-                            (
-                                remaining -
-                                consume
-                            ) *
-                            100
-                        ) / 100;
-                }
-
-
-                // Safety check.
-                // Hii haipaswi kutokea kwa sababu
-                // tulishafanya balance check juu.
-
-                if (remaining > 0) {
-                    return errorResponse(
-                        "Unable to allocate earnings for this withdrawal",
-                        400,
-                        {
-                            remaining_amount:
-                                remaining
-                        }
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // APPROVE WITHDRAWAL
-                // -------------------------------------------------
-
-                statements.push(
-                    db
-                        .prepare(`
-                            UPDATE withdrawals
-                            SET
-                                status = 'approved',
-                                processed_by = ?,
-                                processed_at = CURRENT_TIMESTAMP,
-                                updated_at = CURRENT_TIMESTAMP
-                            WHERE id = ?
-                            AND status = 'pending'
-                        `)
-                        .bind(
-                            adminId,
-                            withdrawalId
-                        )
-                );
-
-
-                // -------------------------------------------------
-                // EXECUTE ALL ACCOUNTING CHANGES TOGETHER
-                // -------------------------------------------------
-
-                await db.batch(statements);
-
-
-                return json({
-                    success: true,
-                    message:
-                        "Withdrawal approved",
-                    withdrawal_id:
-                        withdrawalId,
-                    amount:
-                        withdrawalAmount,
-                    status:
-                        "approved"
-                });
-
-            } catch (error) {
-
-                console.error(
-                    "Approve withdrawal error:",
-                    error
-                );
-
-                return errorResponse(
-                    "Failed to approve withdrawal",
-                    500,
+                return json(
                     {
-                        error:
-                            error?.message ||
-                            String(error)
-                    }
+                        success: true,
+                        recommendation_id:
+                            result.meta.last_row_id,
+                        gross_amount:
+                            gross,
+                        author_amount:
+                            authorAmount,
+                        platform_amount:
+                            platformAmount
+                    },
+                    201
                 );
-            }
-        }
 
-
-
-        // =====================================================
-// ADMIN CREATE AUTHOR
-// POST /api/admin/authors/create
-// =====================================================
-
-if (path === "/admin/authors/create") {
-
-    const adminId =
-        positiveInt(body.admin_id);
-
-    const username =
-        cleanString(body.username, 100);
-
-    const email =
-        cleanString(body.email, 200).toLowerCase();
-
-    const password =
-        String(body.password || "");
-
-    const displayName =
-        cleanString(body.display_name, 200);
-
-    const bio =
-        cleanString(body.bio, 5000);
-
-    const auth =
-        await requireAdmin(db, adminId);
-
-    if (!auth.ok) {
-        return auth.response;
-    }
-
-    if (
-        !username ||
-        !email ||
-        !password ||
-        !displayName
-    ) {
-        return errorResponse(
-            "username, email, password and display_name are required",
-            400
-        );
-    }
-
-    if (password.length < 8) {
-        return errorResponse(
-            "Password must be at least 8 characters",
-            400
-        );
-    }
-
-    try {
-
-        const existingUser =
-            await db
-                .prepare(`
-                    SELECT id
-                    FROM users
-                    WHERE username = ?
-                       OR email = ?
-                    LIMIT 1
-                `)
-                .bind(username, email)
-                .first();
-
-        if (existingUser) {
-            return errorResponse(
-                "Username or email already exists",
-                409
-            );
-        }
-
-        const passwordHash =
-            await hashPassword(password);
-
-        const userResult =
-            await db
-                .prepare(`
-                    INSERT INTO users (
-                        username,
-                        email,
-                        password_hash,
-                        role,
-                        status
-                    )
-                    VALUES (?, ?, ?, 'author', 'active')
-                `)
-                .bind(
-                    username,
-                    email,
-                    passwordHash
-                )
-                .run();
-
-        const userId =
-            userResult.meta.last_row_id;
-
-        if (!userId) {
-            return errorResponse(
-                "Failed to create author user account",
-                500
-            );
-        }
-
-        try {
-
-            const authorResult =
-                await db
-                    .prepare(`
-                        INSERT INTO authors (
-                            user_id,
-                            display_name,
-                            bio,
-                            approval_status
-                        )
-                        VALUES (?, ?, ?, 'pending')
-                    `)
-                    .bind(
-                        userId,
-                        displayName,
-                        bio || null
-                    )
-                    .run();
-
-            const authorId =
-                authorResult.meta.last_row_id;
-
-            if (!authorId) {
-
-                await db
-                    .prepare(`
-                        DELETE FROM users
-                        WHERE id = ?
-                    `)
-                    .bind(userId)
-                    .run();
+            } catch (error) {
 
                 return errorResponse(
-                    "Failed to create author profile",
+                    "Failed to record recommendation",
                     500
                 );
             }
-
-            return json({
-                success: true,
-                message:
-                    "Author created successfully and is pending approval",
-                author: {
-                    id: authorId,
-                    user_id: userId,
-                    username,
-                    email,
-                    display_name: displayName,
-                    approval_status: "pending"
-                }
-            }, 201);
-
-        } catch (authorError) {
-
-            try {
-                await db
-                    .prepare(`
-                        DELETE FROM users
-                        WHERE id = ?
-                    `)
-                    .bind(userId)
-                    .run();
-            } catch {}
-
-            throw authorError;
         }
 
-    } catch (error) {
 
-        return errorResponse(
-            error?.message ||
-            "Failed to create author",
-            500
-        );
-    }
-}
-
-    // =====================================================
-// ADMIN APPROVE AUTHOR
-// POST /api/admin/authors/approve
-// =====================================================
-
-if (path === "/admin/authors/approve") {
-
-    const adminId =
-        positiveInt(body.admin_id);
-
-    const authorId =
-        positiveInt(body.author_id);
-
-    // ...endelea na code yote ya Approve Author...
-}
-
-        
-              // -------------------------------------------------
-        // ADMIN APPROVE WITHDRAWAL
-        // -------------------------------------------------
+        /* =============================================
+           WITHDRAW
+           MINIMUM 50,000
+           ============================================= */
 
         if (
-            path === "/admin/withdrawals/approve"
+            path === "/withdrawals"
+        ) {
+
+            const authorId =
+                positiveInt(
+                    body.author_id
+                );
+
+            const amount =
+                Number(
+                    body.amount || 0
+                );
+
+            if (
+                !authorId ||
+                !Number.isFinite(amount) ||
+                amount <= 0
+            ) {
+
+                return errorResponse(
+                    "Valid author_id and amount are required",
+                    400
+                );
+            }
+
+            if (
+                amount < 50000
+            ) {
+
+                return errorResponse(
+                    "Minimum withdrawal is TSh 50,000",
+                    400
+                );
+            }
+
+            try {
+
+                const earnings =
+                    await db
+                        .prepare(`
+                            SELECT
+                                COALESCE(
+                                    SUM(
+                                        CASE
+                                            WHEN status =
+                                                'available'
+                                            THEN author_amount
+                                            ELSE 0
+                                        END
+                                    ),
+                                    0
+                                ) AS available
+                            FROM author_earnings
+                            WHERE author_id = ?
+                        `)
+                        .bind(authorId)
+                        .first();
+
+                const pending =
+                    await db
+                        .prepare(`
+                            SELECT
+                                COALESCE(
+                                    SUM(amount),
+                                    0
+                                ) AS total
+                            FROM withdrawals
+                            WHERE author_id = ?
+                              AND status = 'pending'
+                        `)
+                        .bind(authorId)
+                        .first();
+
+                const available =
+                    Number(
+                        earnings?.available ||
+                        0
+                    );
+
+                const pendingAmount =
+                    Number(
+                        pending?.total ||
+                        0
+                    );
+
+                const withdrawable =
+                    Math.max(
+                        0,
+                        available -
+                        pendingAmount
+                    );
+
+                if (
+                    amount >
+                    withdrawable
+                ) {
+
+                    return errorResponse(
+                        "Insufficient available balance",
+                        400,
+                        {
+                            available_balance:
+                                withdrawable
+                        }
+                    );
+                }
+
+                const result =
+                    await db
+                        .prepare(`
+                            INSERT INTO withdrawals (
+                                author_id,
+                                amount,
+                                status,
+                                payment_method,
+                                payment_account
+                            )
+                            VALUES (
+                                ?,
+                                ?,
+                                'pending',
+                                ?,
+                                ?
+                            )
+                        `)
+                        .bind(
+                            authorId,
+                            amount,
+                            cleanString(
+                                body.payment_method,
+                                100
+                            ),
+                            cleanString(
+                                body.payment_account,
+                                300
+                            )
+                        )
+                        .run();
+
+                return json(
+                    {
+                        success: true,
+                        message:
+                            "Withdrawal request submitted",
+                        withdrawal_id:
+                            result.meta.last_row_id,
+                        amount,
+                        status:
+                            "pending"
+                    },
+                    201
+                );
+
+            } catch (error) {
+
+                return errorResponse(
+                    "Failed to create withdrawal",
+                    500,
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
+                );
+            }
+        }
+
+
+        /* =============================================
+           ADMIN APPROVE WITHDRAWAL
+           ============================================= */
+
+        if (
+            path ===
+            "/admin/withdrawals/approve"
         ) {
 
             const adminId =
-                positiveInt(body.admin_id);
+                positiveInt(
+                    body.admin_id
+                );
 
             const withdrawalId =
-                positiveInt(body.withdrawal_id);
+                positiveInt(
+                    body.withdrawal_id
+                );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
             }
 
             if (!withdrawalId) {
+
                 return errorResponse(
                     "Invalid withdrawal ID",
                     400
@@ -3793,10 +4288,13 @@ if (path === "/admin/authors/approve") {
                             WHERE id = ?
                             LIMIT 1
                         `)
-                        .bind(withdrawalId)
+                        .bind(
+                            withdrawalId
+                        )
                         .first();
 
                 if (!withdrawal) {
+
                     return errorResponse(
                         "Withdrawal not found",
                         404
@@ -3804,365 +4302,210 @@ if (path === "/admin/authors/approve") {
                 }
 
                 if (
-                    String(withdrawal.status).toLowerCase() !==
+                    String(
+                        withdrawal.status
+                    ).toLowerCase() !==
                     "pending"
                 ) {
+
                     return errorResponse(
                         "Withdrawal is not pending",
                         409
                     );
                 }
 
-                const withdrawalAmount =
-                    Number(withdrawal.amount || 0);
-
-                if (
-                    !Number.isFinite(withdrawalAmount) ||
-                    withdrawalAmount <= 0
-                ) {
-                    return errorResponse(
-                        "Invalid withdrawal amount",
-                        400
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // GET AVAILABLE EARNINGS FIRST
-                // IMPORTANT:
-                // Hakuna earning itabadilishwa kabla ya
-                // kuhakikisha balance inatosha.
-                // -------------------------------------------------
-
-                const balance =
-                    await db
-                        .prepare(`
-                            SELECT
-                                COALESCE(
-                                    SUM(author_amount),
-                                    0
-                                ) AS available
-                            FROM author_earnings
-                            WHERE author_id = ?
-                            AND status = 'available'
-                        `)
-                        .bind(withdrawal.author_id)
-                        .first();
-
-                const available =
-                    Number(balance?.available || 0);
-
-
-                if (available < withdrawalAmount) {
-
-                    return errorResponse(
-                        "Insufficient available earnings",
-                        400,
-                        {
-                            available_balance: available,
-                            withdrawal_amount:
-                                withdrawalAmount
-                        }
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // GET AVAILABLE EARNINGS
-                // Oldest earnings are consumed first.
-                // -------------------------------------------------
-
                 const earnings =
                     await db
                         .prepare(`
                             SELECT
-                                id,
-                                author_id,
-                                story_id,
-                                episode_id,
-                                source_type,
-                                gross_amount,
-                                author_amount,
-                                platform_amount
+                                *
                             FROM author_earnings
                             WHERE author_id = ?
-                            AND status = 'available'
-                            AND author_amount > 0
-                            ORDER BY created_at ASC, id ASC
+                              AND status = 'available'
+                            ORDER BY
+                                id ASC
                         `)
-                        .bind(withdrawal.author_id)
+                        .bind(
+                            withdrawal.author_id
+                        )
                         .all();
 
-
                 let remaining =
-                    withdrawalAmount;
+                    Number(
+                        withdrawal.amount
+                    );
 
-                const statements = [];
+                const rows =
+                    earnings.results || [];
 
-
-                // -------------------------------------------------
-                // CONSUME EARNINGS
-                //
-                // Kama earning moja ni kubwa kuliko kiasi
-                // kinachohitajika, tunaigawa.
-                //
-                // Mfano:
-                // earning = 100,000
-                // withdrawal = 50,000
-                //
-                // earning iliyopo:
-                // 50,000 available
-                //
-                // earning mpya:
-                // 50,000 paid
-                // -------------------------------------------------
+                let availableTotal = 0;
 
                 for (
-                    const earning
-                    of (earnings.results || [])
+                    const row of rows
                 ) {
 
-                    if (remaining <= 0) {
+                    availableTotal +=
+                        Number(
+                            row.author_amount ||
+                            0
+                        );
+                }
+
+                if (
+                    remaining >
+                    availableTotal
+                ) {
+
+                    return errorResponse(
+                        "Insufficient earnings for withdrawal",
+                        400
+                    );
+                }
+
+                for (
+                    const row of rows
+                ) {
+
+                    if (
+                        remaining <= 0
+                    ) {
                         break;
                     }
 
-                    const earningAmount =
+                    const rowAmount =
                         Number(
-                            earning.author_amount || 0
+                            row.author_amount ||
+                            0
                         );
 
                     if (
-                        !Number.isFinite(earningAmount) ||
-                        earningAmount <= 0
+                        rowAmount <= 0
                     ) {
                         continue;
                     }
 
-
-                    const consume =
-                        Math.min(
-                            remaining,
-                            earningAmount
-                        );
-
-
-                    // ---------------------------------------------
-                    // EARNING INATUMIKA YOTE
-                    // ---------------------------------------------
-
                     if (
-                        consume >= earningAmount
+                        rowAmount <=
+                        remaining
                     ) {
 
-                        statements.push(
-                            db
-                                .prepare(`
-                                    UPDATE author_earnings
-                                    SET status = 'paid'
-                                    WHERE id = ?
-                                    AND status = 'available'
-                                `)
-                                .bind(earning.id)
-                        );
+                        await db
+                            .prepare(`
+                                UPDATE author_earnings
+                                SET status =
+                                    'paid'
+                                WHERE id = ?
+                            `)
+                            .bind(row.id)
+                            .run();
 
-                    }
+                        remaining -=
+                            rowAmount;
 
-                    // ---------------------------------------------
-                    // EARNING INATUMIKA SEHEMU TU
-                    // ---------------------------------------------
+                    } else {
 
-                    else {
-
-                        const ratio =
-                            consume /
-                            earningAmount;
-
-
-                        const grossAmount =
+                        const used =
                             Number(
-                                earning.gross_amount || 0
+                                remaining.toFixed(2)
                             );
 
-                        const platformAmount =
+                        const left =
                             Number(
-                                earning.platform_amount || 0
+                                (
+                                    rowAmount -
+                                    used
+                                ).toFixed(2)
                             );
 
-
-                        const paidGross =
-                            Math.round(
-                                grossAmount *
-                                ratio *
-                                100
-                            ) / 100;
-
-                        const paidPlatform =
-                            Math.round(
-                                platformAmount *
-                                ratio *
-                                100
-                            ) / 100;
-
-
-                        const remainingGross =
-                            Math.round(
+                        await db
+                            .prepare(`
+                                UPDATE author_earnings
+                                SET
+                                    author_amount = ?,
+                                    gross_amount = ?,
+                                    platform_amount = ?
+                                WHERE id = ?
+                            `)
+                            .bind(
+                                used,
+                                used / 0.70,
                                 (
-                                    grossAmount -
-                                    paidGross
-                                ) *
-                                100
-                            ) / 100;
+                                    used / 0.70
+                                ) * 0.30,
+                                row.id
+                            )
+                            .run();
 
-                        const remainingPlatform =
-                            Math.round(
-                                (
-                                    platformAmount -
-                                    paidPlatform
-                                ) *
-                                100
-                            ) / 100;
-
-                        const remainingAuthor =
-                            Math.round(
-                                (
-                                    earningAmount -
-                                    consume
-                                ) *
-                                100
-                            ) / 100;
-
-
-                        // Keep the unused balance on the
-                        // original earning row.
-
-                        statements.push(
-                            db
-                                .prepare(`
-                                    UPDATE author_earnings
-                                    SET
-                                        gross_amount = ?,
-                                        author_amount = ?,
-                                        platform_amount = ?
-                                    WHERE id = ?
-                                    AND status = 'available'
-                                `)
-                                .bind(
-                                    remainingGross,
-                                    remainingAuthor,
-                                    remainingPlatform,
-                                    earning.id
+                        await db
+                            .prepare(`
+                                INSERT INTO author_earnings (
+                                    author_id,
+                                    story_id,
+                                    episode_id,
+                                    gross_amount,
+                                    author_amount,
+                                    platform_amount,
+                                    source,
+                                    status
                                 )
-                        );
-
-
-                        // Create the consumed part
-                        // as a separate paid earning.
-
-                        statements.push(
-                            db
-                                .prepare(`
-                                    INSERT INTO author_earnings (
-                                        author_id,
-                                        story_id,
-                                        episode_id,
-                                        source_type,
-                                        gross_amount,
-                                        author_amount,
-                                        platform_amount,
-                                        status
-                                    )
-                                    VALUES (
-                                        ?, ?, ?, ?, ?, ?, ?, 'paid'
-                                    )
-                                `)
-                                .bind(
-                                    earning.author_id,
-                                    earning.story_id,
-                                    earning.episode_id,
-                                    earning.source_type,
-                                    paidGross,
-                                    consume,
-                                    paidPlatform
+                                VALUES (
+                                    ?,
+                                    ?,
+                                    ?,
+                                    ?,
+                                    ?,
+                                    ?,
+                                    ?,
+                                    'available'
                                 )
-                        );
+                            `)
+                            .bind(
+                                row.author_id,
+                                row.story_id,
+                                row.episode_id,
+                                left / 0.70,
+                                left,
+                                (
+                                    left / 0.70
+                                ) * 0.30,
+                                "withdrawal_split"
+                            )
+                            .run();
+
+                        remaining = 0;
                     }
-
-
-                    remaining =
-                        Math.round(
-                            (
-                                remaining -
-                                consume
-                            ) *
-                            100
-                        ) / 100;
                 }
 
-
-                // Safety check.
-                // Hii haipaswi kutokea kwa sababu
-                // tulishafanya balance check juu.
-
-                if (remaining > 0) {
-                    return errorResponse(
-                        "Unable to allocate earnings for this withdrawal",
-                        400,
-                        {
-                            remaining_amount:
-                                remaining
-                        }
-                    );
-                }
-
-
-                // -------------------------------------------------
-                // APPROVE WITHDRAWAL
-                // -------------------------------------------------
-
-                statements.push(
-                    db
-                        .prepare(`
-                            UPDATE withdrawals
-                            SET
-                                status = 'approved',
-                                processed_by = ?,
-                                processed_at = CURRENT_TIMESTAMP,
-                                updated_at = CURRENT_TIMESTAMP
-                            WHERE id = ?
-                            AND status = 'pending'
-                        `)
-                        .bind(
-                            adminId,
-                            withdrawalId
-                        )
-                );
-
-
-                // -------------------------------------------------
-                // EXECUTE ALL ACCOUNTING CHANGES TOGETHER
-                // -------------------------------------------------
-
-                await db.batch(statements);
-
+                await db
+                    .prepare(`
+                        UPDATE withdrawals
+                        SET
+                            status =
+                                'approved',
+                            reviewed_by = ?,
+                            reviewed_at =
+                                CURRENT_TIMESTAMP,
+                            updated_at =
+                                CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `)
+                    .bind(
+                        adminId,
+                        withdrawalId
+                    )
+                    .run();
 
                 return json({
                     success: true,
                     message:
-                        "Withdrawal approved",
+                        "Withdrawal approved successfully",
                     withdrawal_id:
                         withdrawalId,
-                    amount:
-                        withdrawalAmount,
                     status:
                         "approved"
                 });
 
             } catch (error) {
-
-                console.error(
-                    "Approve withdrawal error:",
-                    error
-                );
 
                 return errorResponse(
                     "Failed to approve withdrawal",
@@ -4176,19 +4519,25 @@ if (path === "/admin/authors/approve") {
             }
         }
 
-        // -------------------------------------------------
-        // ADMIN REJECT WITHDRAWAL
-        // -------------------------------------------------
+
+        /* =============================================
+           ADMIN REJECT WITHDRAWAL
+           ============================================= */
 
         if (
-            path === "/admin/withdrawals/reject"
+            path ===
+            "/admin/withdrawals/reject"
         ) {
 
             const adminId =
-                positiveInt(body.admin_id);
+                positiveInt(
+                    body.admin_id
+                );
 
             const withdrawalId =
-                positiveInt(body.withdrawal_id);
+                positiveInt(
+                    body.withdrawal_id
+                );
 
             const note =
                 cleanString(
@@ -4197,13 +4546,17 @@ if (path === "/admin/authors/approve") {
                 );
 
             const auth =
-                await requireAdmin(db, adminId);
+                await requireAdmin(
+                    db,
+                    adminId
+                );
 
             if (!auth.ok) {
                 return auth.response;
             }
 
             if (!withdrawalId) {
+
                 return errorResponse(
                     "Invalid withdrawal ID",
                     400
@@ -4217,13 +4570,16 @@ if (path === "/admin/authors/approve") {
                         .prepare(`
                             UPDATE withdrawals
                             SET
-                                status = 'rejected',
+                                status =
+                                    'rejected',
                                 admin_note = ?,
-                                processed_by = ?,
-                                processed_at = CURRENT_TIMESTAMP,
-                                updated_at = CURRENT_TIMESTAMP
+                                reviewed_by = ?,
+                                reviewed_at =
+                                    CURRENT_TIMESTAMP,
+                                updated_at =
+                                    CURRENT_TIMESTAMP
                             WHERE id = ?
-                            AND status = 'pending'
+                              AND status = 'pending'
                         `)
                         .bind(
                             note,
@@ -4232,7 +4588,10 @@ if (path === "/admin/authors/approve") {
                         )
                         .run();
 
-                if (!result.meta.changes) {
+                if (
+                    result.meta.changes === 0
+                ) {
+
                     return errorResponse(
                         "Pending withdrawal not found",
                         404
@@ -4245,15 +4604,15 @@ if (path === "/admin/authors/approve") {
                         "Withdrawal rejected",
                     withdrawal_id:
                         withdrawalId,
-                    status: "rejected"
+                    status:
+                        "rejected"
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to reject withdrawal",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
@@ -4266,9 +4625,9 @@ if (path === "/admin/authors/approve") {
     }
 
 
-    // =====================================================
-    // PUT
-    // =====================================================
+    /* =================================================
+       PUT ROUTES
+       ================================================= */
 
     if (method === "PUT") {
 
@@ -4276,6 +4635,7 @@ if (path === "/admin/authors/approve") {
             await readJson(request);
 
         if (!body) {
+
             return errorResponse(
                 "Invalid JSON request",
                 400
@@ -4283,37 +4643,31 @@ if (path === "/admin/authors/approve") {
         }
 
 
-        // -------------------------------------------------
-        // READER PROFILE
-        // -------------------------------------------------
+        /* =============================================
+           PROFILE UPDATE
+           ============================================= */
 
         if (
-            path.startsWith("/profile/")
+            path.startsWith(
+                "/profile/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
-            const readerId =
+            const userId =
                 positiveInt(parts[1]);
 
             if (
                 parts.length !== 2 ||
-                !readerId
+                !userId
             ) {
+
                 return errorResponse(
-                    "Invalid reader ID",
+                    "Invalid user ID",
                     400
-                );
-            }
-
-            const reader =
-                await getReader(db, readerId);
-
-            if (!reader) {
-                return errorResponse(
-                    "Reader not found",
-                    404
                 );
             }
 
@@ -4329,77 +4683,54 @@ if (path === "/admin/authors/approve") {
                     200
                 ).toLowerCase();
 
-            if (!username && !email) {
-                return errorResponse(
-                    "Nothing to update",
-                    400
-                );
-            }
-
             try {
 
-                if (username && email) {
-
+                const result =
                     await db
                         .prepare(`
                             UPDATE users
                             SET
-                                username = ?,
-                                email = ?,
-                                updated_at = CURRENT_TIMESTAMP
+                                username =
+                                    COALESCE(
+                                        NULLIF(
+                                            ?,
+                                            ''
+                                        ),
+                                        username
+                                    ),
+                                email =
+                                    COALESCE(
+                                        NULLIF(
+                                            ?,
+                                            ''
+                                        ),
+                                        email
+                                    ),
+                                updated_at =
+                                    CURRENT_TIMESTAMP
                             WHERE id = ?
                         `)
                         .bind(
                             username,
                             email,
-                            readerId
+                            userId
                         )
                         .run();
 
-                } else if (username) {
+                if (
+                    result.meta.changes === 0
+                ) {
 
-                    await db
-                        .prepare(`
-                            UPDATE users
-                            SET
-                                username = ?,
-                                updated_at = CURRENT_TIMESTAMP
-                            WHERE id = ?
-                        `)
-                        .bind(
-                            username,
-                            readerId
-                        )
-                        .run();
-
-                } else {
-
-                    await db
-                        .prepare(`
-                            UPDATE users
-                            SET
-                                email = ?,
-                                updated_at = CURRENT_TIMESTAMP
-                            WHERE id = ?
-                        `)
-                        .bind(
-                            email,
-                            readerId
-                        )
-                        .run();
-                }
-
-                const updated =
-                    await getReader(
-                        db,
-                        readerId
+                    return errorResponse(
+                        "User not found",
+                        404
                     );
+                }
 
                 return json({
                     success: true,
                     message:
-                        "Profile updated successfully",
-                    user: updated
+                        "Profile updated successfully"
                 });
 
             } catch (error) {
@@ -4407,15 +4738,19 @@ if (path === "/admin/authors/approve") {
                 return errorResponse(
                     "Failed to update profile",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN STORY UPDATE
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN STORY UPDATE
+           ============================================= */
 
         if (
             path.startsWith(
@@ -4424,13 +4759,16 @@ if (path === "/admin/authors/approve") {
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const storyId =
                 positiveInt(parts[2]);
 
             const adminId =
-                positiveInt(body.admin_id);
+                positiveInt(
+                    body.admin_id
+                );
 
             const auth =
                 await requireAdmin(
@@ -4443,6 +4781,7 @@ if (path === "/admin/authors/approve") {
             }
 
             if (!storyId) {
+
                 return errorResponse(
                     "Invalid story ID",
                     400
@@ -4470,12 +4809,18 @@ if (path === "/admin/authors/approve") {
                             SET
                                 status =
                                     COALESCE(
-                                        NULLIF(?, ''),
+                                        NULLIF(
+                                            ?,
+                                            ''
+                                        ),
                                         status
                                     ),
                                 visibility =
                                     COALESCE(
-                                        NULLIF(?, ''),
+                                        NULLIF(
+                                            ?,
+                                            ''
+                                        ),
                                         visibility
                                     ),
                                 updated_at =
@@ -4489,7 +4834,10 @@ if (path === "/admin/authors/approve") {
                         )
                         .run();
 
-                if (!result.meta.changes) {
+                if (
+                    result.meta.changes === 0
+                ) {
+
                     return errorResponse(
                         "Story not found",
                         404
@@ -4507,7 +4855,11 @@ if (path === "/admin/authors/approve") {
                 return errorResponse(
                     "Failed to update story",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
@@ -4520,24 +4872,28 @@ if (path === "/admin/authors/approve") {
     }
 
 
-    // =====================================================
-    // DELETE
-    // =====================================================
+    /* =================================================
+       DELETE ROUTES
+       ================================================= */
 
     if (method === "DELETE") {
 
-        // -------------------------------------------------
-        // DELETE BOOKMARK
-        // -------------------------------------------------
+
+        /* =============================================
+           REMOVE BOOKMARK
+           ============================================= */
 
         if (
-            path.startsWith("/bookmarks/")
+            path.startsWith(
+                "/bookmarks/"
+            )
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
-            const readerId =
+            const userId =
                 positiveInt(parts[1]);
 
             const storyId =
@@ -4545,11 +4901,12 @@ if (path === "/admin/authors/approve") {
 
             if (
                 parts.length !== 3 ||
-                !readerId ||
+                !userId ||
                 !storyId
             ) {
+
                 return errorResponse(
-                    "Invalid reader ID or story ID",
+                    "Invalid user ID or story ID",
                     400
                 );
             }
@@ -4561,15 +4918,18 @@ if (path === "/admin/authors/approve") {
                         .prepare(`
                             DELETE FROM bookmarks
                             WHERE user_id = ?
-                            AND story_id = ?
+                              AND story_id = ?
                         `)
                         .bind(
-                            readerId,
+                            userId,
                             storyId
                         )
                         .run();
 
-                if (!result.meta.changes) {
+                if (
+                    result.meta.changes === 0
+                ) {
+
                     return errorResponse(
                         "Bookmark not found",
                         404
@@ -4582,20 +4942,19 @@ if (path === "/admin/authors/approve") {
                         "Bookmark removed successfully"
                 });
 
-            } catch (error) {
+            } catch {
 
                 return errorResponse(
                     "Failed to remove bookmark",
-                    500,
-                    { error: error?.message || String(error) }
+                    500
                 );
             }
         }
 
 
-        // -------------------------------------------------
-        // ADMIN DELETE STORY
-        // -------------------------------------------------
+        /* =============================================
+           ADMIN DELETE STORY
+           ============================================= */
 
         if (
             path.startsWith(
@@ -4604,7 +4963,8 @@ if (path === "/admin/authors/approve") {
         ) {
 
             const parts =
-                path.split("/").filter(Boolean);
+                path.split("/")
+                    .filter(Boolean);
 
             const storyId =
                 positiveInt(parts[2]);
@@ -4627,6 +4987,7 @@ if (path === "/admin/authors/approve") {
             }
 
             if (!storyId) {
+
                 return errorResponse(
                     "Invalid story ID",
                     400
@@ -4640,15 +5001,23 @@ if (path === "/admin/authors/approve") {
                         .prepare(`
                             UPDATE stories
                             SET
-                                status = 'deleted',
-                                visibility = 'private',
-                                updated_at = CURRENT_TIMESTAMP
+                                status =
+                                    'deleted',
+                                visibility =
+                                    'private',
+                                updated_at =
+                                    CURRENT_TIMESTAMP
                             WHERE id = ?
                         `)
-                        .bind(storyId)
+                        .bind(
+                            storyId
+                        )
                         .run();
 
-                if (!result.meta.changes) {
+                if (
+                    result.meta.changes === 0
+                ) {
+
                     return errorResponse(
                         "Story not found",
                         404
@@ -4666,7 +5035,11 @@ if (path === "/admin/authors/approve") {
                 return errorResponse(
                     "Failed to remove story",
                     500,
-                    { error: error?.message || String(error) }
+                    {
+                        error:
+                            error?.message ||
+                            String(error)
+                    }
                 );
             }
         }
@@ -4678,6 +5051,10 @@ if (path === "/admin/authors/approve") {
         );
     }
 
+
+    /* =================================================
+       METHOD NOT ALLOWED
+       ================================================= */
 
     return errorResponse(
         "Method not allowed",
