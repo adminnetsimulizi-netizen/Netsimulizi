@@ -1211,231 +1211,188 @@
   }
 
 
-  /* RENDER */
+ /* RENDER */
 
-  function renderAuthors(){
+function renderAuthors(){
 
-    const authors =
-      getFilteredAuthors();
+  const authors =
+    getFilteredAuthors();
 
+  const table =
+    document.getElementById("authorsTable");
 
-    const table =
-      document.getElementById(
-        "authorsTable"
-      );
+  document.getElementById("resultCount")
+    .textContent =
+    `${authors.length} authors`;
 
+  if(!authors.length){
 
-    document.getElementById(
-      "resultCount"
-    ).textContent =
-      `${authors.length} authors`;
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            Hakuna authors waliopatikana.
+          </div>
+        </td>
+      </tr>
+    `;
 
+    return;
+  }
 
-    if(!authors.length){
+  table.innerHTML =
+    authors.map(function(author){
 
-      table.innerHTML = `
+      const id =
+        author.id ||
+        author.author_id ||
+        "";
 
+      const name =
+        author.display_name ||
+        author.name ||
+        author.author_name ||
+        author.username ||
+        "Unknown Author";
+
+      const email =
+        author.email || "—";
+
+      const storyCount =
+        author.story_count ||
+        author.stories_count ||
+        author.total_stories ||
+        0;
+
+      const earnings =
+        Number(
+          author.earnings ||
+          author.total_earnings ||
+          author.balance ||
+          0
+        );
+
+      const rawStatus =
+        String(
+          author.approval_status ||
+          author.status ||
+          "pending"
+        ).toLowerCase();
+
+      const approved =
+        rawStatus === "approved";
+
+      const pending =
+        rawStatus === "pending";
+
+      let statusClass = "inactive";
+      let statusText = "INACTIVE";
+
+      if(approved){
+
+        statusClass = "active";
+        statusText = "APPROVED";
+
+      }else if(pending){
+
+        statusClass = "pending";
+        statusText = "PENDING";
+
+      }
+
+      const joined =
+        author.created_at ||
+        author.createdAt ||
+        author.joined_at ||
+        "—";
+
+      const initial =
+        name.charAt(0).toUpperCase();
+
+      return `
         <tr>
 
-          <td colspan="6">
+          <td>
+            <div class="author-cell">
 
-            <div class="empty">
-              Hakuna authors waliopatikana.
+              <div class="avatar">
+                ${escapeHTML(initial)}
+              </div>
+
+              <div>
+                <div class="author-name">
+                  ${escapeHTML(name)}
+                </div>
+
+                <div class="author-email">
+                  ${escapeHTML(email)}
+                </div>
+              </div>
+
+            </div>
+          </td>
+
+          <td>
+            <span class="story-count">
+              ${escapeHTML(storyCount)}
+            </span>
+          </td>
+
+          <td>
+            TSh ${earnings.toLocaleString()}
+          </td>
+
+          <td>
+            <span class="status ${statusClass}">
+              ${statusText}
+            </span>
+          </td>
+
+          <td>
+            ${escapeHTML(formatDate(joined))}
+          </td>
+
+          <td>
+
+            <div class="actions">
+
+              <button
+                class="action-btn"
+                onclick="viewAuthor('${escapeAttribute(id)}')"
+              >
+                View
+              </button>
+
+              ${
+                pending
+                ? `
+                  <button
+                    class="action-btn"
+                    onclick="approveAuthor('${escapeAttribute(id)}')"
+                  >
+                    Approve
+                  </button>
+                `
+                : ""
+              }
+
+              <button
+                class="action-btn"
+                onclick="editAuthor('${escapeAttribute(id)}')"
+              >
+                Edit
+              </button>
+
             </div>
 
           </td>
 
         </tr>
-
       `;
 
-      return;
+    }).join("");
 
-    }
-
-
-    table.innerHTML =
-      authors.map(function(author){
-
-        const id =
-          author.id ||
-          author.author_id ||
-          author.user_id ||
-          "";
-
-
-        const name =
-          author.name ||
-          author.author_name ||
-          author.username ||
-          "Unknown Author";
-
-
-        const email =
-          author.email ||
-          "—";
-
-
-        const storyCount =
-          author.story_count ||
-          author.stories_count ||
-          author.total_stories ||
-          0;
-
-
-        const earnings =
-          Number(
-            author.earnings ||
-            author.total_earnings ||
-            author.balance ||
-            0
-          );
-
-
-        const rawStatus =
-          String(
-            author.status ||
-            "active"
-          ).toLowerCase();
-
-
-        const active =
-          rawStatus === "active" ||
-          rawStatus === "approved" ||
-          rawStatus === "enabled";
-
-
-        const pending =
-          rawStatus === "pending";
-
-
-        let statusClass =
-          "active";
-
-        let statusText =
-          "ACTIVE";
-
-
-        if(pending){
-
-          statusClass = "pending";
-          statusText = "PENDING";
-
-        }else if(!active){
-
-          statusClass = "inactive";
-          statusText = "INACTIVE";
-
-        }
-
-
-        const joined =
-          author.created_at ||
-          author.createdAt ||
-          author.joined_at ||
-          author.joined ||
-          "—";
-
-
-        const initial =
-          name
-            .charAt(0)
-            .toUpperCase();
-
-
-        return `
-
-          <tr>
-
-            <td>
-
-              <div class="author-cell">
-
-                <div class="avatar">
-                  ${escapeHTML(initial)}
-                </div>
-
-                <div>
-
-                  <div class="author-name">
-                    ${escapeHTML(name)}
-                  </div>
-
-                  <div class="author-email">
-                    ${escapeHTML(email)}
-                  </div>
-
-                </div>
-
-              </div>
-
-            </td>
-
-
-            <td>
-
-              <span class="story-count">
-                ${escapeHTML(storyCount)}
-              </span>
-
-            </td>
-
-
-            <td>
-              TSh ${earnings.toLocaleString()}
-            </td>
-
-
-            <td>
-
-              <span class="status ${statusClass}">
-                ${statusText}
-              </span>
-
-            </td>
-
-
-            <td>
-              ${escapeHTML(formatDate(joined))}
-            </td>
-
-
-            <td>
-
-              <div class="actions">
-
-                <button
-                  class="action-btn"
-                  onclick="viewAuthor('${escapeAttribute(id)}')"
-                >
-                  View
-                </button>
-
-                <button
-                  class="action-btn"
-                  onclick="editAuthor('${escapeAttribute(id)}')"
-                >
-                  Edit
-                </button>
-
-                <button
-                  class="action-btn"
-                  onclick="toggleAuthor('${escapeAttribute(id)}')"
-                >
-                  ${active ? "Disable" : "Enable"}
-                </button>
-
-              </div>
-
-            </td>
-
-          </tr>
-
-        `;
-
-      }).join("");
-
-  }
+}
 
 
   /* VIEW AUTHOR */
@@ -1503,6 +1460,79 @@
 
   }
 
+
+  /* APPROVE AUTHOR */
+
+async function approveAuthor(authorId){
+
+  if(!authorId){
+    alert("Author ID haipo.");
+    return;
+  }
+
+  const adminId =
+    currentUser &&
+    (
+      currentUser.id ||
+      currentUser.admin_id
+    );
+
+  if(!adminId){
+    alert("Admin session haijapatikana.");
+    return;
+  }
+
+  if(!confirm("Unataka kum-approve author huyu?")){
+    return;
+  }
+
+  try{
+
+    const response =
+      await fetch(
+        `${API}/admin/authors/approve`,
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":"application/json"
+          },
+
+          body:JSON.stringify({
+            admin_id:adminId,
+            author_id:Number(authorId)
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok || !data.success){
+
+      throw new Error(
+        data.message ||
+        "Failed to approve author"
+      );
+
+    }
+
+    alert("Author ame-approve kikamilifu.");
+
+    await loadAuthors();
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(
+      error.message ||
+      "Imeshindikana ku-approve author."
+    );
+
+  }
+
+}
 
   /* EDIT */
 
