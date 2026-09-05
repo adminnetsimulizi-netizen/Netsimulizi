@@ -3556,30 +3556,12 @@ export async function onRequest(context) {
 
 // =====================================================
 // TEMP ADMIN PASSWORD RESET
-// POST /api/admin/reset-password
+// GET /api/admin/reset-password
 // =====================================================
 
 if (path === "/admin/reset-password") {
 
-    const username =
-        cleanString(body.username, 100);
-
-    const newPassword =
-        String(body.password || "");
-
-    if (!username || !newPassword) {
-        return errorResponse(
-            "username and password are required",
-            400
-        );
-    }
-
-    if (newPassword.length < 8) {
-        return errorResponse(
-            "Password must be at least 8 characters",
-            400
-        );
-    }
+    const newPassword = "NetSimulizi@2026";
 
     try {
 
@@ -3620,9 +3602,7 @@ if (path === "/admin/reset-password") {
             500
         );
     }
-}
-        
-        
+}      
          
         // =====================================================
 // ADMIN CREATE AUTHOR
