@@ -1,3 +1,4 @@
+```html
 <!doctype html>
 <html lang="sw">
 
@@ -167,27 +168,6 @@
       width:100%;
       padding:13px;
       font-size:15px;
-    }
-
-    /*
-     * TEMPORARY RESET BUTTON
-     */
-
-    #resetAdminBtn{
-      width:100%;
-      margin-top:10px;
-      padding:10px 18px;
-      border:1px solid #d4aa43;
-      border-radius:8px;
-      cursor:pointer;
-      font-size:14px;
-      font-weight:600;
-      background:transparent;
-      color:inherit;
-    }
-
-    #resetAdminBtn:hover{
-      opacity:.9;
     }
 
     .message{
@@ -420,17 +400,6 @@
         Login
       </button>
 
-
-      <!-- TEMPORARY: REMOVE AFTER PASSWORD RESET -->
-
-      <button
-        id="resetAdminBtn"
-        type="button"
-        onclick="resetAdminPassword()"
-      >
-        Reset Admin Password
-      </button>
-
     </form>
 
 
@@ -438,7 +407,7 @@
 
       🔒 Ukurasa huu ni wa wasimamizi wa Net Simulizi pekee.
       <br>
-      Account lazima iwe na role ya <b>admin</b> ili kuingia.
+      Account lazima iwe na role ya <b>admin</b> ili kuingia kwenye Admin Dashboard.
 
     </div>
 
@@ -482,100 +451,6 @@
 
   const API =
     "https://netsimulizi.pages.dev/functions/api";
-
-
-  /*
-   * TEMPORARY ADMIN PASSWORD RESET
-   * REMOVE AFTER SUCCESSFUL RESET
-   */
-
-  async function resetAdminPassword(){
-
-    const password =
-      prompt(
-        "Enter the new Admin password:"
-      );
-
-
-    if(!password){
-      return;
-    }
-
-
-    try{
-
-      const response =
-        await fetch(
-          `${API}/admin/reset-password`,
-          {
-            method:"POST",
-
-            headers:{
-              "Content-Type":
-                "application/json"
-            },
-
-            body:JSON.stringify({
-              password:password
-            })
-          }
-        );
-
-
-      let data = {};
-
-
-      try{
-
-        data =
-          await response.json();
-
-      }catch(error){
-
-        data = {};
-
-      }
-
-
-      /*
-       * CHECK REAL RESET STATUS
-       */
-
-      if(!response.ok){
-
-        alert(
-          data.error ||
-          data.message ||
-          `Reset API error: HTTP ${response.status}`
-        );
-
-        return;
-
-      }
-
-
-      alert(
-        data.message ||
-        "Reset imefanikiwa."
-      );
-
-
-    }catch(error){
-
-      console.error(
-        "Admin password reset error:",
-        error
-      );
-
-
-      alert(
-        "Reset failed: " +
-        error.message
-      );
-
-    }
-
-  }
 
 
   /*
@@ -723,10 +598,6 @@
 
         try{
 
-          /*
-           * NORMAL ADMIN LOGIN
-           */
-
           const response =
             await fetch(
               `${API}/login`,
@@ -770,16 +641,26 @@
 
 
           /*
-           * SHOW REAL HTTP ERROR
+           * API ERROR
            */
 
           if(!response.ok){
 
-            throw new Error(
+            showMessage(
               data.error ||
               data.message ||
-              `Login API error: HTTP ${response.status}`
+              `Login API error: HTTP ${response.status}`,
+              "error"
             );
+
+            button.textContent =
+              "Login";
+
+            button.classList.remove(
+              "loading"
+            );
+
+            return;
 
           }
 
@@ -794,7 +675,7 @@
 
 
           /*
-           * HAKIKISHA NI ADMIN
+           * ADMIN CHECK
            */
 
           const role =
@@ -827,7 +708,7 @@
 
 
           /*
-           * SAVE ADMIN SESSION
+           * SAVE SESSION
            */
 
           localStorage.setItem(
@@ -866,8 +747,10 @@
 
 
           showMessage(
-            error.message ||
-            "Imeshindikana kuingia. Tafadhali jaribu tena.",
+            `Login API connection error: ${
+              error.message ||
+              "Haikuweza kuwasiliana na server."
+            }`,
             "error"
           );
 
@@ -890,3 +773,4 @@
 
 </body>
 </html>
+```
