@@ -474,8 +474,8 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 </main>
 </div>
 
-
 <script>
+ 
 /* =========================================================
    ADMIN SESSION
    ========================================================= */
@@ -498,10 +498,67 @@ if(
  window.location.href="login.html";
 }
 
+const ADMIN_ID=currentUser?currentUser.admin_id:null;
+
 if(currentUser){
  document.getElementById("adminName").textContent=
   currentUser.username||currentUser.name||"Admin";
 }
+
+
+/* =========================================================
+   API HELPER
+   ========================================================= */
+
+async function api(path,options={}){
+ const url="/api"+path;
+ const opts={
+  headers:{"Content-Type":"application/json"},
+  ...options
+ };
+ if(opts.body&&typeof opts.body==="object"){
+  opts.body=JSON.stringify(opts.body);
+ }
+ try{
+  const res=await fetch(url,opts);
+  const data=await res.json();
+  return data;
+ }catch(err){
+  return{success:false,message:"Network error: "+err.message};
+ }
+}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function toast(message,type="success"){
+ const el=document.createElement("div");
+ el.className="toast toast-"+type;
+ el.textContent=message;
+ document.body.appendChild(el);
+ setTimeout(()=>el.remove(),3500);
+}
+
+/* =========================================================
+   MODAL HELPERS
+   ========================================================= */
+
+function closeModal(id){
+ document.getElementById(id).classList.remove("show");
+}
+
+document.querySelectorAll(".modal-overlay").forEach(overlay=>{
+ overlay.addEventListener("click",e=>{
+  if(e.target===overlay) overlay.classList.remove("show");
+ });
+});
+
+document.addEventListener("keydown",e=>{
+ if(e.key==="Escape"){
+  document.querySelectorAll(".modal-overlay.show").forEach(m=>m.classList.remove("show"));
+ }
+});
 
 
 /* =========================================================
@@ -514,7 +571,7 @@ document.getElementById("currentDate").textContent=
   day:"numeric",
   month:"long",
   year:"numeric"
-});
+ });
 
 
 /* =========================================================
@@ -527,42 +584,30 @@ const components=document.querySelectorAll(".component");
 function showPage(page){
 
  navItems.forEach(item=>{
-  item.classList.toggle(
-   "active",
-   item.dataset.page===page
-  );
+  item.classList.toggle("active",item.dataset.page===page);
  });
 
  components.forEach(component=>{
-  component.classList.toggle(
-   "active",
-   component.id==="page-"+page
-  );
+  component.classList.toggle("active",component.id==="page-"+page);
  });
 
  document.getElementById("sidebar").classList.remove("open");
 
- window.scrollTo({
-  top:0,
-  behavior:"smooth"
- });
+ window.scrollTo({top:0,behavior:"smooth"});
 
- if(page==="authors") renderAuthors();
- if(page==="stories") renderManageStories();
- if(page==="submissions") renderSubmissions();
- if(page==="withdrawals") renderWithdrawals();
+ if(page==="dashboard") loadDashboard();
+ if(page==="authors") loadAuthors();
+ if(page==="stories") loadStories();
+ if(page==="submissions") loadSubmissions();
+ if(page==="withdrawals") loadWithdrawals();
 }
 
 navItems.forEach(item=>{
- item.addEventListener("click",()=>{
-  showPage(item.dataset.page);
- });
+ item.addEventListener("click",()=>showPage(item.dataset.page));
 });
 
 document.querySelectorAll("[data-go]").forEach(button=>{
- button.addEventListener("click",()=>{
-  showPage(button.dataset.go);
- });
+ button.addEventListener("click",()=>showPage(button.dataset.go));
 });
 
 
@@ -606,13 +651,11 @@ function applyTheme(){
 applyTheme();
 
 function toggleTheme(){
-
  if(localStorage.getItem("netsimulizi_theme")==="light"){
   localStorage.removeItem("netsimulizi_theme");
  }else{
   localStorage.setItem("netsimulizi_theme","light");
  }
-
  applyTheme();
 }
 
@@ -621,88 +664,156 @@ document.getElementById("settingsTheme").addEventListener("click",toggleTheme);
 
 
 /* =========================================================
-   TEMPORARY UI DATA
-   ---------------------------------------------------------
-   Hii ni UI state tu.
-   Hatujaunganisha DB hapa.
+   DATA STORES
    ========================================================= */
 
-let authors=[];
-let stories=[];
-let submissions=[];
-let withdrawals=[];
+let allAuthors=[];
+let allStories=[];
+let allSubmissions=[];
+let allWithdrawals=[];
 
 
 /* =========================================================
-   DASHBOARD
+   DASHBOARD — fetches /api/admin/stats
    ========================================================= */
 
-function updateDashboard(){
+async function loadDashboard(){
 
- document.getElementById("usersCount").textContent="0";
- document.getElementById("authorsCount").textContent=authors.length;
- document.getElementById("storiesCount").textContent=stories.length;
+ // Fetch stats
+ const statsResult=await api("/admin/stats?admin_id="+ADMIN_ID);
 
- document.getElementById("pendingCount").textContent=
-  stories.filter(x=>x.status==="pending").length;
+ if(statsResult.success&&statsResult.stats){
+  const s=statsResult.stats;
+  document.getElementById("usersCount").textContent=s.readers||s.users||0;
+  document.getElementById("authorsCount").textContent=s.authors||0;
+  document.getElementById("storiesCount").textContent=s.stories||0;
+  document.getElementById("pendingCount").textContent=s.pending_submissions||0;
+  document.getElementById("withdrawCount").textContent=s.pending_withdrawals||0;
+  document.getElementById("submissionCount").textContent=s.pending_submissions||0;
+ }
 
- document.getElementById("withdrawCount").textContent=
-  withdrawals.filter(x=>x.status==="pending").length;
+ // Fetch recent stories for table
+ const storiesResult=await api("/stories");
+
+ if(storiesResult.success&&storiesResult.stories){
+  allStories=storiesResult.stories;
+  renderDashboardStories();
+ }
+
+ // Update activity feed
+ updateActivity();
 }
 
 function renderDashboardStories(){
-
  const tbody=document.getElementById("storiesTable");
 
- if(!stories.length){
-  tbody.innerHTML=
-   `<tr><td colspan="5"><div class="empty">Hakuna stories bado.</div></td></tr>`;
+ if(!allStories.length){
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Hakuna stories bado.</div></td></tr>`;
   return;
  }
 
- tbody.innerHTML=stories.slice(0,8).map(story=>`
-
+ tbody.innerHTML=allStories.slice(0,8).map(story=>`
   <tr>
    <td>${escapeHTML(story.title)}</td>
-   <td>${escapeHTML(story.author)}</td>
-   <td>${escapeHTML(story.language)}</td>
-   <td>
-    <span class="status ${story.status}">
-     ${escapeHTML(story.status)}
-    </span>
-   </td>
-   <td>
-    <button class="btn btn-dark" onclick="viewStory('${story.id}')">
-     View
-    </button>
-   </td>
+   <td>${escapeHTML(story.author_name||"-")}</td>
+   <td>${escapeHTML(story.language||"-")}</td>
+   <td><span class="status ${story.status||"draft"}">${escapeHTML(story.status||"draft")}</span></td>
+   <td><button class="btn btn-dark" onclick="viewStory(${story.id})">View</button></td>
   </tr>
-
  `).join("");
+}
+
+function updateActivity(){
+ const list=document.getElementById("activityList");
+
+ let html="";
+
+ if(allSubmissions.length){
+  allSubmissions.slice(0,3).forEach(s=>{
+   html+=`
+    <div class="activity-item">
+     <div class="activity-icon">＋</div>
+     <div class="activity-text">
+      <strong>Submission mpya: ${escapeHTML(s.title)}</strong>
+      <span>${escapeHTML(s.author_name||"Unknown")} · ${formatDate(s.created_at)}</span>
+     </div>
+    </div>`;
+  });
+ }
+
+ if(allWithdrawals.length){
+  allWithdrawals.slice(0,3).forEach(w=>{
+   html+=`
+    <div class="activity-item">
+     <div class="activity-icon">◈</div>
+     <div class="activity-text">
+      <strong>Withdrawal request: TSh ${Number(w.amount).toLocaleString()}</strong>
+      <span>${escapeHTML(w.author_name||"Unknown")} · ${formatDate(w.created_at)}</span>
+     </div>
+    </div>`;
+  });
+ }
+
+ if(allStories.length){
+  allStories.slice(0,2).forEach(s=>{
+   html+=`
+    <div class="activity-item">
+     <div class="activity-icon">▤</div>
+     <div class="activity-text">
+      <strong>Story: ${escapeHTML(s.title)}</strong>
+      <span>${escapeHTML(s.author_name||"Unknown")} · ${escapeHTML(s.status||"draft")}</span>
+     </div>
+    </div>`;
+  });
+ }
+
+ if(!html){
+  html=`
+   <div class="activity-item">
+    <div class="activity-icon">✓</div>
+    <div class="activity-text">
+     <strong>Dashboard imefunguka</strong>
+     <span>Admin dashboard iko tayari.</span>
+    </div>
+   </div>`;
+ }
+
+ list.innerHTML=html;
 }
 
 
 /* =========================================================
-   AUTHORS COMPONENT
+   AUTHORS — fetches /api/authors
    ========================================================= */
+
+async function loadAuthors(){
+ const tbody=document.getElementById("authorsTable");
+ tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Inapakia...</div></td></tr>`;
+
+ const result=await api("/authors");
+
+ if(!result.success){
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Imeshindwa kupakia: ${escapeHTML(result.message||"")}</div></td></tr>`;
+  return;
+ }
+
+ allAuthors=result.authors||[];
+ renderAuthors();
+}
 
 function renderAuthors(){
 
- const search=
-  document.getElementById("authorSearch").value.toLowerCase();
+ const search=document.getElementById("authorSearch").value.toLowerCase();
+ const status=document.getElementById("authorStatus").value;
 
- const status=
-  document.getElementById("authorStatus").value;
+ const list=allAuthors.filter(author=>{
 
- const list=authors.filter(author=>{
+  const name=(author.display_name||author.username||author.name||"").toLowerCase();
+  const email=(author.email||"").toLowerCase();
+  const authorStatus=(author.approval_status||"pending").toLowerCase();
 
-  const matchSearch=
-   !search||
-   author.name.toLowerCase().includes(search)||
-   author.email.toLowerCase().includes(search);
-
-  const matchStatus=
-   !status||author.status===status;
+  const matchSearch=!search||name.includes(search)||email.includes(search);
+  const matchStatus=!status||authorStatus===status;
 
   return matchSearch&&matchStatus;
  });
@@ -710,32 +821,27 @@ function renderAuthors(){
  const tbody=document.getElementById("authorsTable");
 
  if(!list.length){
-  tbody.innerHTML=
-   `<tr><td colspan="5"><div class="empty">Hakuna authors kwenye UI kwa sasa.</div></td></tr>`;
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Hakuna authors.</div></td></tr>`;
   return;
  }
 
  tbody.innerHTML=list.map(author=>`
-
   <tr>
-   <td>${escapeHTML(author.name)}</td>
-   <td>${escapeHTML(author.email)}</td>
-   <td><span class="status ${author.status}">
-    ${escapeHTML(author.status)}
-   </span></td>
-   <td>${author.stories}</td>
+   <td>${escapeHTML(author.display_name||author.username||"Unknown")}</td>
+   <td>${escapeHTML(author.email||"-")}</td>
+   <td><span class="status ${author.approval_status||"pending"}">${escapeHTML(author.approval_status||"pending")}</span></td>
+   <td>${author.story_count||0}</td>
    <td>
     <div class="actions">
-     <button class="btn btn-dark" onclick="viewAuthor('${author.id}')">View</button>
+     <button class="btn btn-dark" onclick="viewAuthor(${author.id})">View</button>
      ${
-      author.status==="pending"
-      ? `<button class="btn btn-success" onclick="approveAuthor('${author.id}')">Approve</button>`
-      : ""
+      (author.approval_status||"pending")!=="approved"
+      ?`<button class="btn btn-success" onclick="approveAuthor(${author.id})">Approve</button>`
+      :""
      }
     </div>
    </td>
   </tr>
-
  `).join("");
 }
 
@@ -744,32 +850,38 @@ document.getElementById("authorStatus").addEventListener("change",renderAuthors)
 
 
 /* =========================================================
-   STORIES COMPONENT
+   STORIES — fetches /api/stories
    ========================================================= */
+
+async function loadStories(){
+ const tbody=document.getElementById("manageStoriesTable");
+ tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Inapakia...</div></td></tr>`;
+
+ const result=await api("/stories");
+
+ if(!result.success){
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Imeshindwa kupakia: ${escapeHTML(result.message||"")}</div></td></tr>`;
+  return;
+ }
+
+ allStories=result.stories||[];
+ renderManageStories();
+}
 
 function renderManageStories(){
 
- const search=
-  document.getElementById("storySearch").value.toLowerCase();
+ const search=document.getElementById("storySearch").value.toLowerCase();
+ const status=document.getElementById("storyStatus").value;
+ const language=document.getElementById("storyLanguage").value;
 
- const status=
-  document.getElementById("storyStatus").value;
+ const list=allStories.filter(story=>{
 
- const language=
-  document.getElementById("storyLanguage").value;
+  const title=(story.title||"").toLowerCase();
+  const author=(story.author_name||"").toLowerCase();
 
- const list=stories.filter(story=>{
-
-  const matchSearch=
-   !search||
-   story.title.toLowerCase().includes(search)||
-   story.author.toLowerCase().includes(search);
-
-  const matchStatus=
-   !status||story.status===status;
-
-  const matchLanguage=
-   !language||story.languageCode===language;
+  const matchSearch=!search||title.includes(search)||author.includes(search);
+  const matchStatus=!status||(story.status||"draft")===status;
+  const matchLanguage=!language||(story.language||"")===language;
 
   return matchSearch&&matchStatus&&matchLanguage;
  });
@@ -777,37 +889,24 @@ function renderManageStories(){
  const tbody=document.getElementById("manageStoriesTable");
 
  if(!list.length){
-  tbody.innerHTML=
-   `<tr><td colspan="5"><div class="empty">Hakuna stories kwenye UI kwa sasa.</div></td></tr>`;
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Hakuna stories.</div></td></tr>`;
   return;
  }
 
  tbody.innerHTML=list.map(story=>`
-
   <tr>
    <td>${escapeHTML(story.title)}</td>
-   <td>${escapeHTML(story.author)}</td>
-   <td>${escapeHTML(story.language)}</td>
-   <td><span class="status ${story.status}">
-    ${escapeHTML(story.status)}
-   </span></td>
+   <td>${escapeHTML(story.author_name||"-")}</td>
+   <td>${escapeHTML(story.language||"-")}</td>
+   <td><span class="status ${story.status||"draft"}">${escapeHTML(story.status||"draft")}</span></td>
    <td>
     <div class="actions">
-     <button class="btn btn-dark" onclick="viewStory('${story.id}')">View</button>
-     ${
-      story.status==="pending"
-      ? `<button class="btn btn-success" onclick="approveStory('${story.id}')">Approve</button>`
-      : ""
-     }
-     ${
-      story.status!=="rejected"
-      ? `<button class="btn btn-danger" onclick="rejectStory('${story.id}')">Reject</button>`
-      : ""
-     }
+     <button class="btn btn-dark" onclick="viewStory(${story.id})">View</button>
+     <button class="btn btn-dark" onclick="openEditStoryModal(${story.id})">Edit</button>
+     <button class="btn btn-danger" onclick="deleteStory(${story.id})">Delete</button>
     </div>
    </td>
   </tr>
-
  `).join("");
 }
 
@@ -817,44 +916,56 @@ document.getElementById("storyLanguage").addEventListener("change",renderManageS
 
 
 /* =========================================================
-   SUBMISSIONS
+   SUBMISSIONS — fetches /api/admin/submissions
    ========================================================= */
+
+async function loadSubmissions(){
+ const tbody=document.getElementById("submissionsTable");
+ tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Inapakia...</div></td></tr>`;
+
+ const result=await api("/admin/submissions?admin_id="+ADMIN_ID);
+
+ if(!result.success){
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Imeshindwa kupakia: ${escapeHTML(result.message||"")}</div></td></tr>`;
+  return;
+ }
+
+ allSubmissions=result.submissions||[];
+ document.getElementById("submissionCount").textContent=allSubmissions.length;
+ renderSubmissions();
+}
 
 function renderSubmissions(){
 
- const search=
-  document.getElementById("submissionSearch").value.toLowerCase();
+ const search=document.getElementById("submissionSearch").value.toLowerCase();
 
- const list=submissions.filter(item=>
+ const list=allSubmissions.filter(item=>
   !search||
-  item.title.toLowerCase().includes(search)||
-  item.author.toLowerCase().includes(search)
+  (item.title||"").toLowerCase().includes(search)||
+  (item.author_name||"").toLowerCase().includes(search)
  );
 
  const tbody=document.getElementById("submissionsTable");
 
  if(!list.length){
-  tbody.innerHTML=
-   `<tr><td colspan="5"><div class="empty">Hakuna submissions kwenye UI kwa sasa.</div></td></tr>`;
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Hakuna submissions.</div></td></tr>`;
   return;
  }
 
  tbody.innerHTML=list.map(item=>`
-
   <tr>
    <td>${escapeHTML(item.title)}</td>
-   <td>${escapeHTML(item.author)}</td>
-   <td>${escapeHTML(item.date)}</td>
+   <td>${escapeHTML(item.author_name||"-")}</td>
+   <td>${formatDate(item.created_at)}</td>
    <td><span class="status pending">Pending</span></td>
    <td>
     <div class="actions">
-     <button class="btn btn-dark" onclick="viewSubmission('${item.id}')">View</button>
-     <button class="btn btn-success" onclick="approveSubmission('${item.id}')">Approve</button>
-     <button class="btn btn-danger" onclick="rejectSubmission('${item.id}')">Reject</button>
+     <button class="btn btn-dark" onclick="viewSubmission(${item.id})">View</button>
+     <button class="btn btn-success" onclick="approveSubmission(${item.id})">Approve</button>
+     <button class="btn btn-danger" onclick="openRejectSubmissionModal(${item.id})">Reject</button>
     </div>
    </td>
   </tr>
-
  `).join("");
 }
 
@@ -862,24 +973,35 @@ document.getElementById("submissionSearch").addEventListener("input",renderSubmi
 
 
 /* =========================================================
-   WITHDRAWALS
+   WITHDRAWALS — fetches /api/admin/withdrawals
    ========================================================= */
+
+async function loadWithdrawals(){
+ const tbody=document.getElementById("withdrawTable");
+ tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Inapakia...</div></td></tr>`;
+
+ const result=await api("/admin/withdrawals?admin_id="+ADMIN_ID);
+
+ if(!result.success){
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Imeshindwa kupakia: ${escapeHTML(result.message||"")}</div></td></tr>`;
+  return;
+ }
+
+ allWithdrawals=result.withdrawals||[];
+ document.getElementById("withdrawCount").textContent=allWithdrawals.length;
+ renderWithdrawals();
+}
 
 function renderWithdrawals(){
 
- const search=
-  document.getElementById("withdrawSearch").value.toLowerCase();
+ const search=document.getElementById("withdrawSearch").value.toLowerCase();
+ const status=document.getElementById("withdrawStatus").value;
 
- const status=
-  document.getElementById("withdrawStatus").value;
+ const list=allWithdrawals.filter(item=>{
 
- const list=withdrawals.filter(item=>{
-
-  const matchSearch=
-   !search||item.author.toLowerCase().includes(search);
-
-  const matchStatus=
-   !status||item.status===status;
+  const author=(item.author_name||"").toLowerCase();
+  const matchSearch=!search||author.includes(search);
+  const matchStatus=!status||(item.status||"pending")===status;
 
   return matchSearch&&matchStatus;
  });
@@ -887,32 +1009,28 @@ function renderWithdrawals(){
  const tbody=document.getElementById("withdrawTable");
 
  if(!list.length){
-  tbody.innerHTML=
-   `<tr><td colspan="5"><div class="empty">Hakuna withdrawal requests kwenye UI kwa sasa.</div></td></tr>`;
+  tbody.innerHTML=`<tr><td colspan="5"><div class="empty">Hakuna withdrawal requests.</div></td></tr>`;
   return;
  }
 
  tbody.innerHTML=list.map(item=>`
-
   <tr>
-   <td>${escapeHTML(item.author)}</td>
+   <td>${escapeHTML(item.author_name||"-")}</td>
    <td>TSh ${Number(item.amount).toLocaleString()}</td>
-   <td>${escapeHTML(item.method)}</td>
-   <td><span class="status ${item.status}">
-    ${escapeHTML(item.status)}
-   </span></td>
+   <td>${escapeHTML(item.payment_method||"-")}</td>
+   <td><span class="status ${item.status||"pending"}">${escapeHTML(item.status||"pending")}</span></td>
    <td>
     <div class="actions">
-     <button class="btn btn-dark" onclick="viewWithdrawal('${item.id}')">View</button>
+     <button class="btn btn-dark" onclick="viewWithdrawal(${item.id})">View</button>
      ${
-      item.status==="pending"
-      ? `<button class="btn btn-success" onclick="completeWithdrawal('${item.id}')">Complete</button>`
-      : ""
+      (item.status||"pending")==="pending"
+      ?`<button class="btn btn-success" onclick="approveWithdrawal(${item.id})">Complete</button>
+         <button class="btn btn-danger" onclick="openRejectWithdrawalModal(${item.id})">Reject</button>`
+      :""
      }
     </div>
    </td>
   </tr>
-
  `).join("");
 }
 
@@ -921,80 +1039,259 @@ document.getElementById("withdrawStatus").addEventListener("change",renderWithdr
 
 
 /* =========================================================
-   ACTIONS
+   ACTIONS — real API calls
    ========================================================= */
 
 function viewAuthor(id){
- const item=authors.find(x=>x.id===id);
- if(item) alert("Author: "+item.name);
+ const item=allAuthors.find(x=>x.id==id);
+ if(item){
+  alert(
+   "Author: "+(item.display_name||item.username)+"\n"+
+   "Email: "+(item.email||"-")+"\n"+
+   "Status: "+(item.approval_status||"pending")+"\n"+
+   "Stories: "+(item.story_count||0)+"\n"+
+   "Earnings: TSh "+Number(item.earnings||0).toLocaleString()
+  );
+ }
 }
 
-function approveAuthor(id){
- const item=authors.find(x=>x.id===id);
- if(item){
-  item.status="approved";
-  renderAuthors();
-  updateDashboard();
+async function approveAuthor(id){
+ if(!confirm("Approve author #"+id+"?")) return;
+
+ const result=await api("/admin/authors/approve",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,author_id:id}
+ });
+
+ if(result.success){
+  toast("Author approved!");
+  loadAuthors();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to approve","error");
  }
 }
 
 function viewStory(id){
- const item=stories.find(x=>x.id===id);
- if(item) alert("Story: "+item.title);
-}
-
-function approveStory(id){
- const item=stories.find(x=>x.id===id);
+ const item=allStories.find(x=>x.id==id);
  if(item){
-  item.status="approved";
-  renderManageStories();
-  renderDashboardStories();
-  updateDashboard();
+  alert(
+   "Story: "+item.title+"\n"+
+   "Author: "+(item.author_name||"-")+"\n"+
+   "Language: "+(item.language||"-")+"\n"+
+   "Status: "+(item.status||"draft")+"\n"+
+   "Readers: "+(item.readers_count||0)
+  );
  }
 }
 
-function rejectStory(id){
- const item=stories.find(x=>x.id===id);
- if(item){
-  item.status="rejected";
-  renderManageStories();
-  renderDashboardStories();
-  updateDashboard();
+async function deleteStory(id){
+ if(!confirm("Delete story #"+id+"? This will hide it from public view.")) return;
+
+ const result=await api("/admin/stories/"+id+"?admin_id="+ADMIN_ID,{
+  method:"DELETE"
+ });
+
+ if(result.success){
+  toast("Story deleted!");
+  loadStories();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to delete","error");
  }
 }
 
 function viewSubmission(id){
- const item=submissions.find(x=>x.id===id);
- if(item) alert("Submission: "+item.title);
-}
-
-function approveSubmission(id){
- const item=submissions.find(x=>x.id===id);
+ const item=allSubmissions.find(x=>x.id==id);
  if(item){
-  submissions=submissions.filter(x=>x.id!==id);
-  renderSubmissions();
+  alert(
+   "Submission: "+item.title+"\n"+
+   "Author: "+(item.author_name||"-")+"\n"+
+   "Language: "+(item.language||"-")+"\n"+
+   "Description: "+(item.description||"-")+"\n"+
+   "Submitted: "+formatDate(item.created_at)
+  );
  }
 }
 
-function rejectSubmission(id){
- const item=submissions.find(x=>x.id===id);
- if(item){
-  submissions=submissions.filter(x=>x.id!==id);
-  renderSubmissions();
+async function approveSubmission(id){
+ if(!confirm("Approve submission #"+id+"? This will publish the story.")) return;
+
+ const result=await api("/admin/submissions/approve",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,submission_id:id}
+ });
+
+ if(result.success){
+  toast("Submission approved and story published!");
+  loadSubmissions();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to approve","error");
  }
 }
+
+let pendingRejectSubmissionId=null;
+
+function openRejectSubmissionModal(id){
+ pendingRejectSubmissionId=id;
+ document.getElementById("rejectSubmissionNote").value="";
+ document.getElementById("rejectSubmissionModal").classList.add("show");
+}
+
+document.getElementById("rejectSubmissionConfirm").onclick=async()=>{
+ const note=document.getElementById("rejectSubmissionNote").value.trim();
+
+ const result=await api("/admin/submissions/reject",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,submission_id:pendingRejectSubmissionId,admin_note:note}
+ });
+
+ if(result.success){
+  toast("Submission rejected");
+  closeModal("rejectSubmissionModal");
+  loadSubmissions();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to reject","error");
+ }
+};
 
 function viewWithdrawal(id){
- const item=withdrawals.find(x=>x.id===id);
- if(item) alert("Withdrawal: TSh "+item.amount);
+ const item=allWithdrawals.find(x=>x.id==id);
+ if(item){
+  alert(
+   "Withdrawal #"+item.id+"\n"+
+   "Author: "+(item.author_name||"-")+"\n"+
+   "Amount: TSh "+Number(item.amount).toLocaleString()+"\n"+
+   "Method: "+(item.payment_method||"-")+"\n"+
+   "Account: "+(item.payment_account||"-")+"\n"+
+   "Status: "+(item.status||"pending")
+  );
+ }
 }
 
-function completeWithdrawal(id){
- const item=withdrawals.find(x=>x.id===id);
- if(item){
-  item.status="completed";
-  renderWithdrawals();
-  updateDashboard();
+async function approveWithdrawal(id){
+ if(!confirm("Approve withdrawal #"+id+"?")) return;
+
+ const result=await api("/admin/withdrawals/approve",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,withdrawal_id:id}
+ });
+
+ if(result.success){
+  toast("Withdrawal approved!");
+  loadWithdrawals();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to approve","error");
+ }
+}
+
+let pendingRejectWithdrawalId=null;
+
+function openRejectWithdrawalModal(id){
+ pendingRejectWithdrawalId=id;
+ document.getElementById("rejectWithdrawalNote").value="";
+ document.getElementById("rejectWithdrawalModal").classList.add("show");
+}
+
+document.getElementById("rejectWithdrawalConfirm").onclick=async()=>{
+ const note=document.getElementById("rejectWithdrawalNote").value.trim();
+
+ const result=await api("/admin/withdrawals/reject",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,withdrawal_id:pendingRejectWithdrawalId,admin_note:note}
+ });
+
+ if(result.success){
+  toast("Withdrawal rejected");
+  closeModal("rejectWithdrawalModal");
+  loadWithdrawals();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to reject","error");
+ }
+};
+
+
+/* =========================================================
+   EDIT STORY MODAL
+   ========================================================= */
+
+let editStoryId=null;
+
+function openEditStoryModal(id){
+ editStoryId=id;
+ const story=allStories.find(x=>x.id==id);
+ if(story){
+  document.getElementById("editStoryStatus").value=story.status||"draft";
+  document.getElementById("editStoryVisibility").value=story.visibility||"public";
+ }
+ document.getElementById("editStoryModal").classList.add("show");
+}
+
+document.getElementById("editStoryConfirm").onclick=async()=>{
+ const status=document.getElementById("editStoryStatus").value;
+ const visibility=document.getElementById("editStoryVisibility").value;
+
+ const result=await api("/admin/stories/"+editStoryId,{
+  method:"PUT",
+  body:{admin_id:ADMIN_ID,status,visibility}
+ });
+
+ if(result.success){
+  toast("Story updated!");
+  closeModal("editStoryModal");
+  loadStories();
+ }else{
+  toast(result.message||"Failed to update","error");
+ }
+};
+
+
+/* =========================================================
+   ADD AUTHOR — POST /api/admin/authors/create
+   ========================================================= */
+
+document.getElementById("addAuthorBtn").onclick=()=>{
+ document.getElementById("newAuthorUsername").value="";
+ document.getElementById("newAuthorEmail").value="";
+ document.getElementById("newAuthorPassword").value="";
+ document.getElementById("newAuthorDisplayName").value="";
+ document.getElementById("newAuthorBio").value="";
+ document.getElementById("addAuthorModal").classList.add("show");
+};
+
+async function createAuthor(){
+ const username=document.getElementById("newAuthorUsername").value.trim();
+ const email=document.getElementById("newAuthorEmail").value.trim();
+ const password=document.getElementById("newAuthorPassword").value;
+ const displayName=document.getElementById("newAuthorDisplayName").value.trim();
+ const bio=document.getElementById("newAuthorBio").value.trim();
+
+ if(!username||!email||!password||!displayName){
+  toast("All required fields must be filled","error");
+  return;
+ }
+
+ if(password.length<8){
+  toast("Password must be at least 8 characters","error");
+  return;
+ }
+
+ const result=await api("/admin/authors/create",{
+  method:"POST",
+  body:{admin_id:ADMIN_ID,username,email,password,display_name:displayName,bio}
+ });
+
+ if(result.success){
+  toast("Author created successfully!");
+  closeModal("addAuthorModal");
+  loadAuthors();
+  loadDashboard();
+ }else{
+  toast(result.message||"Failed to create author","error");
  }
 }
 
@@ -1003,16 +1300,12 @@ function completeWithdrawal(id){
    QUICK BUTTONS
    ========================================================= */
 
-document.getElementById("addAuthorBtn").onclick=()=>{
- alert("Author creation UI iko tayari. API itaunganishwa hatua ya D1.");
-};
-
 document.getElementById("newStoryBtn").onclick=()=>{
- alert("Story creation UI iko tayari. API itaunganishwa hatua ya D1.");
+ alert("Story creation inayopatikana kwenye Author Dashboard. Authors hujenga stories zao wenyewe.");
 };
 
 document.getElementById("newNotificationBtn").onclick=()=>{
- alert("Notification creation UI iko tayari. API itaunganishwa hatua ya D1.");
+ alert("Notification system itaunganishwa hatua inayofuata.");
 };
 
 
@@ -1023,16 +1316,9 @@ document.getElementById("newNotificationBtn").onclick=()=>{
 let notificationsEnabled=true;
 
 document.getElementById("notificationToggle").onclick=function(){
-
  notificationsEnabled=!notificationsEnabled;
-
- this.textContent=
-  notificationsEnabled?"Enabled":"Disabled";
-
- this.className=
-  notificationsEnabled
-  ?"btn btn-success"
-  :"btn btn-danger";
+ this.textContent=notificationsEnabled?"Enabled":"Disabled";
+ this.className=notificationsEnabled?"btn btn-success":"btn btn-danger";
 };
 
 
@@ -1041,10 +1327,8 @@ document.getElementById("notificationToggle").onclick=function(){
    ========================================================= */
 
 function logout(){
-
  localStorage.removeItem("netsimulizi_user");
  window.location.href="login.html";
-
 }
 
 document.getElementById("logoutBtn").addEventListener("click",logout);
@@ -1052,29 +1336,35 @@ document.getElementById("settingsLogout").addEventListener("click",logout);
 
 
 /* =========================================================
-   SECURITY DISPLAY ESCAPE
+   UTILS
    ========================================================= */
 
 function escapeHTML(value){
-
  return String(value??"")
   .replace(/&/g,"&amp;")
   .replace(/</g,"&lt;")
   .replace(/>/g,"&gt;")
   .replace(/"/g,"&quot;")
   .replace(/'/g,"&#039;");
+}
 
+function formatDate(dateStr){
+ if(!dateStr) return "-";
+ try{
+  return new Date(dateStr+"Z").toLocaleDateString("sw-TZ",{
+   day:"numeric",month:"short",year:"numeric"
+  });
+ }catch{
+  return dateStr;
+ }
 }
 
 
 /* =========================================================
-   INITIAL UI
+   INIT — load dashboard data on page open
    ========================================================= */
 
-updateDashboard();
-renderDashboardStories();
-
-</script>
-
+loadDashboard();
+ </script>
 </body>
 </html>
