@@ -1105,15 +1105,14 @@ form.addEventListener(
      * itaunganishwa kwenye D1 hatua inayofuata.
      */
 
-       const payload = {
+         const payload = {
 
       title: title,
 
       language: language,
 
-      category_id: null,
+      category_id: category ? parseInt(category) : null,
 
-      category_name: category,
 
       description: description,
 
@@ -1124,15 +1123,13 @@ form.addEventListener(
         user.user_id ||
         null,
 
-      originality_declared: true,
+      originality_declared: 1,
 
-      originality_declaration: true,
+      originality_declaration: 1,
 
-      originality: true
-
+      originality: 1
 
     };
-
 
     try{
 
