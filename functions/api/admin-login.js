@@ -277,37 +277,40 @@ export async function onRequest(context) {
       );
     }
 
-    const admin = await db
-      .prepare(`
-        SELECT *
-        FROM admins
-        WHERE user_id = ?
-        LIMIT 1
-      `)
-      .bind(user.id)
-      .first();
+    /* TRY TO FETCH ADMIN RECORD — but allow login without it if user has admin role */
+    let adminId = user.id; // Default to user.id
 
-    if (!admin) {
-      return json(
-        {
-          success: false,
-          error: "Admin account not found"
-        },
-        404
-      );
-    }
+    try {
+      const admin = await db
+        .prepare(`
+          SELECT *
+          FROM admins
+          WHERE user_id = ?
+          LIMIT 1
+        `)
+        .bind(user.id)
+        .first();
 
-    if (
-      String(admin.status || "").toLowerCase() !==
-      "active"
-    ) {
-      return json(
-        {
-          success: false,
-          error: "Admin account is not active"
-        },
-        403
-      );
+      if (admin) {
+        /* Admin record exists — use its ID */
+        if (
+          String(admin.status || "").toLowerCase() !==
+          "active"
+        ) {
+          return json(
+            {
+              success: false,
+              error: "Admin account is not active"
+            },
+            403
+          );
+        }
+        adminId = admin.id;
+      }
+      /* If no admin record found, continue with user.id as fallback */
+    } catch (e) {
+      /* If admins table doesn't exist or query fails, continue with user.id */
+      console.error("Admin record lookup error:", e?.message || String(e));
     }
 
     return json({
@@ -315,7 +318,7 @@ export async function onRequest(context) {
       message: "Admin login successful",
       user: {
         id: user.id,
-        admin_id: admin.id,
+        admin_id: adminId,
         username: user.username,
         email: user.email,
         role: user.role,
