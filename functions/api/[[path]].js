@@ -152,48 +152,24 @@ const hexToBytes = (hex) => {
     return bytes;
 };
 
-const hashPassword = async (
-    password
-) => {
-
-    const salt =
-        crypto.getRandomValues(
-            new Uint8Array(16)
+const base64ToBytes = (base64) => {
+    const binaryString =
+        atob(base64);
+    const bytes =
+        new Uint8Array(
+            binaryString.length
         );
-
-    const key =
-        await crypto.subtle.importKey(
-            "raw",
-            textEncoder.encode(password),
-            {
-                name: "PBKDF2"
-            },
-            false,
-            ["deriveBits"]
-        );
-
-    const bits =
-        await crypto.subtle.deriveBits(
-            {
-                name: "PBKDF2",
-                salt,
-                iterations: 100000,
-                hash: "SHA-256"
-            },
-            key,
-            256
-        );
-
-    return [
-        "pbkdf2",
-        "sha256",
-        "100000",
-        bytesToHex(salt),
-        bytesToHex(
-            new Uint8Array(bits)
-        )
-    ].join("$");
+    for (
+        let i = 0;
+        i < binaryString.length;
+        i++
+    ) {
+        bytes[i] =
+            binaryString.charCodeAt(i);
+    }
+    return bytes;
 };
+
 
 const verifyPassword = async (
     password,
@@ -202,26 +178,52 @@ const verifyPassword = async (
 
     try {
 
-        const parts =
-            String(stored || "")
-                .split("$");
+        const storedStr =
+            String(stored || "");
 
+        const parts =
+            storedStr.split("$");
+
+        let iterations, salt, expected;
+
+        /* ---- Format 1: pbkdf2$sha256$100000$<hex_salt>$<hex_hash> ---- */
         if (
-            parts.length !== 5 ||
-            parts[0] !== "pbkdf2" ||
-            parts[1] !== "sha256"
+            parts.length === 5 &&
+            parts[0] === "pbkdf2" &&
+            parts[1] === "sha256"
         ) {
+            iterations =
+                Number(parts[2]);
+            salt =
+                hexToBytes(parts[3]);
+            expected =
+                hexToBytes(parts[4]);
+        }
+
+        /* ---- Format 2: pbkdf2$100000$<base64_salt>$<base64_hash> ---- */
+        /* ---- Format 3: pbkdf2$1000$<base64_salt>$<base64_hash>  ---- */
+        else if (
+            parts.length === 4 &&
+            parts[0] === "pbkdf2"
+        ) {
+            iterations =
+                Number(parts[1]);
+            salt =
+                base64ToBytes(parts[2]);
+            expected =
+                base64ToBytes(parts[3]);
+        }
+
+        else {
             return false;
         }
 
-        const iterations =
-            Number(parts[2]);
-
-        const salt =
-            hexToBytes(parts[3]);
-
-        const expected =
-            hexToBytes(parts[4]);
+        if (
+            !iterations ||
+            iterations <= 0
+        ) {
+            return false;
+        }
 
         const key =
             await crypto.subtle.importKey(
@@ -255,6 +257,25 @@ const verifyPassword = async (
         ) {
             return false;
         }
+
+        let result = 0;
+
+        for (
+            let i = 0;
+            i < actual.length;
+            i++
+        ) {
+            result |=
+                actual[i] ^
+                expected[i];
+        }
+
+        return result === 0;
+
+    } catch {
+        return false;
+    }
+};
 
         let result = 0;
 
