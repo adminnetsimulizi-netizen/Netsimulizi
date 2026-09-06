@@ -114,7 +114,7 @@ const hashPassword = async password => {
     ].join("$");
 };
 
-cconst verifyPassword = async (password, stored) => {
+const verifyPassword = async (password, stored) => {
     try {
         const parts = String(stored || "").split("$");
 
