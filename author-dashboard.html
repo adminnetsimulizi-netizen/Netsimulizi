@@ -600,7 +600,9 @@ async function loadStories(){
 
     try{
 
-        const response = await fetch(`${API}/stories`);
+        const response = await fetch(
+            `${API}/author/stories/${author.id}`
+        );
 
         const data = await response.json();
 
@@ -614,7 +616,7 @@ async function loadStories(){
             ? data.stories
             : [];
 
-        allStories = stories.filter(belongsToAuthor);
+        allStories = stories;
 
         renderStories(allStories);
 
@@ -630,6 +632,7 @@ async function loadStories(){
         `;
     }
 }
+
 
 document.getElementById("searchInput")
     .addEventListener("input", function(){
