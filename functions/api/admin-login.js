@@ -207,9 +207,11 @@ export async function onRequest(context) {
       );
     }
 
-    if (
-      String(user.role || "").toLowerCase() !== "admin"
-    ) {
+    /* ADMIN CHECK — accepts both 'admin' and 'super_admin' roles, case-insensitive */
+    const role = String(user.role || "").toLowerCase().trim();
+    const isAdmin = role === "admin" || role === "super_admin";
+
+    if (!isAdmin) {
       return json(
         {
           success: false,
@@ -316,7 +318,7 @@ export async function onRequest(context) {
         admin_id: admin.id,
         username: user.username,
         email: user.email,
-        role: "admin",
+        role: user.role,
         status: user.status
       }
     });
