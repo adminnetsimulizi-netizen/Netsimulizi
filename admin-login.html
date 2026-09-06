@@ -519,10 +519,11 @@ document.getElementById("adminLoginForm").addEventListener("submit", async funct
     /* EXTRACT USER */
     const user = data.user || data;
 
-    /* ADMIN CHECK */
-    const role = String(user.role || "").toLowerCase();
+    /* ADMIN CHECK — accepts both 'admin' and 'super_admin' roles, case-insensitive */
+    const role = String(user.role || "").toLowerCase().trim();
+    const isAdmin = role === "admin" || role === "super_admin";
 
-    if (role !== "admin") {
+    if (!isAdmin) {
       showMessage(
         "Account hii si ya Admin. Huwezi kuingia kwenye Admin Dashboard.",
         "error"
