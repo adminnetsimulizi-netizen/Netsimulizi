@@ -110,6 +110,21 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
  .quick{grid-template-columns:1fr 1fr}.brand-text{font-size:18px}
  .brand img{width:38px;height:38px}
 }
+ /* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto}
+.modal h2{font-size:20px;margin-bottom:18px}
+.modal .form{margin-bottom:18px}
+.modal .form input,.modal .form select,.modal .form textarea{width:100%}
+.modal .form textarea{min-height:80px;resize:vertical}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+/* TOAST */
+.toast{position:fixed;bottom:25px;right:25px;z-index:3000;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;animation:slideIn .3s ease}
+.toast-success{background:var(--success);color:#fff}
+.toast-error{background:var(--danger);color:#fff}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
 </style>
 </head>
 
@@ -137,6 +152,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 
  <div class="nav-item active" data-page="dashboard">
   <span class="nav-icon">⌂</span><span class="nav-label">Dashboard</span>
+
  </div>
 
  <div class="nav-item" data-page="authors">
@@ -148,7 +164,8 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
  </div>
 
  <div class="nav-item" data-page="submissions">
-  <span class="nav-icon">＋</span><span class="nav-label">Story Submission</span>
+  <span class="nav-icon">＋</span><span class="nav-label">Story Submission</span><span class="nav-count" id="submissionCount">0</span>
+  
  </div>
 
  <div class="sidebar-title" style="margin-top:28px">Fedha</div>
@@ -474,6 +491,94 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 </main>
 </div>
 
+<!-- ADD AUTHOR MODAL -->
+<div class="modal-overlay" id="addAuthorModal">
+ <div class="modal">
+  <h2>Add New Author</h2>
+  <div class="form">
+   <label>Username *</label>
+   <input id="newAuthorUsername" type="text" placeholder="Username">
+  </div>
+  <div class="form">
+   <label>Email *</label>
+   <input id="newAuthorEmail" type="email" placeholder="Email">
+  </div>
+  <div class="form">
+   <label>Password * (min 8 chars)</label>
+   <input id="newAuthorPassword" type="password" placeholder="Password">
+  </div>
+  <div class="form">
+   <label>Display Name *</label>
+   <input id="newAuthorDisplayName" type="text" placeholder="Display Name">
+  </div>
+  <div class="form">
+   <label>Bio</label>
+   <textarea id="newAuthorBio" placeholder="Author bio..."></textarea>
+  </div>
+  <div class="modal-actions">
+   <button class="btn btn-dark" onclick="closeModal('addAuthorModal')">Cancel</button>
+   <button class="btn btn-gold" onclick="createAuthor()">Create Author</button>
+  </div>
+ </div>
+</div>
+
+<!-- EDIT STORY MODAL -->
+<div class="modal-overlay" id="editStoryModal">
+ <div class="modal">
+  <h2>Edit Story</h2>
+  <div class="form">
+   <label>Status</label>
+   <select id="editStoryStatus">
+    <option value="published">Published</option>
+    <option value="draft">Draft</option>
+    <option value="pending">Pending</option>
+   </select>
+  </div>
+  <div class="form">
+   <label>Visibility</label>
+   <select id="editStoryVisibility">
+    <option value="public">Public</option>
+    <option value="private">Private</option>
+   </select>
+  </div>
+  <div class="modal-actions">
+   <button class="btn btn-dark" onclick="closeModal('editStoryModal')">Cancel</button>
+   <button class="btn btn-gold" id="editStoryConfirm">Save</button>
+  </div>
+ </div>
+</div>
+
+<!-- REJECT SUBMISSION MODAL -->
+<div class="modal-overlay" id="rejectSubmissionModal">
+ <div class="modal">
+  <h2>Reject Submission</h2>
+  <div class="form">
+   <label>Reason (optional)</label>
+   <textarea id="rejectSubmissionNote" placeholder="Reason for rejection..."></textarea>
+  </div>
+  <div class="modal-actions">
+   <button class="btn btn-dark" onclick="closeModal('rejectSubmissionModal')">Cancel</button>
+   <button class="btn btn-danger" id="rejectSubmissionConfirm">Reject</button>
+  </div>
+ </div>
+</div>
+
+<!-- REJECT WITHDRAWAL MODAL -->
+<div class="modal-overlay" id="rejectWithdrawalModal">
+ <div class="modal">
+  <h2>Reject Withdrawal</h2>
+  <div class="form">
+   <label>Reason (optional)</label>
+   <textarea id="rejectWithdrawalNote" placeholder="Reason for rejection..."></textarea>
+  </div>
+  <div class="modal-actions">
+   <button class="btn btn-dark" onclick="closeModal('rejectWithdrawalModal')">Cancel</button>
+   <button class="btn btn-danger" id="rejectWithdrawalConfirm">Reject</button>
+  </div>
+ </div>
+</div>
+
+ 
 <script>
  
 /* =========================================================
