@@ -1105,37 +1105,26 @@ form.addEventListener(
      * itaunganishwa kwenye D1 hatua inayofuata.
      */
 
-    const payload = {
+       const payload = {
 
-      title:title,
+      title: title,
 
-      language:language,
+      language: language,
 
-      category:category,
+      category_id: null,
 
-      description:description,
+      category_name: category,
 
-      status:status,
+      description: description,
 
-      pricing:pricing,
+      cover_url: "",
 
-      tags:tags,
-
-      author_id:
+      user_id:
         user.id ||
         user.user_id ||
         null,
 
-      author_name:
-        user.name ||
-        user.username ||
-        "",
-
-      originality_confirmed:true,
-
-      terms_accepted:true,
-
-      submission_status:"pending"
+      originality_declaration: true
 
     };
 
@@ -1146,19 +1135,15 @@ form.addEventListener(
        * Jaribu endpoint ya submission.
        */
 
-      const response =
+         const response =
         await fetch(
-          "/api/author/stories",
+          "https://netsimulizi.pages.dev/api/author/stories",
           {
-
-            method:"POST",
-
-            headers:{
-              "Content-Type":"application/json"
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
             },
-
-            body:JSON.stringify(payload)
-
+            body: JSON.stringify(payload)
           }
         );
 
