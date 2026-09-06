@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Story — Net Simulizi</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f7f1e5;color:#2d241b;min-height:100vh;transition:.2s}
+body.dark{background:#17130f;color:#f5ead8}
+a{text-decoration:none;color:inherit}
+.topbar{position:sticky;top:0;z-index:1000;width:100%;background:#fffaf0;border-bottom:1px solid #e5d7c0;padding:14px 5%;display:flex;align-items:center;justify-content:space-between}
+.dark .topbar{background:#211b16;border-color:#3b3025}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
+.logo{width:38px;height:38px;border-radius:10px;background:#8b5e34;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.top-actions{display:flex;align-items:center;gap:10px}
+.btn{border:0;border-radius:9px;padding:10px 15px;cursor:pointer;font-size:14px;font-weight:600}
+.btn-light{background:#eadcc7;color:#35291d}
+.dark .btn-light{background:#382d23;color:#f5ead8}
+.btn-primary{background:#8b5e34;color:#fff}
+.btn-danger{background:#c0392b;color:#fff}
+.container{width:min(1150px,92%);margin:0 auto}
+.hero{margin:25px 0;padding:25px;border-radius:18px;background:#fffaf0;border:1px solid #eadcc7}
+.dark .hero{background:#211b16;border-color:#3b3025}
+.hero h1{font-size:26px;margin-bottom:8px}
+.hero p{color:#786653;line-height:1.6}
+.dark .hero p{color:#c8b9a6}
+.story-info{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+.badge{display:inline-block;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;background:#eadcc7;color:#35291d}
+.dark .badge{background:#382d23;color:#f5ead8}
+.status-pending{background:#f5e7bd;color:#76570a}
+.status-published{background:#dcefdc;color:#245b29}
+.status-approved{background:#dcefdc;color:#245b29}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+.card{background:#fffaf0;border:1px solid #eadcc7;border-radius:16px;padding:22px;margin-bottom:20px}
+.dark .card{background:#211b16;border-color:#3b3025}
+.card h2{font-size:18px;margin-bottom:15px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 13px;border:1px solid #ddcdb7;border-radius:8px;background:transparent;color:inherit;font:inherit;outline:none}
+.dark .form-group input,.dark .form-group textarea,.dark .form-group select{border-color:#3b3025}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#8b5e34}
+.form-group textarea{min-height:200px;resize:vertical}
+.episode-list{display:grid;gap:12px}
+.episode-item{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid #eadcc7;border-radius:10px;background:#fffaf0}
+.dark .episode-item{background:#211b16;border-color:#3b3025}
+.episode-info{display:flex;align-items:center;gap:12px}
+.episode-number{width:36px;height:36px;border-radius:50%;background:#8b5e34;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.episode-title{font-weight:600;font-size:14px}
+.episode-date{color:#806d59;font-size:11px}
+.dark .episode-date{color:#bcae9c}
+.episode-actions{display:flex;gap:6px}
+.episode-actions .btn{padding:7px 12px;font-size:12px}
+.empty{text-align:center;padding:30px 20px;color:#806d59;font-size:14px}
+.dark .empty{color:#bcae9c}
+.loading{text-align:center;padding:40px;color:#806d59}
+.dark .loading{color:#bcae9c}
+.message{display:none;padding:14px;border-radius:9px;margin-bottom:16px;font-size:14px;line-height:1.5}
+.message.error{display:block;background:#ffe7e7;border:1px solid #e2aaaa;color:#9b2222}
+.dark .message.error{background:#351b1b;border-color:#653333;color:#ffaaaa}
+.message.success{display:block;background:#e5f8eb;border:1px solid #a7d9b5;color:#176b32}
+.dark .message.success{background:#193221;border-color:#315f3d;color:#9be0ad}
+.actions{display:flex;gap:10px;margin-top:15px}
+.actions .btn{flex:1;text-align:center}
+footer{border-top:1px solid #e5d7c0;padding:25px 5%;text-align:center;color:#806d59;margin-top:20px}
+.dark footer{border-color:#3b3025;color:#bcae9c}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+@media(max-width:500px){.topbar{padding:12px 4%}.brand{font-size:17px}.hero h1{font-size:22px}.card{padding:18px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+    <a href="author-dashboard.html" class="brand">
+        <div class="logo">NS</div>
+        <span>Net Simulizi</span>
+    </a>
+    <div class="top-actions">
+        <button class="btn btn-light" id="themeBtn">🌙</button>
+        <a href="author-dashboard.html" class="btn btn-light">Dashboard</a>
+        <button class="btn btn-light" id="logoutBtn">Logout</button>
+    </div>
+</header>
+
+<main class="container">
+
+    <div class="loading" id="pageLoading">Inapakia hadithi...</div>
+
+    <div id="pageContent" style="display:none">
+
+        <section class="hero">
+            <h1 id="storyTitle">—</h1>
+            <p id="storyDescription">—</p>
+            <div class="story-info" id="storyInfo"></div>
+        </section>
+
+        <div id="message" class="message"></div>
+
+        <div class="grid2">
+
+            <section class="card">
+                <h2>Episodes</h2>
+                <div class="episode-list" id="episodeList">
+                    <div class="loading">Inapakia episodes...</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2>Add New Episode</h2>
+                <form id="episodeForm">
+                    <div class="form-group">
+                        <label for="episodeTitle">Episode Title *</label>
+                        <input type="text" id="episodeTitle" placeholder="Mfano: Sura ya 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="episodeNumber">Episode Number</label>
+                        <input type="number" id="episodeNumber" placeholder="Auto (leave empty)" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="episodeContent">Episode Content *</label>
+                        <textarea id="episodeContent" placeholder="Andika maudhui ya episode hapa..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="episodeFree">Free Episode?</label>
+                        <select id="episodeFree">
+                            <option value="free">Free (anyone can read)</option>
+                            <option value="paid">Paid (readers must pay)</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary" id="addEpisodeBtn">Add Episode</button>
+                    </div>
+                </form>
+            </section>
+
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    © 2026 Net Simulizi. All rights reserved.
+</footer>
+
+<script>
+const API = "https://netsimulizi.pages.dev/api";
+
+const author = JSON.parse(
+    localStorage.getItem("netsimulizi_author") || "null"
+);
+
+if (!author || !author.id) {
+    window.location.href = "author-login.html";
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const storyId = urlParams.get("id");
+
+if (!storyId) {
+    window.location.href = "author-dashboard.html";
+}
+
+function escapeHTML(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function showMessage(text, type) {
+    const msg = document.getElementById("message");
+    msg.textContent = text;
+    msg.className = "message " + type;
+}
+
+function getStatusClass(status) {
+    const v = String(status || "").toLowerCase();
+    if (v === "published" || v === "approved") return "status-published";
+    if (v === "pending") return "status-pending";
+    return "";
+}
+
+const themeBtn = document.getElementById("themeBtn");
+if (localStorage.getItem("netsimulizi_dark") === "1") {
+    document.body.classList.add("dark");
+}
+themeBtn.addEventListener("click", function () {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("netsimulizi_dark", document.body.classList.contains("dark") ? "1" : "0");
+});
+
+document.getElementById("logoutBtn").addEventListener("click", function () {
+    localStorage.removeItem("netsimulizi_author");
+    window.location.href = "author-login.html";
+});
+
+async function loadStory() {
+    try {
+        const response = await fetch(`${API}/stories/${storyId}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            document.getElementById("pageLoading").innerHTML = "Hadithi haijapatikana.";
+            return;
+        }
+
+        const story = data.story;
+
+        document.getElementById("storyTitle").textContent = story.title || "Untitled Story";
+        document.getElementById("storyDescription").textContent = story.description || "No description available.";
+
+        const info = document.getElementById("storyInfo");
+        info.innerHTML = "";
+
+        if (story.language) {
+            info.innerHTML += `<span class="badge">${escapeHTML(story.language)}</span>`;
+        }
+        if (story.category_name) {
+            info.innerHTML += `<span class="badge">${escapeHTML(story.category_name)}</span>`;
+        }
+        if (story.status) {
+            info.innerHTML += `<span class="badge ${getStatusClass(story.status)}">${escapeHTML(story.status)}</span>`;
+        }
+
+        document.getElementById("pageLoading").style.display = "none";
+        document.getElementById("pageContent").style.display = "block";
+
+    } catch (error) {
+        document.getElementById("pageLoading").innerHTML = "Imeshindikana kupakia hadithi.";
+    }
+}
+
+async function loadEpisodes() {
+    const list = document.getElementById("episodeList");
+
+    try {
+        const response = await fetch(`${API}/stories/${storyId}/episodes`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            list.innerHTML = '<div class="empty">Imeshindikana kupakia episodes.</div>';
+            return;
+        }
+
+        const episodes = data.episodes || [];
+
+        if (!episodes.length) {
+            list.innerHTML = '<div class="empty">Hakuna episodes zilizoongezwa bado.<br>Tumia form hapa kulia kuongeza episode ya kwanza.</div>';
+            return;
+        }
+
+        list.innerHTML = episodes.map(ep => `
+            <div class="episode-item">
+                <div class="episode-info">
+                    <div class="episode-number">${escapeHTML(ep.episode_number || "?")}</div>
+                    <div>
+                        <div class="episode-title">${escapeHTML(ep.title || "Untitled")}</div>
+                        <div class="episode-date">${escapeHTML(ep.created_at || "")}</div>
+                    </div>
+                </div>
+                <div class="episode-actions">
+                    <button class="btn btn-light" onclick="viewEpisode(${escapeHTML(ep.id)})">View</button>
+                </div>
+            </div>
+        `).join("");
+
+    } catch (error) {
+        list.innerHTML = '<div class="empty">Imeshindikana kupakia episodes.</div>';
+    }
+}
+
+function viewEpisode(episodeId) {
+    alert("Episode viewer itaongezwa hapa. Episode ID: " + episodeId);
+}
+
+document.getElementById("episodeForm").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const title = document.getElementById("episodeTitle").value.trim();
+    const content = document.getElementById("episodeContent").value.trim();
+    const episodeNumber = document.getElementById("episodeNumber").value;
+    const isFree = document.getElementById("episodeFree").value === "free";
+
+    if (!title || !content) {
+        showMessage("Tafadhali weka title na content ya episode.", "error");
+        return;
+    }
+
+    const btn = document.getElementById("addEpisodeBtn");
+    btn.disabled = true;
+    btn.textContent = "Inaongeza...";
+
+    const payload = {
+        user_id: author.user_id || author.id,
+        story_id: parseInt(storyId),
+        title: title,
+        content: content,
+        is_free: isFree
+    };
+
+    if (episodeNumber) {
+        payload.episode_number = parseInt(episodeNumber);
+    }
+
+    try {
+        const response = await fetch(`${API}/author/episodes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Imeshindikana kuongeza episode.");
+        }
+
+        showMessage("Episode imeongezwa kwa mafanikio!", "success");
+
+        document.getElementById("episodeForm").reset();
+
+        loadEpisodes();
+
+    } catch (error) {
+        showMessage(error.message || "Imeshindikana kuongeza episode. Jaribu tena.", "error");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Add Episode";
+});
+
+loadStory();
+loadEpisodes();
+</script>
+
+</body>
+</html>
