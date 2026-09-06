@@ -445,9 +445,9 @@
 <script>
 
 /* API — auto-detects same-origin vs cross-origin */
-const API = window.location.hostname.includes("netsimulizi.pages.dev") && window.location.hostname !== "netsimulizi.pages.dev"
-  ? "https://netsimulizi.pages.dev/api"   // subdomain → cross-origin
-  : "/api";                                 // same domain → relative
+const API = window.location.hostname === "netsimulizi.pages.dev"
+  ? "/api"                                   // same domain → relative
+  : "/api";                                  // local/other → relative (use proxy or backend)
 
 /* THEME */
 const themeBtn = document.getElementById("themeBtn");
@@ -590,4 +590,3 @@ document.getElementById("adminLoginForm").addEventListener("submit", async funct
 
 </body>
 </html>
-```
