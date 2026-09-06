@@ -64,6 +64,17 @@ a{text-decoration:none;color:inherit}
 .actions .btn{flex:1;text-align:center}
 footer{border-top:1px solid #e5d7c0;padding:25px 5%;text-align:center;color:#806d59;margin-top:20px}
 .dark footer{border-color:#3b3025;color:#bcae9c}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#fffaf0;border:1px solid #eadcc7;border-radius:14px;padding:28px;max-width:700px;width:100%;max-height:85vh;overflow-y:auto}
+.dark .modal{background:#211b16;border-color:#3b3025}
+.modal h2{font-size:20px;margin-bottom:5px}
+.modal .modal-meta{color:#806d59;font-size:12px;margin-bottom:18px}
+.dark .modal .modal-meta{color:#bcae9c}
+.modal .modal-content{line-height:1.8;font-size:15px;white-space:pre-wrap}
+.modal-actions{display:flex;justify-content:flex-end;margin-top:20px}
+.episode-free-badge{background:#dcefdc;color:#245b29;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700}
+.episode-paid-badge{background:#f5e7bd;color:#76570a;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700}
 @media(max-width:800px){.grid2{grid-template-columns:1fr}}
 @media(max-width:500px){.topbar{padding:12px 4%}.brand{font-size:17px}.hero h1{font-size:22px}.card{padding:18px}.actions{flex-direction:column}}
 </style>
@@ -139,6 +150,18 @@ footer{border-top:1px solid #e5d7c0;padding:25px 5%;text-align:center;color:#806
 
 </main>
 
+<!-- EPISODE VIEWER MODAL -->
+<div class="modal-overlay" id="episodeModal">
+    <div class="modal">
+        <h2 id="modalTitle">—</h2>
+        <div class="modal-meta" id="modalMeta">—</div>
+        <div class="modal-content" id="modalContent">—</div>
+        <div class="modal-actions">
+            <button class="btn btn-light" onclick="closeEpisodeModal()">Close</button>
+        </div>
+    </div>
+</div>
+
 <footer>
     © 2026 Net Simulizi. All rights reserved.
 </footer>
@@ -160,6 +183,8 @@ const storyId = urlParams.get("id");
 if (!storyId) {
     window.location.href = "author-dashboard.html";
 }
+
+let allEpisodes = [];
 
 function escapeHTML(value) {
     return String(value ?? "")
@@ -245,20 +270,23 @@ async function loadEpisodes() {
             return;
         }
 
-        const episodes = data.episodes || [];
+        allEpisodes = data.episodes || [];
 
-        if (!episodes.length) {
+        if (!allEpisodes.length) {
             list.innerHTML = '<div class="empty">Hakuna episodes zilizoongezwa bado.<br>Tumia form hapa kulia kuongeza episode ya kwanza.</div>';
             return;
         }
 
-        list.innerHTML = episodes.map(ep => `
+        list.innerHTML = allEpisodes.map(ep => `
             <div class="episode-item">
                 <div class="episode-info">
                     <div class="episode-number">${escapeHTML(ep.episode_number || "?")}</div>
                     <div>
                         <div class="episode-title">${escapeHTML(ep.title || "Untitled")}</div>
-                        <div class="episode-date">${escapeHTML(ep.created_at || "")}</div>
+                        <div class="episode-date">
+                            ${escapeHTML(ep.created_at || "")}
+                            ${ep.is_free ? '<span class="episode-free-badge">Free</span>' : '<span class="episode-paid-badge">Paid</span>'}
+                        </div>
                     </div>
                 </div>
                 <div class="episode-actions">
@@ -273,8 +301,34 @@ async function loadEpisodes() {
 }
 
 function viewEpisode(episodeId) {
-    alert("Episode viewer itaongezwa hapa. Episode ID: " + episodeId);
+    const ep = allEpisodes.find(e => Number(e.id) === Number(episodeId));
+
+    if (!ep) {
+        return;
+    }
+
+    document.getElementById("modalTitle").textContent = ep.title || "Untitled Episode";
+
+    const metaParts = [];
+    if (ep.episode_number) metaParts.push("Episode " + ep.episode_number);
+    if (ep.created_at) metaParts.push(ep.created_at);
+    metaParts.push(ep.is_free ? "Free" : "Paid");
+
+    document.getElementById("modalMeta").textContent = metaParts.join(" • ");
+    document.getElementById("modalContent").textContent = ep.content || "No content available.";
+
+    document.getElementById("episodeModal").classList.add("show");
 }
+
+function closeEpisodeModal() {
+    document.getElementById("episodeModal").classList.remove("show");
+}
+
+document.getElementById("episodeModal").addEventListener("click", function (event) {
+    if (event.target === this) {
+        closeEpisodeModal();
+    }
+});
 
 document.getElementById("episodeForm").addEventListener("submit", async function (event) {
     event.preventDefault();
