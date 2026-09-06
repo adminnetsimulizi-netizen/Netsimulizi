@@ -277,25 +277,7 @@ const verifyPassword = async (
     }
 };
 
-        let result = 0;
-
-        for (
-            let i = 0;
-            i < actual.length;
-            i++
-        ) {
-            result |=
-                actual[i] ^
-                expected[i];
-        }
-
-        return result === 0;
-
-    } catch {
-        return false;
-    }
-};
-
+  
 
 /* =====================================================
    DATABASE HELPERS
